@@ -3,6 +3,7 @@
 .idea
 data
 .vscode
+*.code-workspace
 debug
 builds/
 vendor/
