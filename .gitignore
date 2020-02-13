@@ -1,0 +1,9 @@
+*.bak
+*.swp
+.idea
+data
+.vscode
+debug
+builds/
+vendor/
+bin/
