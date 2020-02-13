@@ -1,6 +1,6 @@
 # ssh_ms
 
-Integrate with [https://github.com/hashicorp/vault](HashiCorp Vault) to store SSH configs and ease your remote life.
+Integrate with [HashiCorp Vault](https://github.com/hashicorp/vault) to store SSH configs and ease your remote life.
 You will no longer need to make changes to your local `.ssh/config`, except if you need gateway hosts, and you will
 have access to the same configs from anywhere. All of this while you are safe with the knowledge that they
 require authentication in order to access them.
@@ -8,10 +8,10 @@ require authentication in order to access them.
 ## Installation
 
 Use of this tool requires a working Vault installation, which is out of the scope of this documentation. Please see
-the official [https://www.vaultproject.io/docs/](HashiCorp documentation) for more information.
+the official [HashiCorp documentation](https://www.vaultproject.io/docs/) for more information.
 
 In order to install the tool using `go get` you will first require a working installation
-of `Go`. Please follow the [https://golang.org/doc/install](official documentation) for
+of `Go`. Please follow the [official documentation](https://golang.org/doc/install) for
 installing `Go`.
 
 ```sh
@@ -28,12 +28,12 @@ For ease of use, ensure that `${GOPATH}/bin` is in your `PATH` to use the tools 
 #### Go
 
 Once you have a version installed then you can follow the documentation to
-[https://golang.org/doc/install#extra_versions](install extra versions).
+[install extra versions](https://golang.org/doc/install#extra_versions).
 
 #### Vault
 
 In order to use the more secure authentication approach, you will also need to install `Vault`.
-Binaries are available from the [https://www.vaultproject.io/downloads/](official Vault download page).
+Binaries are available from the [official Vault download page](https://www.vaultproject.io/downloads/).
 
 ## Usage
 
@@ -107,6 +107,7 @@ $ ssh_ms write gateway-us-1 HostName=192.168.0.1 IdentityFile='~/.ssh/custom_rsa
 ```
 
 Using the `show` command you can then pull the config so that you can write it locally:
+
 #### Default template (placeholder is removed from view)
 ```sh
 $ ssh_ms show gateway-us-1
@@ -118,6 +119,7 @@ Host gateway-us-1
    IdentitiesOnly yes
    ProxyJump none
 ```
+
 #### Specify username via arguments
 ```sh
 $ ssh_ms show gateway-us-1 --user bob
@@ -177,12 +179,12 @@ ssh_ms purge
 
 Should you wish to build the binary to have some defaults preset for you, then you can use the following env variables
 along with `make build`:
-- BUILD_DIR : Set the location for the binary
-- RELEASE_VER : Sets `cmd.Version`
-- DEFAULT_VAULT_ADDR : Sets `cmd.EnvVaultAddr`
-- SSH_DEFAULT_USERNAME : Sets `ssh.EnvSSHDefaultUsername`
-- SSH_MS_USERNAME : Sets `cmd.EnvSSHUsername`
-- SSH_ID_FILE : Sets `cmd.EnvSSHIdentityFile`
+- `BUILD_DIR` : Set the location for the binary
+- `RELEASE_VER` : Sets `cmd.Version`
+- `DEFAULT_VAULT_ADDR` : Sets `cmd.EnvVaultAddr`
+- `SSH_DEFAULT_USERNAME` : Sets `ssh.EnvSSHDefaultUsername`
+- `SSH_MS_USERNAME` : Sets `cmd.EnvSSHUsername`
+- `SSH_ID_FILE` : Sets `cmd.EnvSSHIdentityFile`
 
 To set the build version (e.g. if you are making a custom build, etc) you can use `make build` to set
 the build version (by default it will set it to `git rev-parse HEAD`), e.g.
