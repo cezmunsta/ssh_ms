@@ -45,8 +45,11 @@ func ReadSecret(c api.Client, key string) *api.Secret {
 }
 
 // WriteSecret adds a secret to Vault
+// c : Vault client
+// key : the key for the secret
+// data : config for use when writing data
 func WriteSecret(c api.Client, key string, data map[string]interface{}) bool {
-	if _, err := c.Logical().Write("secret/ssh_ms/"+key, data); err != nil {
+	if _, err := c.Logical().Write(key, data); err != nil {
 		log.Fatal(err)
 		return false
 	}

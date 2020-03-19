@@ -434,7 +434,7 @@ func writeSecret(vc api.Client, key string, args []string) bool {
 	}
 
 	if !flags.Simulate {
-		status = vault.WriteSecret(vc, key, secret)
+		status = vault.WriteSecret(vc, fmt.Sprintf("secret/ssh_ms/%s", key), secret)
 	} else {
 		log.Println(" - secret would be: ", secret)
 	}
