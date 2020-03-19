@@ -12,6 +12,16 @@ type UserEnv struct {
 	Simulate    bool
 }
 
+// DeleteSecret removes a secret from Vault
+func DeleteSecret(c api.Client, key string) bool {
+	if _, err := c.Logical().Delete(key); err != nil {
+		log.Fatal(err)
+		return false
+	}
+
+	return true
+}
+
 // ListSecrets reads the list of secrets/data under a path in Vault
 // c : Vault client
 // path : path to secret/data in Vault

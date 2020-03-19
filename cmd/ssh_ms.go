@@ -80,6 +80,18 @@ var (
 		},
 	}
 
+	deleteCmd = &cobra.Command{
+		Use:   "delete KEY [flags]",
+		Short: "Delete a config",
+		Long:  "Delete an existing SSH configuration from Vault",
+		Example: `
+    ssh_ms delete localhost 
+		`,
+		Run: func(cmd *cobra.Command, args []string) {
+			deleteSecret(*getVaultClient(), args[0])
+		},
+	}
+
 	listCmd = &cobra.Command{
 		Use:   "list [flags]",
 		Short: "List available connections",
@@ -349,6 +361,13 @@ func connect(vc api.Client, env ssh.UserEnv, args []string) {
 	}
 }
 
+// deleteSecret in Vault
+// vc : Vault client
+// key : secret to remove
+func deleteSecret(vc api.Client, key string) bool {
+	return vault.DeleteSecret(vc, fmt.Sprintf("secret/ssh_ms/%s", key))
+}
+
 // listSecrets in Vault
 // vc : Vault client
 func listSecrets(vc api.Client) bool {
@@ -490,6 +509,7 @@ func printVersion() {
 func Execute() {
 	rootCmd.AddCommand(
 		connectCmd,
+		deleteCmd,
 		listCmd,
 		purgeCmd,
 		showCmd,
