@@ -33,13 +33,13 @@ binary-mac: export GOOS=darwin
 binary-mac: export GOARCH=amd64
 binary-mac: binary-prep
 	@go build -o "${BUILD_DIR}/${GOOS}/${GOARCH}/ssh_ms" ${LDFLAGS};
-	@xz -kez9 "${BUILD_DIR}/${GOOS}/${GOARCH}/ssh_ms";
+	@xz -fkez9 "${BUILD_DIR}/${GOOS}/${GOARCH}/ssh_ms";
 
 binary-linux: export GOOS=linux
 binary-linux: export GOARCH=amd64
 binary-linux: binary-prep
 	@go build -o "${BUILD_DIR}/${GOOS}/${GOARCH}/ssh_ms" ${LDFLAGS};
-	@xz -kez9 "${BUILD_DIR}/${GOOS}/${GOARCH}/ssh_ms";
+	@xz -fkez9 "${BUILD_DIR}/${GOOS}/${GOARCH}/ssh_ms";
 
 build: binary-prep
 	@go build -o "${BUILD_DIR}/ssh_ms" ${LDFLAGS}
