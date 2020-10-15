@@ -76,7 +76,7 @@ var (
     ssh_ms connect localhost hostname
 		`,
 		Run: func(cmd *cobra.Command, args []string) {
-			connect(*getVaultClient(), ssh.UserEnv{User: sshArgs.User, Simulate: flags.Simulate}, args)
+			connect(getVaultClient(), ssh.UserEnv{User: sshArgs.User, Simulate: flags.Simulate}, args)
 		},
 	}
 
@@ -88,7 +88,7 @@ var (
     ssh_ms delete localhost 
 		`,
 		Run: func(cmd *cobra.Command, args []string) {
-			deleteSecret(*getVaultClient(), args[0])
+			deleteSecret(getVaultClient(), args[0])
 		},
 	}
 
@@ -97,7 +97,7 @@ var (
 		Short: "List available connections",
 		Long:  "Checks Vault to find available connections and lists them",
 		Run: func(cmd *cobra.Command, args []string) {
-			listSecrets(*getVaultClient())
+			listSecrets(getVaultClient())
 		},
 	}
 
@@ -121,7 +121,7 @@ var (
     ssh_ms show gateway
 		`,
 		Run: func(cmd *cobra.Command, args []string) {
-			showSecret(*getVaultClient(), args[0])
+			showSecret(getVaultClient(), args[0])
 		},
 	}
 
@@ -133,7 +133,7 @@ var (
     ssh_ms write localhost HostName=localhost Port=22 User=ceri
 		`,
 		Run: func(cmd *cobra.Command, args []string) {
-			writeSecret(*getVaultClient(), args[0], args[1:])
+			writeSecret(getVaultClient(), args[0], args[1:])
 		},
 	}
 
@@ -209,10 +209,13 @@ func authenticate(e vault.UserEnv) *api.Client {
 // vc : Vault client
 // args : options for inspection
 // verbose : enable informational output
-func prepareConnection(vc api.Client, args []string, verbose bool) ([]string, ssh.Connection) {
+func prepareConnection(vc *api.Client, args []string, verbose bool) ([]string, ssh.Connection) {
 	var sshArgs []string
 	var config map[string]interface{}
 
+	if len(args) == 0 {
+		log.Fatal("Minimum requirement is to specify an alias")
+	}
 	host := args[0]
 	config = getLocalCache(host)
 
@@ -239,7 +242,7 @@ func prepareConnection(vc api.Client, args []string, verbose bool) ([]string, ss
 
 // getRemoteCache reads directly from Vault
 // host : the hostname alias for SSH
-func getRemoteCache(vc api.Client, host string) map[string]interface{} {
+func getRemoteCache(vc *api.Client, host string) map[string]interface{} {
 	var data map[string]interface{}
 	secret := vault.ReadSecret(vc, fmt.Sprintf("secret/ssh_ms/%s", host))
 
@@ -331,7 +334,7 @@ func purgeCache() error {
 // expert : enable full control over SSH args
 // verbose : perform additional output
 // args : extra args passed by the user
-func connect(vc api.Client, env ssh.UserEnv, args []string) {
+func connect(vc *api.Client, env ssh.UserEnv, args []string) {
 	sshArgs := args
 	sshClient := ssh.Connection{}
 	execCmd := true
@@ -364,13 +367,13 @@ func connect(vc api.Client, env ssh.UserEnv, args []string) {
 // deleteSecret in Vault
 // vc : Vault client
 // key : secret to remove
-func deleteSecret(vc api.Client, key string) bool {
+func deleteSecret(vc *api.Client, key string) bool {
 	return vault.DeleteSecret(vc, fmt.Sprintf("secret/ssh_ms/%s", key))
 }
 
 // listSecrets in Vault
 // vc : Vault client
-func listSecrets(vc api.Client) bool {
+func listSecrets(vc *api.Client) bool {
 	secrets := vault.ListSecrets(vc, "secret/ssh_ms")
 
 	if secrets == nil || secrets.Data["keys"] == nil {
@@ -399,7 +402,7 @@ func listSecrets(vc api.Client) bool {
 // showSecret in Vault
 // vc : Vault client
 // key : secret to show
-func showSecret(vc api.Client, key string) bool {
+func showSecret(vc *api.Client, key string) bool {
 	secret := vault.ReadSecret(vc, fmt.Sprintf("secret/ssh_ms/%s", key))
 
 	if secret == nil {
@@ -424,7 +427,7 @@ func showSecret(vc api.Client, key string) bool {
 // vc : Vault client
 // key : secret key name
 // args : extra args passed by the user
-func writeSecret(vc api.Client, key string, args []string) bool {
+func writeSecret(vc *api.Client, key string, args []string) bool {
 	secret := make(secretData)
 	status := true
 
@@ -470,7 +473,7 @@ func rewriteUsername(cache ssh.CachedConnection) string {
 	if len(name) > 0 && len(name[0]) > 0 {
 		tmpl.Execute(&b, userInfo{strings.Join(name, "."), name[0], name[1], name[0][0:1], name[1][0:1]})
 	} else {
-		log.Println("*** Your LDAP username was undetected ****\n")
+		log.Print("*** Your LDAP username was undetected ****\n\n")
 		tmpl.Execute(&b, userInfo{})
 	}
 	updatedConfig = b.String()
@@ -529,10 +532,7 @@ func Execute() {
 
 	connectCmd.Flags().BoolVarP(&flags.Expert, "expert", "e", false, "Expert-mode - pass in your SSH args")
 
-	writeCmd.Flags().StringVarP(&sshArgs.HostName, "host", "H", sshArgs.HostName, "Set HostName")
-	writeCmd.Flags().Uint16VarP(&sshArgs.Port, "port", "p", sshArgs.Port, "Set Port")
-	writeCmd.Flags().StringVarP(&sshArgs.IdentityFile, "identity", "i", "~/.ssh/"+EnvSSHIdentityFile, "Set IdentityFile")
-	writeCmd.Flags().StringVarP(&sshArgs.ProxyJump, "proxy", "P", sshArgs.ProxyJump, "Set ProxyJump")
+	//writeCmd.Flags().StringVarP()
 
 	if flags.Token == "" {
 		flags.StoredToken = true
