@@ -356,7 +356,7 @@ func connect(vc *api.Client, env ssh.UserEnv, args []string) {
 	}
 
 	for i := 0; i < len(sshClient.LocalForward); i++ {
-		log.Printf("FWD: %d -> %d\n", sshClient.LocalForward[i].LocalPort, sshClient.LocalForward[i].RemotePort)
+		log.Printf("FWD: https://127.0.0.1:%d -> %d\n", sshClient.LocalForward[i].LocalPort, sshClient.LocalForward[i].RemotePort)
 	}
 
 	if execCmd {
