@@ -31,7 +31,7 @@ const EnvBasePath = "HOME"
 
 type cmdFlags struct {
 	Expert, List, Purge, StoredToken, Simulate, Verbose, Version bool
-	Addr, Show, StoragePath, Token, User, Write                  string
+	Addr, Comment, Show, StoragePath, Token, User, Write         string
 }
 
 type secretData map[string]interface{}
@@ -414,6 +414,9 @@ func showSecret(vc *api.Client, key string) bool {
 	sshArgs := sshClient.BuildConnection(secret.Data, key)
 	config := rewriteEmpty(rewriteUsername(sshClient.Cache))
 
+	if secret.Data["ConfigComment"] != "" {
+		fmt.Println("#", secret.Data["ConfigComment"])
+	}
 	fmt.Print(config)
 
 	if flags.Verbose {
@@ -435,6 +438,8 @@ func writeSecret(vc *api.Client, key string, args []string) bool {
 		s := strings.Split(args[i], "=")
 		secret[s[0]] = s[1]
 	}
+
+	secret["ConfigComment"] = flags.Comment
 
 	if !flags.Simulate {
 		status = vault.WriteSecret(vc, fmt.Sprintf("secret/ssh_ms/%s", key), secret)
@@ -532,7 +537,7 @@ func Execute() {
 
 	connectCmd.Flags().BoolVarP(&flags.Expert, "expert", "e", false, "Expert-mode - pass in your SSH args")
 
-	//writeCmd.Flags().StringVarP()
+	writeCmd.Flags().StringVarP(&flags.Comment, "comment", "c", "", "Add a comment to the config")
 
 	if flags.Token == "" {
 		flags.StoredToken = true
