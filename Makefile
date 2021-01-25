@@ -47,7 +47,7 @@ test:
 	@go test "${PACKAGE}/ssh" "${PACKAGE}/cmd" "${PACKAGE}/vault"
 
 lint:
-	@golint ssh vault cmd
+	@golint -set_exit_status ssh vault cmd
 
 format:
 	@gofmt -w ssh vault cmd
