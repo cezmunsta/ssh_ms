@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"runtime"
+	"strings"
 
 	vaultApi "github.com/hashicorp/vault/api"
 	"github.com/spf13/cobra"
@@ -76,7 +77,7 @@ func printVersion() {
 	lines := getVersion()
 
 	for _, line := range lines {
-		fmt.Println(line)
+		fmt.Println(strings.Join(line, " "))
 	}
 }
 
