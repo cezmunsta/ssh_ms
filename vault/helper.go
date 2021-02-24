@@ -1,13 +1,67 @@
 package vault
 
 import (
+	"os"
+
 	"github.com/hashicorp/vault/api"
+	credToken "github.com/hashicorp/vault/builtin/credential/token"
+	login "github.com/hashicorp/vault/command"
+
+	"github.com/cezmunsta/ssh_ms/log"
 )
 
 // UserEnv contains settings from the ENV
 type UserEnv struct {
 	Addr, Token string
 	Simulate    bool
+}
+
+// Authenticate a user with Vault
+// e : user environment
+// st: flag to use the stored token
+func Authenticate(e UserEnv, st bool) *api.Client {
+	os.Setenv(api.EnvVaultAddress, e.Addr)
+	defer os.Setenv(api.EnvVaultAddress, "")
+
+	if !st {
+		os.Setenv(api.EnvVaultToken, e.Token)
+	}
+	defer os.Setenv(api.EnvVaultToken, "")
+
+	os.Setenv(api.EnvVaultMaxRetries, "3")
+	defer os.Setenv(api.EnvVaultMaxRetries, "")
+
+	config := api.DefaultConfig()
+	client, err := api.NewClient(config)
+
+	if st {
+		lc := &login.LoginCommand{
+			BaseCommand: &login.BaseCommand{},
+			Handlers: map[string]login.LoginHandler{
+				"token": &credToken.CLIHandler{},
+			},
+		}
+		th, err := lc.TokenHelper()
+		if err != nil {
+			log.Debug("TokenHelper:", th)
+			log.Panic("Uh oh, the TokenHelper had an issue")
+		}
+		storedToken, err := th.Get()
+		if err != nil {
+			log.Debug("storedToken:", storedToken)
+			log.Panic("Unable to read token from store")
+		}
+		client.SetToken(storedToken)
+	}
+
+	if err != nil {
+		log.Debug(api.EnvVaultAddress, e.Addr)
+		log.Debug("Client address", client.Address())
+		log.Panic(err)
+	}
+
+	client.Auth()
+	return client
 }
 
 // DeleteSecret removes a secret from Vault
