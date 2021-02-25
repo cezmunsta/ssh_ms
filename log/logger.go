@@ -26,6 +26,11 @@ func Panic(args ...interface{}) {
 	logrus.Panic(args...)
 }
 
+// Panicf logs a message and panics
+func Panicf(format string, args ...interface{}) {
+	logrus.Panicf(format, args...)
+}
+
 // Fatal error messages
 func Fatal(args ...interface{}) {
 	logrus.Fatal(args...)
