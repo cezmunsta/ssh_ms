@@ -31,9 +31,19 @@ func Fatal(args ...interface{}) {
 	logrus.Fatal(args...)
 }
 
+// Fatalf error messages
+func Fatalf(format string, args ...interface{}) {
+	logrus.Fatalf(format, args...)
+}
+
 // Error messages
 func Error(args ...interface{}) {
 	logrus.Error(args...)
+}
+
+// Errorf messages
+func Errorf(format string, args ...interface{}) {
+	logrus.Errorf(format, args...)
 }
 
 // Warning messages
@@ -41,14 +51,29 @@ func Warning(args ...interface{}) {
 	logrus.Warning(args...)
 }
 
+// Warningf messages
+func Warningf(format string, args ...interface{}) {
+	logrus.Warningf(format, args...)
+}
+
 // Info messages
 func Info(args ...interface{}) {
 	logrus.Info(args...)
 }
 
+// Infof messages
+func Infof(format string, args ...interface{}) {
+	logrus.Infof(format, args...)
+}
+
 // Debug messages
 func Debug(args ...interface{}) {
 	logrus.Debug(args...)
+}
+
+// Debugf messages
+func Debugf(format string, args ...interface{}) {
+	logrus.Debugf(format, args...)
 }
 
 // GetLoggers returns the pre-configured loggers
