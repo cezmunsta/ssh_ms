@@ -15,7 +15,7 @@ const EnvBasePath = "HOME"
 
 type cmdFlags struct {
 	List, Simulate, StoredToken, Verbose, Version bool
-	Addr, Show, Token                             string
+	Addr, Show, Token, User                       string
 }
 
 //type cmdFlags struct {
@@ -98,6 +98,8 @@ func init() {
 	)
 	rootCmd.PersistentFlags().StringVar(&flags.Addr, "vault-addr", os.Getenv(vaultApi.EnvVaultAddress), "Specify the Vault address")
 	rootCmd.PersistentFlags().StringVar(&flags.Token, "vault-token", os.Getenv(vaultApi.EnvVaultToken), "Specify the Vault token")
+
+	rootCmd.PersistentFlags().StringVarP(&flags.User, "user", "u", os.Getenv(EnvSSHUsername), "Your SSH username for templated configs")
 
 	rootCmd.PersistentFlags().BoolVarP(&flags.StoredToken, "stored-token", "", false, "Use a stored token from 'vault login' (overrides --vault-token, auto-enabled when no token is specified)")
 	rootCmd.PersistentFlags().BoolVarP(&flags.Verbose, "verbose", "v", false, "Provide addition output")
