@@ -16,27 +16,37 @@ func init() {
 	logger, _ = GetLoggers(logrus.DebugLevel, "")
 }
 
+// Println out to console
+func Println(args ...interface{}) {
+	logrus.Println(args...)
+}
+
 // Panic logs a message and panics
 func Panic(args ...interface{}) {
 	logrus.Panic(args...)
 }
 
-// Error log messages
+// Fatal error messages
+func Fatal(args ...interface{}) {
+	logrus.Fatal(args...)
+}
+
+// Error messages
 func Error(args ...interface{}) {
 	logrus.Error(args...)
 }
 
-// Warning log messages
+// Warning messages
 func Warning(args ...interface{}) {
 	logrus.Warning(args...)
 }
 
-// Info log messages
+// Info messages
 func Info(args ...interface{}) {
 	logrus.Info(args...)
 }
 
-// Debug log messages
+// Debug messages
 func Debug(args ...interface{}) {
 	logrus.Debug(args...)
 }
