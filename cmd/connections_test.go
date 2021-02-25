@@ -1,7 +1,10 @@
 package cmd
 
 import (
+	"strings"
 	"testing"
+
+	"github.com/cezmunsta/ssh_ms/ssh"
 )
 
 func TestGetConnections(t *testing.T) {
@@ -13,7 +16,23 @@ func TestGetConnections(t *testing.T) {
 }
 
 func TestGetRawConnection(t *testing.T) {
-	if cn, err := getRawConnection(getVaultClientWithEnv(env), "ceri"); err != nil || cn == nil {
+	if cn, err := getRawConnection(getVaultClientWithEnv(env), lookupKey); err != nil || cn == nil {
 		t.Fatalf("expected: connection data got: '%v', err '%s'", cn, err)
+	}
+}
+
+func TestShowConnection(t *testing.T) {
+	cn, err := getRawConnection(getVaultClientWithEnv(env), lookupKey)
+
+	if err != nil || cn == nil {
+		t.Fatalf("expected: connection data got: '%v', err '%s'", cn, err)
+	}
+
+	sshClient := ssh.Connection{}
+	sshClient.BuildConnection(cn.Data, lookupKey)
+	config := sshClient.Cache.Config
+
+	if !strings.Contains(config, lookupKey) {
+		t.Fatalf("expected: got: ")
 	}
 }

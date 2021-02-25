@@ -53,6 +53,18 @@ var (
 		},
 	}
 
+	showCmd = &cobra.Command{
+		Use:   "show CONNECTION [flags]",
+		Short: "Display a connection",
+		Long:  "Display the SSH config for the requested connection",
+		Example: `
+    ssh_ms show gateway
+        `,
+		Run: func(cmd *cobra.Command, args []string) {
+			showConnection(getVaultClient(), args[0])
+		},
+	}
+
 	flags = cmdFlags{}
 
 	/*
@@ -82,6 +94,7 @@ var (
 func init() {
 	rootCmd.AddCommand(
 		listCmd,
+		showCmd,
 	)
 	rootCmd.PersistentFlags().StringVar(&flags.Addr, "vault-addr", os.Getenv(vaultApi.EnvVaultAddress), "Specify the Vault address")
 	rootCmd.PersistentFlags().StringVar(&flags.Token, "vault-token", os.Getenv(vaultApi.EnvVaultToken), "Specify the Vault token")

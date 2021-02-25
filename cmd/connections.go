@@ -9,6 +9,7 @@ import (
 	vaultApi "github.com/hashicorp/vault/api"
 
 	"github.com/cezmunsta/ssh_ms/log"
+	"github.com/cezmunsta/ssh_ms/ssh"
 	vaultHelper "github.com/cezmunsta/ssh_ms/vault"
 )
 
@@ -17,12 +18,8 @@ func listConnections(vc *vaultApi.Client) bool {
 	connections, err := getConnections(vc)
 
 	if err != nil {
-		log.Panic("Unable to list connections:", err)
-	}
-
-	if len(connections) == 0 {
 		fmt.Println("no available connections")
-		return true
+		return false
 	}
 	for i, s := range connections {
 		m := " "
@@ -32,6 +29,31 @@ func listConnections(vc *vaultApi.Client) bool {
 		fmt.Print(s, m)
 	}
 	fmt.Println("")
+	return true
+}
+
+// showConnection details suitable for use with ssh_config
+func showConnection(vc *vaultApi.Client, key string) bool {
+	conn, err := getRawConnection(vc, key)
+
+	if err != nil {
+		log.Debug("Unable to show connection", key)
+		return false
+	}
+
+	if conn.Data["ConfigComment"] != "" {
+		fmt.Println("#", conn.Data["ConfigComment"])
+	}
+
+	sshClient := ssh.Connection{}
+	sshArgs := sshClient.BuildConnection(conn.Data, key)
+	config := sshClient.Cache.Config
+
+	if flags.Verbose {
+		log.Info("SSH cmd:", sshArgs)
+	}
+
+	fmt.Println(config)
 	return true
 }
 
