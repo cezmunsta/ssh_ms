@@ -1,20 +1,31 @@
 package ssh
 
 import (
+	"errors"
 	"fmt"
-	"log"
 	"net"
 	"os"
 	"os/exec"
 	"reflect"
 	"strconv"
 	"strings"
+
+	"github.com/cezmunsta/ssh_ms/log"
 )
 
 var (
 	errNoFreePort       = fmt.Errorf("no free port")
 	localForwardPortMin = uint16(18000)
 	localForwardPortMax = uint16(20000)
+
+	// Placeholders are used for templated connections
+	Placeholders = map[string]string{
+		"@@USER_INITIAL_LASTNAME":  "{{.Firstinitial}}{{.Lastname}}",
+		"@@USER_LASTNAME_INITIAL":  "{{.Lastname}}{{.Firstinitial}}",
+		"@@USER_FIRSTNAME_INITIAL": "{{.Firstname}}{{.Lastinitial}}",
+		"@@USER_FIRSTNAME":         "{{.Firstname}}",
+		//"@@" + cmd.EnvSSHUsername:  "{{.Fullname}}",
+	}
 
 	// EnvSSHDefaultUsername is used to authenticate with SSH
 	EnvSSHDefaultUsername = os.Getenv("USER")
@@ -24,6 +35,12 @@ var (
 type UserEnv struct {
 	User     string
 	Simulate bool
+}
+
+// userName maps templated entries for usernames
+type userName struct {
+	FirstName, FirstNameInitial, FullName, LastName, LastNameInitial string
+	IsParsed                                                         bool
 }
 
 // Connection stores the SSH properties
@@ -71,6 +88,27 @@ func acquirePort(min uint16, max uint16) (uint16, error) {
 		return i, nil
 	}
 	return 0, errNoFreePort
+}
+
+// generateUserName converts a string to a userName
+func (un *userName) generateUserName(username string) (bool, error) {
+	name := strings.Split(username, ".")
+
+	if len(un.FirstName) > 0 {
+		return false, errors.New("Rejecting request, userName already initialised")
+	} else if len(name) > 1 {
+		un.FirstName = name[0]
+		un.FirstNameInitial = name[0][0:1]
+		un.LastName = name[1]
+		un.LastNameInitial = name[1][0:1]
+		un.FullName = username
+		un.IsParsed = true
+	} else {
+		un.FirstName = username
+		un.FullName = username
+		un.IsParsed = false
+	}
+	return un.IsParsed, nil
 }
 
 // setHostname specifies the HostName value for SSH
