@@ -46,7 +46,7 @@ func showConnection(vc *vaultApi.Client, key string) bool {
 	}
 
 	sshClient := ssh.Connection{}
-	sshArgs := sshClient.BuildConnection(conn.Data, key)
+	sshArgs := sshClient.BuildConnection(conn.Data, key, flags.User)
 	config := sshClient.Cache.Config
 
 	if flags.Verbose {
