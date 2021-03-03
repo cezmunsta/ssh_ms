@@ -198,4 +198,17 @@ version to 0.2 and build the binary as builds/ssh_ms:
 $ go build -ldflags "-X github.com/cezmunsta/ssh_ms/cmd.Version=0.2" -o builds/ssh_ms
 ```
 
+## Development environment
 
+To create your own local Vault for use during development, perform the following steps:
+```sh
+$ podman run -d --cap-add=IPC_LOCK --name=dev-vault --network=host \
+    -e VAULT_DEV_ROOT_TOKEN_ID=myroottoken -e VAULT_DEV_LISTEN_ADDRESS=127.0.0.1:8200 vault
+
+$ export VAULT_ADDR=http://127.0.0.1:8200
+$ export VAULT_TOKEN=myroottoken
+
+$ vault login -no-store
+$ vault secrets disable secret/
+$ vault secrets enable --path=secret/ssh_ms kv
+```
