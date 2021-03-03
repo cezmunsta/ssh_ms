@@ -1,6 +1,7 @@
 package ssh
 
 import (
+	"strings"
 	"testing"
 )
 
@@ -63,9 +64,9 @@ func TestRewriteUsername(t *testing.T) {
 		if _, err := user.generateUserName(n); err != nil {
 			t.Fatalf("expected: userName{} got: %v", err)
 		}
-		//user.rewriteUsername()
-		//if strings.Contains(user.FullName, "@") {
-		//	t.Fatalf("expected: templates to be parsed got: %v", user.FullName)
-		//}
+		user.rewriteUsername("ceri.williams")
+		if strings.Contains(user.FullName, "@") {
+			t.Fatalf("expected: templates to be parsed got: %v", user.FullName)
+		}
 	}
 }

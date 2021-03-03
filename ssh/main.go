@@ -174,25 +174,30 @@ func (un *userName) rewriteUsername(newuser string) (bool, error) {
 		log.Errorf("Unable to convert '%v' to JSON; err %v", un, err)
 		return false, err
 	}
+	log.Debugf("jsonUser '%v", jsonUser)
 
 	for marker, tpl := range Placeholders {
 		jsonUser = strings.Replace(jsonUser, marker, tpl, 1)
 	}
+	log.Debugf("jsonUser rewritten '%v", jsonUser)
 
 	tpl, err := template.New("userName").Parse(jsonUser)
 	if err != nil {
 		log.Panicf("Unable to rewrite username: %v", un)
 	}
-	tpl.Execute(&b, un)
-	templatedUser, err := un.doUnmarshal(b.String())
+	tpl.Execute(&b, tempUser)
 
+	templatedUser, err := un.doUnmarshal(b.String())
 	if err != nil {
 		log.Errorf("Unable to process template '%v' to JSON; err %v", b, err)
 		return false, err
 	}
+	log.Debugf("templatedUser '%v'", templatedUser)
 
+	log.Debugf("original user '%v'", un)
 	un = &templatedUser
 	un.IsParsed = true
+	log.Debugf("updated user '%v'", un)
 	return true, nil
 }
 
