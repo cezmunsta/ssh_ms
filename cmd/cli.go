@@ -106,6 +106,20 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&flags.Verbose, "verbose", "v", false, "Provide addition output")
 
 	rootCmd.Flags().BoolVarP(&flags.Version, "version", "V", false, "Show the version")
+
+	//if flags.Debug && !log.SetLevel(logrus.DebugLevel) {
+	//	log.Warning("Unable to set debug mode")
+	//} else if flags.Verbose && log.SetLevel(logrus.InfoLevel) {
+	//	log.Warning("Unable to set verbose mode")
+	//}
+
+	if flags.Token == "" {
+		flags.StoredToken = true
+	}
+
+	if flags.Addr == "" {
+		flags.Addr = EnvVaultAddr
+	}
 }
 
 // getVersion information for the application
