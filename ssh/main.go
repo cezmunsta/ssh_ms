@@ -163,6 +163,7 @@ func (un *userName) rewriteUsername(newuser string) (bool, error) {
 	var b bytes.Buffer
 	var tempUser = userName{}
 	tempUser.generateUserName(newuser)
+	log.Debugf("original user '%v'", un)
 
 	if len(un.FirstName) == 0 {
 		log.Warning("User has not been initialised")
@@ -194,7 +195,6 @@ func (un *userName) rewriteUsername(newuser string) (bool, error) {
 	}
 	log.Debugf("templatedUser '%v'", templatedUser)
 
-	log.Debugf("original user '%v'", un)
 	un = &templatedUser
 	un.IsParsed = true
 	log.Debugf("updated user '%v'", un)
