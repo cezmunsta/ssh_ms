@@ -96,6 +96,9 @@ func GetLogger(level logrus.Level, logFile string) *logrus.Logger {
 	once.Do(func() {
 		logger, _ = getInstance(level, logFile)
 	})
+	if level != logger.GetLevel() {
+		logger.SetLevel(level)
+	}
 	return logger
 }
 
