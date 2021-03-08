@@ -3,86 +3,103 @@ package log
 import (
 	"log/syslog"
 	"os"
+	"sync"
 
 	"github.com/sirupsen/logrus"
 	syslogHook "github.com/sirupsen/logrus/hooks/syslog"
 )
 
 var (
-	logger *logrus.Logger
+	defaultOut   = ""
+	defaultLevel = logrus.WarnLevel
+	logger       *logrus.Logger
+	once         sync.Once
 )
 
 func init() {
-	logger, _ = GetLoggers(logrus.DebugLevel, "")
+	logger = GetLogger(defaultLevel, defaultOut)
 }
 
 // Println out to console
 func Println(args ...interface{}) {
-	logrus.Println(args...)
+	logger.Println(args...)
 }
 
 // Panic logs a message and panics
 func Panic(args ...interface{}) {
-	logrus.Panic(args...)
+	logger.Panic(args...)
 }
 
 // Panicf logs a message and panics
 func Panicf(format string, args ...interface{}) {
-	logrus.Panicf(format, args...)
+	logger.Panicf(format, args...)
 }
 
 // Fatal error messages
 func Fatal(args ...interface{}) {
-	logrus.Fatal(args...)
+	logger.Fatal(args...)
 }
 
 // Fatalf error messages
 func Fatalf(format string, args ...interface{}) {
-	logrus.Fatalf(format, args...)
+	logger.Fatalf(format, args...)
 }
 
 // Error messages
 func Error(args ...interface{}) {
-	logrus.Error(args...)
+	logger.Error(args...)
 }
 
 // Errorf messages
 func Errorf(format string, args ...interface{}) {
-	logrus.Errorf(format, args...)
+	logger.Errorf(format, args...)
 }
 
 // Warning messages
 func Warning(args ...interface{}) {
-	logrus.Warning(args...)
+	logger.Warning(args...)
 }
 
 // Warningf messages
 func Warningf(format string, args ...interface{}) {
-	logrus.Warningf(format, args...)
+	logger.Warningf(format, args...)
 }
 
 // Info messages
 func Info(args ...interface{}) {
-	logrus.Info(args...)
+	logger.Info(args...)
 }
 
 // Infof messages
 func Infof(format string, args ...interface{}) {
-	logrus.Infof(format, args...)
+	logger.Infof(format, args...)
 }
 
 // Debug messages
 func Debug(args ...interface{}) {
-	logrus.Debug(args...)
+	logger.Debug(args...)
 }
 
 // Debugf messages
 func Debugf(format string, args ...interface{}) {
-	logrus.Debugf(format, args...)
+	logger.Debugf(format, args...)
 }
 
-// GetLoggers returns the pre-configured loggers
-func GetLoggers(level logrus.Level, logFile string) (*logrus.Logger, error) {
+// SetLevel of logging
+func SetLevel(level logrus.Level) bool {
+	logger.SetLevel(level)
+	return logger.GetLevel() == level
+}
+
+// GetLogger returns the pre-configured loggers
+func GetLogger(level logrus.Level, logFile string) *logrus.Logger {
+	once.Do(func() {
+		logger, _ = getInstance(level, logFile)
+	})
+	return logger
+}
+
+func getInstance(level logrus.Level, logFile string) (*logrus.Logger, error) {
 	logrus.SetLevel(level)
 
 	userLogger := logrus.New()

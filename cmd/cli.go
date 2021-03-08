@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	vaultApi "github.com/hashicorp/vault/api"
+	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
@@ -107,11 +108,11 @@ func init() {
 
 	rootCmd.Flags().BoolVarP(&flags.Version, "version", "V", false, "Show the version")
 
-	//if flags.Debug && !log.SetLevel(logrus.DebugLevel) {
-	//	log.Warning("Unable to set debug mode")
-	//} else if flags.Verbose && log.SetLevel(logrus.InfoLevel) {
-	//	log.Warning("Unable to set verbose mode")
-	//}
+	if flags.Debug && !Log.SetLevel(logrus.DebugLevel) {
+		Log.Warning("Unable to set debug mode")
+	} else if flags.Verbose && Log.SetLevel(logrus.InfoLevel) {
+		Log.Warning("Unable to set verbose mode")
+	}
 
 	if flags.Token == "" {
 		flags.StoredToken = true
