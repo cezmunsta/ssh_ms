@@ -6,6 +6,8 @@ import (
 	"runtime"
 	"strings"
 
+	"github.com/cezmunsta/ssh_ms/config"
+	"github.com/cezmunsta/ssh_ms/log"
 	vaultApi "github.com/hashicorp/vault/api"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -13,16 +15,6 @@ import (
 
 // EnvBasePath is the parent location used to prefix storage paths
 const EnvBasePath = "HOME"
-
-type cmdFlags struct {
-	Debug, List, Simulate, StoredToken, Verbose, Version bool
-	Addr, Show, Token, User                              string
-}
-
-//type cmdFlags struct {
-//    Expert, Purge, bool
-//    Comment, StoragePath, User, Write         string
-//}
 
 var (
 	rootCmd = &cobra.Command{
@@ -35,7 +27,7 @@ var (
 			}
 		},
 		Run: func(cmd *cobra.Command, args []string) {
-			if flags.Version {
+			if cfg.Version {
 				printVersion()
 				os.Exit(0)
 			} else {
@@ -66,7 +58,7 @@ var (
 		},
 	}
 
-	flags = cmdFlags{}
+	cfg = config.GetConfig()
 
 	/*
 		The following support overrides during builds, which can be done
@@ -97,29 +89,33 @@ func init() {
 		listCmd,
 		showCmd,
 	)
-	rootCmd.PersistentFlags().StringVar(&flags.Addr, "vault-addr", os.Getenv(vaultApi.EnvVaultAddress), "Specify the Vault address")
-	rootCmd.PersistentFlags().StringVar(&flags.Token, "vault-token", os.Getenv(vaultApi.EnvVaultToken), "Specify the Vault token")
+	rootCmd.PersistentFlags().StringVar(&cfg.VaultAddr, "vault-addr", os.Getenv(vaultApi.EnvVaultAddress), "Specify the Vault address")
+	rootCmd.PersistentFlags().StringVar(&cfg.VaultToken, "vault-token", os.Getenv(vaultApi.EnvVaultToken), "Specify the Vault token")
 
-	rootCmd.PersistentFlags().StringVarP(&flags.User, "user", "u", os.Getenv(EnvSSHUsername), "Your SSH username for templated configs")
+	rootCmd.PersistentFlags().StringVarP(&cfg.User, "user", "u", os.Getenv(EnvSSHUsername), "Your SSH username for templated configs")
 
-	rootCmd.PersistentFlags().BoolVarP(&flags.StoredToken, "stored-token", "", false, "Use a stored token from 'vault login' (overrides --vault-token, auto-enabled when no token is specified)")
-	rootCmd.PersistentFlags().BoolVarP(&flags.Debug, "debug", "d", false, "Provide addition output")
-	rootCmd.PersistentFlags().BoolVarP(&flags.Verbose, "verbose", "v", false, "Provide addition output")
+	rootCmd.PersistentFlags().BoolVarP(&cfg.StoredToken, "stored-token", "", false, "Use a stored token from 'vault login' (overrides --vault-token, auto-enabled when no token is specified)")
+	rootCmd.PersistentFlags().BoolVarP(&cfg.Debug, "debug", "d", false, "Provide addition output")
+	rootCmd.PersistentFlags().BoolVarP(&cfg.Verbose, "verbose", "v", false, "Provide addition output")
 
-	rootCmd.Flags().BoolVarP(&flags.Version, "version", "V", false, "Show the version")
+	rootCmd.Flags().BoolVarP(&cfg.Version, "version", "V", false, "Show the version")
 
-	if flags.Debug && !Log.SetLevel(logrus.DebugLevel) {
-		Log.Warning("Unable to set debug mode")
-	} else if flags.Verbose && Log.SetLevel(logrus.InfoLevel) {
-		Log.Warning("Unable to set verbose mode")
+	log := log.GetLogger(log.GetDefaultLevel(), "")
+	cfg.LogLevel = log.GetLevel()
+
+	if cfg.Debug {
+		cfg.LogLevel = logrus.DebugLevel
+	} else if cfg.Verbose {
+		cfg.LogLevel = logrus.InfoLevel
+	}
+	log.SetLevel(cfg.LogLevel)
+
+	if cfg.VaultToken == "" {
+		cfg.StoredToken = true
 	}
 
-	if flags.Token == "" {
-		flags.StoredToken = true
-	}
-
-	if flags.Addr == "" {
-		flags.Addr = EnvVaultAddr
+	if cfg.VaultAddr == "" {
+		cfg.VaultAddr = EnvVaultAddr
 	}
 }
 
@@ -127,7 +123,7 @@ func init() {
 func getVersion() [][]string {
 	var lines [][]string
 
-	if !flags.Verbose {
+	if !cfg.Verbose {
 		lines = append(lines, []string{Version})
 	} else {
 		lines = append(lines, []string{"Version:", Version})

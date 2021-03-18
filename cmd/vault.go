@@ -9,15 +9,19 @@ import (
 
 // getVaultClient by authenticating using flags
 func getVaultClient() *vaultApi.Client {
-	env := vaultHelper.UserEnv{Addr: flags.Addr, Token: flags.Token, Simulate: flags.Simulate}
+	env := vaultHelper.UserEnv{
+		Addr:     cfg.VaultAddr,
+		Token:    cfg.VaultToken,
+		Simulate: cfg.Simulate,
+	}
 	return getVaultClientWithEnv(env)
 }
 
 // getVaultClientWithEnv by authenticating using UserEnv
 func getVaultClientWithEnv(env vaultHelper.UserEnv) *vaultApi.Client {
-	if flags.Verbose {
+	if cfg.Verbose {
 		log.Debug("Vault Address:", env.Addr)
-		log.Debug("Simulate:", flags.Simulate)
+		log.Debug("Simulate:", cfg.Simulate)
 	}
-	return vaultHelper.Authenticate(env, flags.StoredToken)
+	return vaultHelper.Authenticate(env, cfg.StoredToken)
 }

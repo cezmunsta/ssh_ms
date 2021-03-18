@@ -3,6 +3,7 @@ module github.com/cezmunsta/ssh_ms
 go 1.13
 
 require (
+	github.com/gabriel-vasile/mimetype v1.2.0 // indirect
 	github.com/hashicorp/vault v1.3.2
 	github.com/hashicorp/vault/api v1.0.5-0.20200117231345-460d63e36490
 	github.com/sirupsen/logrus v1.4.2

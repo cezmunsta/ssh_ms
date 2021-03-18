@@ -13,6 +13,10 @@ import (
 	vaultHelper "github.com/cezmunsta/ssh_ms/vault"
 )
 
+//var (
+//	log logrus.Logger
+//)
+
 // listConnections from Vault
 func listConnections(vc *vaultApi.Client) bool {
 	connections, err := getConnections(vc)
@@ -34,6 +38,7 @@ func listConnections(vc *vaultApi.Client) bool {
 
 // showConnection details suitable for use with ssh_config
 func showConnection(vc *vaultApi.Client, key string) bool {
+	log.Debugf("showConnection %v", key)
 	conn, err := getRawConnection(vc, key)
 
 	if err != nil {
@@ -46,12 +51,10 @@ func showConnection(vc *vaultApi.Client, key string) bool {
 	}
 
 	sshClient := ssh.Connection{}
-	sshArgs := sshClient.BuildConnection(conn.Data, key, flags.User)
+	sshArgs := sshClient.BuildConnection(conn.Data, key, cfg.User)
 	config := sshClient.Cache.Config
 
-	if flags.Verbose {
-		log.Info("SSH cmd:", sshArgs)
-	}
+	log.Info("SSH cmd:", sshArgs)
 
 	fmt.Println(config)
 	return true

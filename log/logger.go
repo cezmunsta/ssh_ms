@@ -91,6 +91,11 @@ func SetLevel(level logrus.Level) bool {
 	return logger.GetLevel() == level
 }
 
+// GetDefaultLevel returns the defaultLevel
+func GetDefaultLevel() logrus.Level {
+	return defaultLevel
+}
+
 // GetLogger returns the pre-configured loggers
 func GetLogger(level logrus.Level, logFile string) *logrus.Logger {
 	once.Do(func() {
