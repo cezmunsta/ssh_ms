@@ -139,7 +139,7 @@ func (un *userName) generateUserName(username string) (bool, error) {
 	un.IsParsed = false
 
 	if len(un.FirstName) > 0 {
-		return false, errors.New("Rejecting request, userName already initialised")
+		return false, errors.New("rejecting request, userName already initialised")
 	} else if len(name) > 1 {
 		un.FirstName = name[0]
 		un.FirstNameInitial = name[0][0:1]
@@ -167,7 +167,7 @@ func (un *userName) rewriteUsername(newuser string) (bool, error) {
 
 	if len(un.FirstName) == 0 {
 		log.Warning("User has not been initialised")
-		return false, errors.New("User has not been initialised")
+		return false, errors.New("user has not been initialised")
 	}
 
 	jsonUser, err := un.doMarshal()

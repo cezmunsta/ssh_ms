@@ -66,7 +66,7 @@ func getRawConnection(vc *vaultApi.Client, key string) (*vaultApi.Secret, error)
 
 	if err != nil || secret == nil {
 		log.Warning("Unable to find connection for:", key)
-		return nil, errors.New("No match found")
+		return nil, errors.New("no match found")
 	}
 	return secret, nil
 }
@@ -79,7 +79,7 @@ func getConnections(vc *vaultApi.Client) ([]string, error) {
 	if err != nil {
 		log.Panic("Unable to get connections:", err)
 	} else if secrets == nil || secrets.Data["keys"] == nil {
-		return nil, errors.New("No data returned")
+		return nil, errors.New("no data returned")
 	}
 
 	switch reflect.TypeOf(secrets.Data["keys"]).Kind() {
