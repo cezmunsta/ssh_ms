@@ -211,4 +211,18 @@ $ export VAULT_TOKEN=myroottoken
 $ vault login -no-store
 $ vault secrets disable secret/
 $ vault secrets enable --path=secret/ssh_ms kv
+
+$ ssh_ms write test --comment Testing HostName=localhost User=@@USER_FIRSTNAME
+```
+
+If you wish to run the server in production mode, which would require the `Cmd`
+being adjusted to remove the `-dev` flag, then you will most likely want to use some
+persistent volumes:
+
+```sh
+$ podman volume create vault-file
+$ podman volume create vault-logs
+$ podman run -d --cap-add=IPC_LOCK --name=dev-vault --network=host \
+     -e VAULT_DEV_ROOT_TOKEN_ID=myroottoken -e VAULT_DEV_LISTEN_ADDRESS=127.0.0.1:8200 \
+     -v vault-file:/vault/file -v vault-logs:/vault/logs vault server <your options>
 ```
