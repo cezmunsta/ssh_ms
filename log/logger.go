@@ -111,10 +111,14 @@ func getInstance(level logrus.Level, logFile string) (*logrus.Logger, error) {
 	logrus.SetLevel(level)
 
 	userLogger := logrus.New()
+	//userLogger.SetReportCaller(true)
 	userLogger.SetFormatter(&logrus.TextFormatter{
 		DisableColors:          true,
 		DisableLevelTruncation: true,
 		FullTimestamp:          true,
+		/*CallerPrettyfier: func(f *runtime.Frame) (string, string) {
+			return f.Func.Name(), "test"
+		},*/
 	})
 	if logFile != "" {
 		file, err := os.OpenFile(logFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0600)
