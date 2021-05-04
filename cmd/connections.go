@@ -61,7 +61,7 @@ func showConnection(vc *vaultApi.Client, key string) bool {
 	return true
 }
 
-// printConnection details suitable for use with ssh_config
+// printConnection details suitable for use on the command line
 func printConnection(vc *vaultApi.Client, key string) bool {
 	log.Debugf("printConnection %v", key)
 	conn, err := getRawConnection(vc, key)
