@@ -42,6 +42,15 @@ var (
 		},
 	}
 
+	printCmd = &cobra.Command{
+		Use:   "print [flags]",
+		Short: "Print out the SSH command for a connection",
+		Long:  "Print full command that would be used to connect",
+		Run: func(cmd *cobra.Command, args []string) {
+			printConnection(getVaultClient(), args[0])
+		},
+	}
+
 	showCmd = &cobra.Command{
 		Use:   "show CONNECTION [flags]",
 		Short: "Display a connection",
@@ -92,6 +101,7 @@ var (
 func init() {
 	rootCmd.AddCommand(
 		listCmd,
+		printCmd,
 		showCmd,
 		versionCmd,
 	)

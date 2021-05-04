@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"math"
 	"reflect"
+	"strings"
 
 	vaultApi "github.com/hashicorp/vault/api"
 
@@ -57,6 +58,23 @@ func showConnection(vc *vaultApi.Client, key string) bool {
 	log.Info("SSH cmd:", sshArgs)
 
 	fmt.Println(config)
+	return true
+}
+
+// printConnection details suitable for use with ssh_config
+func printConnection(vc *vaultApi.Client, key string) bool {
+	log.Debugf("printConnection %v", key)
+	conn, err := getRawConnection(vc, key)
+
+	if err != nil {
+		log.Debug("Unable to print connection", key)
+		return false
+	}
+
+	sshClient := ssh.Connection{}
+	sshArgs := sshClient.BuildConnection(conn.Data, key, cfg.User)
+
+	fmt.Printf("ssh %v\n", strings.Join(sshArgs, " "))
 	return true
 }
 
