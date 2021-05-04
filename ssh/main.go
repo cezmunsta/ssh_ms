@@ -217,18 +217,26 @@ func setHostname(sshArgs *Connection, args map[string]interface{}) {
 // args : options provided for inspection
 func setUser(sshArgs *Connection, args map[string]interface{}, templateUser string) {
 	option := EnvSSHDefaultUsername
+	log.Debugf("original user: %v", templateUser)
 	if val, ok := args["User"]; ok {
 		option = val.(string)
 	}
+	log.Debugf("loaded user: %v", option)
+
 	tempUser := userName{}
 	if _, err := tempUser.generateUserName(templateUser); err != nil {
 		log.Error("Unable to generate tempUser")
 	}
+	log.Debugf("tempUser: %v", tempUser)
 
 	if _, err := tempUser.rewriteUsername(option); err != nil {
 		log.Error("Unable to rewrite tempUser")
 	}
-	sshArgs.User = tempUser.FullName
+	log.Debugf("tempUser updated to: %v", tempUser)
+
+	if len(tempUser.FullName) > 0 {
+		sshArgs.User = tempUser.FullName
+	}
 }
 
 // setPort specifies the Port value for SSH

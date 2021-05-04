@@ -25,15 +25,11 @@ var (
 			if cmd.Name() == "help" {
 				return
 			}
+			updateSettings()
 		},
 		Run: func(cmd *cobra.Command, args []string) {
-			if cfg.Version {
-				printVersion()
-				os.Exit(0)
-			} else {
-				cmd.Usage()
-				os.Exit(1)
-			}
+			cmd.Usage()
+			os.Exit(1)
 		},
 	}
 
@@ -55,6 +51,15 @@ var (
         `,
 		Run: func(cmd *cobra.Command, args []string) {
 			showConnection(getVaultClient(), args[0])
+		},
+	}
+
+	versionCmd = &cobra.Command{
+		Use:   "version [flags]",
+		Short: "Show the version",
+		Long:  "Show the version of the application",
+		Run: func(cmd *cobra.Command, args []string) {
+			printVersion()
 		},
 	}
 
@@ -88,6 +93,7 @@ func init() {
 	rootCmd.AddCommand(
 		listCmd,
 		showCmd,
+		versionCmd,
 	)
 	rootCmd.PersistentFlags().StringVar(&cfg.VaultAddr, "vault-addr", os.Getenv(vaultApi.EnvVaultAddress), "Specify the Vault address")
 	rootCmd.PersistentFlags().StringVar(&cfg.VaultToken, "vault-token", os.Getenv(vaultApi.EnvVaultToken), "Specify the Vault token")
@@ -98,11 +104,32 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&cfg.Debug, "debug", "d", false, "Provide addition output")
 	rootCmd.PersistentFlags().BoolVarP(&cfg.Verbose, "verbose", "v", false, "Provide addition output")
 
-	rootCmd.Flags().BoolVarP(&cfg.Version, "version", "V", false, "Show the version")
-
 	log := log.GetLogger(log.GetDefaultLevel(), "")
 	cfg.LogLevel = log.GetLevel()
+}
 
+// getVersion information for the application
+func getVersion() [][]string {
+	var lines [][]string
+
+	if !cfg.Verbose && !cfg.Debug {
+		lines = append(lines, []string{Version})
+	} else {
+		lines = append(lines, []string{"Version:", Version})
+		lines = append(lines, []string{"Arch:", runtime.GOOS, runtime.GOARCH})
+	}
+	return lines
+}
+
+// printVersion of the application
+func printVersion() {
+	for _, line := range getVersion() {
+		fmt.Println(strings.Join(line, " "))
+	}
+}
+
+// updateSettings will update certain configuration items
+func updateSettings() {
 	if cfg.Debug {
 		cfg.LogLevel = logrus.DebugLevel
 	} else if cfg.Verbose {
@@ -116,28 +143,6 @@ func init() {
 
 	if cfg.VaultAddr == "" {
 		cfg.VaultAddr = EnvVaultAddr
-	}
-}
-
-// getVersion information for the application
-func getVersion() [][]string {
-	var lines [][]string
-
-	if !cfg.Verbose {
-		lines = append(lines, []string{Version})
-	} else {
-		lines = append(lines, []string{"Version:", Version})
-		lines = append(lines, []string{"Arch:", runtime.GOOS, runtime.GOARCH})
-	}
-	return lines
-}
-
-// printVersion of the application
-func printVersion() {
-	lines := getVersion()
-
-	for _, line := range lines {
-		fmt.Println(strings.Join(line, " "))
 	}
 }
 
