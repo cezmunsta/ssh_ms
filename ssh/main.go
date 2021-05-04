@@ -178,6 +178,7 @@ func (un *userName) rewriteUsername(newuser string) (bool, error) {
 	log.Debugf("jsonUser '%v", jsonUser)
 
 	for marker, tpl := range Placeholders {
+		log.Debugf("rewriting marker '%v' with '%v'", marker, tpl)
 		jsonUser = strings.Replace(jsonUser, marker, tpl, 1)
 	}
 	log.Debugf("jsonUser rewritten '%v", jsonUser)
