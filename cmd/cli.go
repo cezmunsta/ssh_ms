@@ -82,12 +82,6 @@ var (
 
 	*/
 
-	// EnvSSHUsername is used to authenticate with SSH
-	EnvSSHUsername = "SSH_MS_USERNAME"
-
-	// EnvSSHIdentityFile is used for SSH authentication
-	EnvSSHIdentityFile = "id_rsa"
-
 	// EnvVaultAddr is the default location for Vault
 	EnvVaultAddr = vaultApi.EnvVaultAddress
 
@@ -108,7 +102,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&cfg.VaultAddr, "vault-addr", os.Getenv(vaultApi.EnvVaultAddress), "Specify the Vault address")
 	rootCmd.PersistentFlags().StringVar(&cfg.VaultToken, "vault-token", os.Getenv(vaultApi.EnvVaultToken), "Specify the Vault token")
 
-	rootCmd.PersistentFlags().StringVarP(&cfg.User, "user", "u", os.Getenv(EnvSSHUsername), "Your SSH username for templated configs")
+	rootCmd.PersistentFlags().StringVarP(&cfg.User, "user", "u", os.Getenv(cfg.EnvSSHUsername), "Your SSH username for templated configs")
 
 	rootCmd.PersistentFlags().BoolVarP(&cfg.StoredToken, "stored-token", "", false, "Use a stored token from 'vault login' (overrides --vault-token, auto-enabled when no token is specified)")
 	rootCmd.PersistentFlags().BoolVarP(&cfg.Debug, "debug", "d", false, "Provide addition output")
