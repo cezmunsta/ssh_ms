@@ -2,6 +2,7 @@ package config
 
 import (
 	"os"
+	"path/filepath"
 	"sync"
 
 	"github.com/sirupsen/logrus"
@@ -9,9 +10,10 @@ import (
 
 // Settings contains the configuration details
 type Settings struct {
-	LogLevel                                                                                                    logrus.Level
-	Debug, Simulate, StoredToken, Verbose, Version                                                              bool
-	ConfigComment, EnvSSHDefaultUsername, EnvSSHIdentityFile, EnvSSHUsername, Show, User, VaultAddr, VaultToken string
+	LogLevel                                       logrus.Level
+	Debug, Simulate, StoredToken, Verbose, Version bool
+	ConfigComment, EnvSSHDefaultUsername, EnvSSHIdentityFile,
+	EnvSSHUsername, Show, StoragePath, User, VaultAddr, VaultToken string
 }
 
 var (
@@ -25,6 +27,9 @@ var (
 		`-ldflags "-X github.com/cezmunsta/ssh_ms/config.EnvSSHUserName=xxx"`
 
 	*/
+	// EnvBasePath is the parent location used to prefix storage paths
+	EnvBasePath = filepath.Join(os.Getenv("HOME"), ".ssh", "cache")
+
 	// EnvSSHUsername is used to authenticate with SSH
 	EnvSSHUsername = "SSH_MS_USERNAME"
 
@@ -43,6 +48,7 @@ func GetConfig() *Settings {
 			EnvSSHUsername:        os.Getenv(EnvSSHUsername),
 			LogLevel:              logrus.WarnLevel,
 			Simulate:              false,
+			StoragePath:           EnvBasePath,
 			StoredToken:           false,
 		}
 	})

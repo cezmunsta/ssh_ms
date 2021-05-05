@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"path/filepath"
 	"reflect"
 	"strings"
 
@@ -131,6 +132,11 @@ func deleteConnection(vc *vaultApi.Client, key string) bool {
 		return false
 	}
 	return status
+}
+
+// getCachePath returns the path to save to
+func getCachePath(host string) string {
+	return filepath.Join(cfg.StoragePath, host, ".json")
 }
 
 // getRawConnection retrieves the secret from Vault

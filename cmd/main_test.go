@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"os"
+
 	vaultHelper "github.com/cezmunsta/ssh_ms/vault"
 	vaultApi "github.com/hashicorp/vault/api"
 )
@@ -8,6 +10,6 @@ import (
 var (
 	vc *vaultApi.Client
 
-	env       = vaultHelper.UserEnv{Addr: "http://127.0.0.1:8200", Token: "myroottoken", Simulate: false}
+	env       = vaultHelper.UserEnv{Addr: os.Getenv("VAULT_ADDR"), Token: os.Getenv("VAULT_TOKEN"), Simulate: false}
 	lookupKey = "test"
 )

@@ -21,6 +21,10 @@ func TestGetRawConnection(t *testing.T) {
 	}
 }
 
+func TestCache(t *testing.T) {
+
+}
+
 func TestShowConnection(t *testing.T) {
 	cn, err := getRawConnection(getVaultClientWithEnv(env), lookupKey)
 
