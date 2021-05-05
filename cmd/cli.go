@@ -33,6 +33,15 @@ var (
 		},
 	}
 
+	deleteCmd = &cobra.Command{
+		Use:   "delete CONNECTION [flags]",
+		Short: "Delete a connection",
+		Long:  "Lookup the requested connection and remove it when present",
+		Run: func(cmd *cobra.Command, args []string) {
+			deleteConnection(getVaultClient(), args[0])
+		},
+	}
+
 	listCmd = &cobra.Command{
 		Use:   "list [flags]",
 		Short: "List available connections",
@@ -43,7 +52,7 @@ var (
 	}
 
 	printCmd = &cobra.Command{
-		Use:   "print [flags]",
+		Use:   "print CONNECTION [flags]",
 		Short: "Print out the SSH command for a connection",
 		Long:  "Print full command that would be used to connect",
 		Run: func(cmd *cobra.Command, args []string) {
@@ -94,6 +103,7 @@ var (
 
 func init() {
 	rootCmd.AddCommand(
+		deleteCmd,
 		listCmd,
 		printCmd,
 		showCmd,

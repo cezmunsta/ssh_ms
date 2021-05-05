@@ -78,6 +78,24 @@ func printConnection(vc *vaultApi.Client, key string) bool {
 	return true
 }
 
+// deleteConnection removes an entry from Vault
+func deleteConnection(vc *vaultApi.Client, key string) bool {
+	log.Debugf("deleteConnection %v", key)
+	_, err := getRawConnection(vc, key)
+
+	if err != nil {
+		log.Debug("Unable to retrieve connection", key)
+		return false
+	}
+
+	status, err := vaultHelper.DeleteSecret(vc, fmt.Sprintf("%s/%s", SecretPath, key))
+	if err != nil {
+		log.Warning("Unable to delete connection", key)
+		return false
+	}
+	return status
+}
+
 // getRawConnection retrieves the secret from Vault
 func getRawConnection(vc *vaultApi.Client, key string) (*vaultApi.Secret, error) {
 	secret, err := vaultHelper.ReadSecret(vc, fmt.Sprintf("%s/%s", SecretPath, key))
