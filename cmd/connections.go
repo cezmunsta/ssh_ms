@@ -14,9 +14,7 @@ import (
 	vaultHelper "github.com/cezmunsta/ssh_ms/vault"
 )
 
-//var (
-//	log logrus.Logger
-//)
+type secretData map[string]interface{}
 
 // listConnections from Vault
 func listConnections(vc *vaultApi.Client) bool {
@@ -78,6 +76,39 @@ func printConnection(vc *vaultApi.Client, key string) bool {
 	return true
 }
 
+// writeConnection creates a new entry, or updates an existing one
+func writeConnection(vc *vaultApi.Client, key string, args []string) bool {
+	log.Debugf("writeConnection %v", key)
+	conn, err := getRawConnection(vc, key)
+	secret := make(secretData)
+
+	if err != nil {
+		// New connection
+		for i := 0; i < len(args); i++ {
+			s := strings.Split(args[i], "=")
+			secret[s[0]] = s[1]
+		}
+	} else {
+		// Existing connection
+		log.Warning("Updating an existing connection is WIP")
+		log.Debug("writeConnection found: ", conn)
+		return false
+	}
+
+	secret["ConfigComment"] = cfg.ConfigComment
+
+	if cfg.Simulate {
+		return true
+	}
+
+	status, err := vaultHelper.WriteSecret(vc, fmt.Sprintf("%s/%s", SecretPath, key), secret)
+	if err != nil {
+		log.Errorf("Failed to write '%v': %v", key, err)
+		return false
+	}
+	return status
+}
+
 // deleteConnection removes an entry from Vault
 func deleteConnection(vc *vaultApi.Client, key string) bool {
 	log.Debugf("deleteConnection %v", key)
@@ -101,7 +132,7 @@ func getRawConnection(vc *vaultApi.Client, key string) (*vaultApi.Secret, error)
 	secret, err := vaultHelper.ReadSecret(vc, fmt.Sprintf("%s/%s", SecretPath, key))
 
 	if err != nil || secret == nil {
-		log.Warning("Unable to find connection for:", key)
+		log.Warning("Unable to find connection for: ", key)
 		return nil, errors.New("no match found")
 	}
 	return secret, nil

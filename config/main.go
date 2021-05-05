@@ -9,9 +9,9 @@ import (
 
 // Settings contains the configuration details
 type Settings struct {
-	LogLevel                                                                                     logrus.Level
-	Debug, Simulate, StoredToken, Verbose, Version                                               bool
-	EnvSSHDefaultUsername, EnvSSHIdentityFile, EnvSSHUsername, Show, User, VaultAddr, VaultToken string
+	LogLevel                                                                                                    logrus.Level
+	Debug, Simulate, StoredToken, Verbose, Version                                                              bool
+	ConfigComment, EnvSSHDefaultUsername, EnvSSHIdentityFile, EnvSSHUsername, Show, User, VaultAddr, VaultToken string
 }
 
 var (
@@ -37,6 +37,7 @@ var (
 func GetConfig() *Settings {
 	once.Do(func() {
 		settings = Settings{
+			ConfigComment:         "",
 			EnvSSHDefaultUsername: os.Getenv("USER"),
 			EnvSSHIdentityFile:    EnvSSHIdentityFile,
 			EnvSSHUsername:        os.Getenv(EnvSSHUsername),
