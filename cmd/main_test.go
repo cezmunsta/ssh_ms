@@ -8,6 +8,6 @@ import (
 var (
 	vc *vaultApi.Client
 
-	env       = vaultHelper.UserEnv{Addr: "http://127.0.0.1:8200", Token: "myroot", Simulate: false}
-	lookupKey = "ceri"
+	env       = vaultHelper.UserEnv{Addr: "http://127.0.0.1:8200", Token: "myroottoken", Simulate: false}
+	lookupKey = "test"
 )
