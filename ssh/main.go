@@ -13,6 +13,7 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/cezmunsta/ssh_ms/config"
 	"github.com/cezmunsta/ssh_ms/log"
 )
 
@@ -21,13 +22,16 @@ var (
 	localForwardPortMin = uint16(18000)
 	localForwardPortMax = uint16(20000)
 
+	cfg = config.GetConfig()
+
 	// Placeholders are used for templated connections
 	Placeholders = map[string]string{
-		"@@USER_INITIAL_LASTNAME":  "{{.FirstNameInitial}}{{.LastName}}",
-		"@@USER_LASTNAME_INITIAL":  "{{.LastName}}{{.FirstNameInitial}}",
-		"@@USER_FIRSTNAME_INITIAL": "{{.FirstName}}{{.LastNameInitial}}",
-		"@@USER_FIRSTNAME":         "{{.FirstName}}",
-		//"@@" + cmd.EnvSSHUsername:  "{{.FullName}}",
+		"@@USER_INITIAL_LASTNAME":          "{{.FirstNameInitial}}{{.LastName}}",
+		"@@USER_LASTNAME_INITIAL":          "{{.LastName}}{{.FirstNameInitial}}",
+		"@@USER_FIRSTNAME_INITIAL":         "{{.FirstName}}{{.LastNameInitial}}",
+		"@@USER_FIRSTNAME.@@USER_LASTNAME": "{{.FirstName}}.{{.LastName}}",
+		"@@USER_FIRSTNAME":                 "{{.FirstName}}",
+		"@@" + cfg.EnvSSHUsername:          "{{.FullName}}",
 	}
 
 	// EnvSSHDefaultUsername is used to authenticate with SSH
@@ -140,6 +144,12 @@ func (un *userName) generateUserName(username string) (bool, error) {
 
 	if len(un.FirstName) > 0 {
 		return false, errors.New("rejecting request, userName already initialised")
+	} else if strings.HasPrefix(username, "@") {
+		un.FirstName = username
+		un.FirstNameInitial = username
+		un.LastName = username
+		un.LastNameInitial = username
+		un.FullName = username
 	} else if len(name) > 1 {
 		un.FirstName = name[0]
 		un.FirstNameInitial = name[0][0:1]
@@ -196,8 +206,8 @@ func (un *userName) rewriteUsername(newuser string) (bool, error) {
 	}
 	log.Debugf("templatedUser '%v'", templatedUser)
 
-	un = &templatedUser
-	un.IsParsed = true
+	templatedUser.IsParsed = true
+	*un = templatedUser
 	log.Debugf("updated user '%v'", un)
 	return true, nil
 }
@@ -225,23 +235,19 @@ func setUser(sshArgs *Connection, args map[string]interface{}, templateUser stri
 	log.Debugf("loaded user: %v", option)
 
 	tempUser := userName{}
-	if _, err := tempUser.generateUserName(templateUser); err != nil {
+	if _, err := tempUser.generateUserName(option); err != nil {
 		log.Error("Unable to generate tempUser")
 	}
 	log.Debugf("tempUser: %v", tempUser)
 
-	if _, err := tempUser.rewriteUsername(option); err != nil {
+	if _, err := tempUser.rewriteUsername(templateUser); err != nil {
 		log.Error("Unable to rewrite tempUser")
 	}
 	log.Debugf("tempUser updated to: %v", tempUser)
 
-	if len(tempUser.FullName) > 0 {
-		sshArgs.User = tempUser.FullName
-	}
+	sshArgs.User = tempUser.FirstName
 }
 
-// setPort specifies the Port value for SSH
-// sshArgs : Connection properties for SSH
 // args : options provided for inspection
 func setPort(sshArgs *Connection, args map[string]interface{}) {
 	option := uint16(22)
