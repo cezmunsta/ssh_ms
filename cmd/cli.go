@@ -126,6 +126,7 @@ func init() {
 
 	rootCmd.PersistentFlags().BoolVarP(&cfg.StoredToken, "stored-token", "", false, "Use a stored token from 'vault login' (overrides --vault-token, auto-enabled when no token is specified)")
 	rootCmd.PersistentFlags().BoolVarP(&cfg.Debug, "debug", "d", false, "Provide addition output")
+	rootCmd.PersistentFlags().BoolVarP(&cfg.Simulate, "dry-run", "n", false, "Display commands rather than executing them")
 	rootCmd.PersistentFlags().BoolVarP(&cfg.Verbose, "verbose", "v", false, "Provide addition output")
 
 	writeCmd.Flags().StringVarP(&cfg.ConfigComment, "comment", "c", "", "Add a comment for the config entry")

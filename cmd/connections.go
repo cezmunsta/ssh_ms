@@ -98,6 +98,7 @@ func writeConnection(vc *vaultApi.Client, key string, args []string) bool {
 	secret["ConfigComment"] = cfg.ConfigComment
 
 	if cfg.Simulate {
+		log.Infof("simulated write to '%v': %v", key, args)
 		return true
 	}
 
@@ -117,6 +118,11 @@ func deleteConnection(vc *vaultApi.Client, key string) bool {
 	if err != nil {
 		log.Debug("Unable to retrieve connection", key)
 		return false
+	}
+
+	if cfg.Simulate {
+		log.Infof("simulated delete of '%v'", key)
+		return true
 	}
 
 	status, err := vaultHelper.DeleteSecret(vc, fmt.Sprintf("%s/%s", SecretPath, key))
