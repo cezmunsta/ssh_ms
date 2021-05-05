@@ -34,6 +34,13 @@ var (
 		"@@" + cfg.EnvSSHUsername:          "{{.FullName}}",
 	}
 
+	/*
+		The following support overrides during builds, which can be done
+		by setting ldflags, e.g.
+
+		`-ldflags "-X github.com/cezmunsta/ssh_ms/ssh.EnvSSHDefaultUsername=xxx"`
+
+	*/
 	// EnvSSHDefaultUsername is used to authenticate with SSH
 	EnvSSHDefaultUsername = os.Getenv("USER")
 )
@@ -188,6 +195,10 @@ func (un *userName) rewriteUsername(newuser string) (bool, error) {
 	log.Debugf("jsonUser '%v", jsonUser)
 
 	for marker, tpl := range Placeholders {
+		if marker == "@@" {
+			// Broken marker from misconfigured env
+			continue
+		}
 		log.Debugf("rewriting marker '%v' with '%v'", marker, tpl)
 		jsonUser = strings.Replace(jsonUser, marker, tpl, 1)
 	}
