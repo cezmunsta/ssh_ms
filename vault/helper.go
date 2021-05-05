@@ -2,6 +2,7 @@ package vault
 
 import (
 	"os"
+	"strings"
 
 	"github.com/hashicorp/vault/api"
 	credToken "github.com/hashicorp/vault/builtin/credential/token"
@@ -9,6 +10,8 @@ import (
 
 	"github.com/cezmunsta/ssh_ms/log"
 )
+
+type secretData map[string]interface{}
 
 // UserEnv contains settings from the ENV
 type UserEnv struct {
@@ -99,7 +102,33 @@ func ReadSecret(c *api.Client, key string) (*api.Secret, error) {
 // key : the key for the secret
 // data : config for use when writing data
 func WriteSecret(c *api.Client, key string, data map[string]interface{}) (bool, error) {
-	if _, err := c.Logical().Write(key, data); err != nil {
+	sanitisedData := make(secretData)
+	keyLookup := map[string]interface{}{
+		"hostname":            "HostName",
+		"port":                "Port",
+		"user":                "User",
+		"localforward":        "LocalForward",
+		"identityfile":        "IdentityFile",
+		"identitiesonly":      "IdentitiesOnly",
+		"proxyjump":           "ProxyJump",
+		"serveraliveinterval": "ServerAliveInterval",
+		"serveralivecountmax": "ServerAliveCountMax",
+		"cache":               "Cache",
+		"configcomment":       "ConfigComment",
+	}
+
+	for k, v := range data {
+		opt := ""
+		lk := strings.ToLower(k)
+		if val, ok := keyLookup[lk]; ok {
+			opt = val.(string)
+		} else {
+			log.Warning("Unknown option received: ", k)
+			continue
+		}
+		sanitisedData[opt] = v
+	}
+	if _, err := c.Logical().Write(key, sanitisedData); err != nil {
 		return false, err
 	}
 	return true, nil
