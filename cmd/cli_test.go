@@ -15,7 +15,7 @@ func TestExecute(t *testing.T) {
 	b := bytes.NewBufferString("")
 
 	cmd.SetOut(b)
-	cmd.SetArgs([]string{"--version"})
+	cmd.SetArgs([]string{"version"})
 	cmd.Execute()
 
 	out, err := ioutil.ReadAll(b)
