@@ -65,7 +65,7 @@ func TestRewriteUsername(t *testing.T) {
 			t.Fatalf("expected: userName{} got: %v", err)
 		}
 		user.rewriteUsername("ceri.williams")
-		if strings.Contains(user.FullName, "@") {
+		if strings.Contains(user.FullName, "@") && !strings.Contains(n, "@") {
 			t.Fatalf("expected: templates to be parsed got: %v", user.FullName)
 		}
 	}
