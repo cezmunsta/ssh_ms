@@ -277,7 +277,7 @@ func setPort(sshArgs *Connection, args map[string]interface{}) {
 // sshArgs : Connection properties for SSH
 // args : options provided for inspection
 func setIdentity(sshArgs *Connection, args map[string]interface{}) {
-	option := "~/.ssh/id_rsa"
+	option := cfg.EnvSSHIdentityFile
 	if val, ok := args["IdentityFile"]; ok {
 		option = val.(string)
 	}
