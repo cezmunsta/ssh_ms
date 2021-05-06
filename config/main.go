@@ -58,7 +58,7 @@ func GetConfig() *Settings {
 			ConfigComment:         "",
 			EnvSSHDefaultUsername: EnvSSHDefaultUsername,
 			EnvSSHIdentityFile:    EnvSSHIdentityFile,
-			EnvSSHUsername:        os.Getenv(EnvSSHUsername),
+			EnvSSHUsername:        EnvSSHUsername,
 			LogLevel:              logrus.WarnLevel,
 			Simulate:              false,
 			StoragePath:           EnvBasePath,
