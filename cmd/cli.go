@@ -101,6 +101,15 @@ var (
 		},
 	}
 
+	updateCmd = &cobra.Command{
+		Use:   "update CONNECTION [args]",
+		Short: "Update an existing connection to storage",
+		Long:  "TBD",
+		Run: func(cmd *cobra.Command, args []string) {
+			updateConnection(getVaultClient(), args[0], args[1:])
+		},
+	}
+
 	writeCmd = &cobra.Command{
 		Use:   "write CONNECTION [args]",
 		Short: "Add a new connection to storage",
@@ -139,6 +148,7 @@ func init() {
 		purgeCmd,
 		showCmd,
 		versionCmd,
+		updateCmd,
 		writeCmd,
 	)
 	rootCmd.PersistentFlags().StringVar(&cfg.VaultAddr, "vault-addr", os.Getenv(vaultApi.EnvVaultAddress), "Specify the Vault address")
@@ -152,6 +162,7 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&cfg.Simulate, "dry-run", "n", false, "Prevent certain commands without full execution")
 	rootCmd.PersistentFlags().BoolVarP(&cfg.Verbose, "verbose", "v", false, "Provide addition output")
 
+	updateCmd.Flags().StringVarP(&cfg.ConfigComment, "comment", "c", "", "Set the comment for the config entry")
 	writeCmd.Flags().StringVarP(&cfg.ConfigComment, "comment", "c", "", "Add a comment for the config entry")
 
 	log := log.GetLogger(log.GetDefaultLevel(), "")
