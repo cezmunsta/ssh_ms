@@ -17,9 +17,13 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 package main
 
 import (
+	"os"
+
 	"github.com/cezmunsta/ssh_ms/cmd"
 )
 
 func main() {
-	cmd.Execute()
+	if exitCode, err := cmd.Execute(); err != nil {
+		os.Exit(exitCode)
+	}
 }
