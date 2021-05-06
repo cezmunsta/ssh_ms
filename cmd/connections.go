@@ -22,11 +22,12 @@ import (
 
 type secretData map[string]interface{}
 
-// CacheExpireAfter sets the threshold for cleaning stales caches
+// CacheExpireAfter sets the threshold for cleaning stale caches
 const CacheExpireAfter = (7 * 24) * time.Hour
 
 // listConnections from Vault
 func listConnections(vc *vaultApi.Client) bool {
+	log.Debugf("listConnections")
 	connections, err := getConnections(vc)
 
 	if err != nil {
@@ -46,7 +47,7 @@ func listConnections(vc *vaultApi.Client) bool {
 
 // showConnection details suitable for use with ssh_config
 func showConnection(vc *vaultApi.Client, key string) bool {
-	log.Debugf("showConnection %v", key)
+	log.Debugf("showConnection: %v", key)
 	conn, err := getRawConnection(vc, key)
 
 	if err != nil {
@@ -70,7 +71,7 @@ func showConnection(vc *vaultApi.Client, key string) bool {
 
 // printConnection details suitable for use on the command line
 func printConnection(vc *vaultApi.Client, key string) bool {
-	log.Debugf("printConnection %v", key)
+	log.Debugf("printConnection: %v", key)
 	conn, err := getRawConnection(vc, key)
 
 	if err != nil {
@@ -87,8 +88,8 @@ func printConnection(vc *vaultApi.Client, key string) bool {
 
 // writeConnection creates a new entry, or updates an existing one
 func writeConnection(vc *vaultApi.Client, key string, args []string) bool {
-	log.Debugf("writeConnection %v", key)
-	conn, err := getRawConnection(vc, key)
+	log.Debugf("writeConnection: %v", key)
+	_, err := getRawConnection(vc, key)
 	secret := make(secretData)
 
 	if err != nil {
@@ -99,8 +100,7 @@ func writeConnection(vc *vaultApi.Client, key string, args []string) bool {
 		}
 	} else {
 		// Existing connection
-		log.Warning("Updating an existing connection is WIP")
-		log.Debug("writeConnection found: ", conn)
+		log.Warningf("Existing connection found for '%v', please use update instead", key)
 		return false
 	}
 
@@ -119,9 +119,44 @@ func writeConnection(vc *vaultApi.Client, key string, args []string) bool {
 	return status
 }
 
+// updateConnection performs a partial update of an existing connection
+func updateConnection(vc *vaultApi.Client, key string, args []string) bool {
+	log.Debugf("updateConnection: %v", key)
+	conn, err := getRawConnection(vc, key)
+
+	if err != nil {
+		log.Warningf("Unable to retrieve connection '%v', please use write instead", key)
+		return false
+	}
+
+	for i := 0; i < len(args); i++ {
+		s := strings.Split(args[i], "=")
+		if len(s) != 2 {
+			log.Fatalf("Unexpected option '%v', expected XXX=YYY", args[i])
+		}
+		conn.Data[s[0]] = s[1]
+	}
+
+	if len(cfg.ConfigComment) > 0 {
+		conn.Data["ConfigComment"] = cfg.ConfigComment
+	}
+
+	if cfg.Simulate {
+		log.Infof("Simulate update of '%v'", key, conn.Data)
+		return true
+	}
+
+	status, err := vaultHelper.WriteSecret(vc, fmt.Sprintf("%s/%s", SecretPath, key), conn.Data)
+	if err != nil {
+		log.Errorf("Failed to write '%v': %v", key, err)
+		return false
+	}
+	return status
+}
+
 // deleteConnection removes an entry from Vault
 func deleteConnection(vc *vaultApi.Client, key string) bool {
-	log.Debugf("deleteConnection %v", key)
+	log.Debugf("deleteConnection: %v", key)
 	_, err := getRawConnection(vc, key)
 
 	if err != nil {

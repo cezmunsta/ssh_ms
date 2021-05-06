@@ -30,6 +30,9 @@ var (
 	// EnvBasePath is the parent location used to prefix storage paths
 	EnvBasePath = filepath.Join(os.Getenv("HOME"), ".ssh", "cache")
 
+	// EnvSSHDefaultUsername sets the default used in connections
+	EnvSSHDefaultUsername = os.Getenv("USER")
+
 	// EnvSSHUsername is used to authenticate with SSH
 	EnvSSHUsername = "SSH_MS_USERNAME"
 
@@ -43,7 +46,7 @@ func GetConfig() *Settings {
 	once.Do(func() {
 		settings = Settings{
 			ConfigComment:         "",
-			EnvSSHDefaultUsername: os.Getenv("USER"),
+			EnvSSHDefaultUsername: EnvSSHDefaultUsername,
 			EnvSSHIdentityFile:    EnvSSHIdentityFile,
 			EnvSSHUsername:        os.Getenv(EnvSSHUsername),
 			LogLevel:              logrus.WarnLevel,

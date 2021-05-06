@@ -13,7 +13,7 @@ SSH_MS_SYNC_HOST?="localhost"
 SSH_MS_SYNC_PATH?="/usr/share/nginx/html/downloads/ssh_ms/"
 
 PACKAGE="github.com/cezmunsta/ssh_ms"
-LDFLAGS=-ldflags "-w -X ${PACKAGE}/cmd.Version=${RELEASE_VER} -X ${PACKAGE}/cmd.EnvSSHUsername=${SSH_MS_USERNAME} -X ${PACKAGE}/cmd.EnvSSHIdentityFile=${SSH_ID_FILE} -X ${PACKAGE}/ssh.EnvSSHDefaultUsername=${SSH_DEFAULT_USERNAME} -X ${PACKAGE}/cmd.EnvVaultAddr=${DEFAULT_VAULT_ADDR}"
+LDFLAGS=-ldflags "-w -X ${PACKAGE}/cmd.Version=${RELEASE_VER} -X ${PACKAGE}/config.EnvSSHUsername=${SSH_MS_USERNAME} -X ${PACKAGE}/config.EnvSSHIdentityFile=${SSH_ID_FILE} -X ${PACKAGE}/config.EnvSSHDefaultUsername=${SSH_DEFAULT_USERNAME} -X ${PACKAGE}/cmd.EnvVaultAddr=${DEFAULT_VAULT_ADDR}"
 
 all: lint format test binaries
 
