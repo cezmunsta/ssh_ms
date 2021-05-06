@@ -205,6 +205,7 @@ func updateSettings() {
 	if cfg.VaultAddr == "" {
 		cfg.VaultAddr = EnvVaultAddr
 	}
+	log.Debug("config: ", cfg.ToJSON())
 }
 
 // Execute the commands

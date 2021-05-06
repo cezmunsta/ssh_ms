@@ -1,6 +1,7 @@
 package config
 
 import (
+	"encoding/json"
 	"os"
 	"path/filepath"
 	"sync"
@@ -39,6 +40,15 @@ var (
 	// EnvSSHIdentityFile is used for SSH authentication
 	EnvSSHIdentityFile = "id_rsa"
 )
+
+// ToJSON returns the config in JSON format
+func (s *Settings) ToJSON() string {
+	data, err := json.Marshal(s)
+	if err != nil {
+		return ""
+	}
+	return string(data)
+}
 
 // GetConfig returns an instance of Settings
 // ensuring that only one instance is ever returned
