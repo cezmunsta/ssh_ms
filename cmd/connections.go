@@ -27,6 +27,7 @@ const CacheExpireAfter = (7 * 24) * time.Hour
 
 // listConnections from Vault
 func listConnections(vc *vaultApi.Client) bool {
+	log.Debugf("listConnections")
 	connections, err := getConnections(vc)
 
 	if err != nil {
@@ -46,7 +47,7 @@ func listConnections(vc *vaultApi.Client) bool {
 
 // showConnection details suitable for use with ssh_config
 func showConnection(vc *vaultApi.Client, key string) bool {
-	log.Debugf("showConnection %v", key)
+	log.Debugf("showConnection: %v", key)
 	conn, err := getRawConnection(vc, key)
 
 	if err != nil {
@@ -70,7 +71,7 @@ func showConnection(vc *vaultApi.Client, key string) bool {
 
 // printConnection details suitable for use on the command line
 func printConnection(vc *vaultApi.Client, key string) bool {
-	log.Debugf("printConnection %v", key)
+	log.Debugf("printConnection: %v", key)
 	conn, err := getRawConnection(vc, key)
 
 	if err != nil {
@@ -155,7 +156,7 @@ func updateConnection(vc *vaultApi.Client, key string, args []string) bool {
 
 // deleteConnection removes an entry from Vault
 func deleteConnection(vc *vaultApi.Client, key string) bool {
-	log.Debugf("deleteConnection %v", key)
+	log.Debugf("deleteConnection: %v", key)
 	_, err := getRawConnection(vc, key)
 
 	if err != nil {
