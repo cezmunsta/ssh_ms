@@ -1,12 +1,17 @@
 package cmd
 
 import (
+	"bufio"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"math"
+	"os"
 	"path/filepath"
 	"reflect"
 	"strings"
+	"time"
 
 	vaultApi "github.com/hashicorp/vault/api"
 
@@ -16,6 +21,8 @@ import (
 )
 
 type secretData map[string]interface{}
+
+const CacheExpireAfter = (7 * 24) * time.Hour
 
 // listConnections from Vault
 func listConnections(vc *vaultApi.Client) bool {
@@ -134,9 +141,190 @@ func deleteConnection(vc *vaultApi.Client, key string) bool {
 	return status
 }
 
+// prepareConnection for SSH
+// vc : Vault client
+// args : options for inspection
+// verbose : enable informational output
+func prepareConnection(vc *vaultApi.Client, args []string) ([]string, ssh.Connection) {
+	log.Debugf("prepareConnection: %v", args)
+
+	var sshArgs []string
+	var config map[string]interface{}
+
+	if len(args) == 0 {
+		log.Fatal("Minimum requirement is to specify an alias")
+	}
+	key := args[0]
+	config, _ = getCache(key)
+
+	if config == nil {
+		config, _ = getRemoteCache(vc, key)
+	}
+
+	if config == nil {
+		return sshArgs, ssh.Connection{}
+	}
+
+	log.Debugf("config: %v", config)
+	sshClient := ssh.Connection{}
+	sshArgs = append(sshClient.BuildConnection(config, key, cfg.User), args[1:]...)
+	log.Debugf("sshArgs: %v", sshArgs)
+	return sshArgs, sshClient
+}
+
+// connect using SSH
+// vc: Vault client
+// env: UserEnv configuration
+// args : extra args passed by the user
+func connect(vc *vaultApi.Client, env ssh.UserEnv, args []string) {
+	log.Debug("connect: %v", args[0])
+	sshArgs, sshClient := prepareConnection(vc, args)
+
+	log.Debugf("%v", map[string]interface{}{
+		"env": env,
+		//"expertMode": cfg.ExpertMode
+		"args": args,
+	})
+
+	for i := 0; i < len(sshClient.LocalForward); i++ {
+		fmt.Printf("FWD: https://127.0.0.1:%d -> %d\n", sshClient.LocalForward[i].LocalPort, sshClient.LocalForward[i].RemotePort)
+	}
+
+	if cfg.Simulate {
+		printConnection(vc, args[0])
+		return
+	}
+	ssh.Connect(sshArgs, env)
+}
+
 // getCachePath returns the path to save to
-func getCachePath(host string) string {
-	return filepath.Join(cfg.StoragePath, host, ".json")
+func getCachePath(key string) string {
+	log.Debugf("getCachePath: %v", key)
+	return filepath.Join(cfg.StoragePath, key+".json")
+}
+
+func makeCachePath() (bool, error) {
+	log.Debugf("makeCachePath: %v", cfg.StoragePath)
+	if err := os.MkdirAll(cfg.StoragePath, os.ModePerm); err != nil {
+		log.Fatalf("Failed to create cache directory '%v': %v", cfg.StoragePath, err)
+		return false, err
+	}
+	return true, nil
+}
+
+// getCache checks for a fresh, local copy
+// key: SSH host alias
+func getCache(key string) (map[string]interface{}, error) {
+	log.Debugf("getCache: %v", key)
+	var data map[string]interface{}
+	makeCachePath()
+
+	/*if err := expireLocalCache(host); err != nil {
+		log.Println(err)
+		return nil
+	}*/
+
+	read, err := ioutil.ReadFile(getCachePath(key))
+	if err != nil {
+		log.Infof("No local copy exists for: %v", key)
+		return nil, err
+	}
+
+	if err := json.Unmarshal(read, &data); err != nil {
+		log.Fatalf("Failed to unmarshal data for '%v': %v", key, err)
+	}
+	return data, nil
+}
+
+// getRemoteCache reads directly from Vault
+// key: the hostname alias for SSH
+func getRemoteCache(vc *vaultApi.Client, key string) (map[string]interface{}, error) {
+	log.Debugf("getRemoteCache: %v", key)
+	conn, err := getRawConnection(vc, key)
+
+	if err != nil {
+		log.Errorf("Failed to request data for '%v': %v", key, err)
+		return nil, err
+	}
+
+	if status, err := saveCache(key, conn.Data); err != nil || status == false {
+		return nil, err
+	}
+	return conn.Data, nil
+}
+
+// removeCache deletes a specific file
+func removeCache(key string) (bool, error) {
+	log.Debugf("removeCache: %v", key)
+	cacheFile := getCachePath(key)
+
+	if err := os.Remove(cacheFile); err != nil {
+		if os.IsExist(err) {
+			return false, err
+		}
+		return false, nil
+	}
+	return true, nil
+}
+
+// expireLocalCache checks to see if the cache file is stale
+// key: SSH host alias
+func expireCache(key string) (bool, error) {
+	log.Debugf("expireCache: %v", key)
+	cacheFile := getCachePath(key)
+
+	localCache, err := os.Stat(cacheFile)
+	if err != nil {
+		return false, err
+	}
+
+	loc, _ := time.LoadLocation("UTC")
+	lastModified := localCache.ModTime().In(loc)
+
+	if time.Now().In(loc).After(lastModified.Add(CacheExpireAfter)) {
+		return removeCache(key)
+	}
+	return false, nil
+}
+
+// purgeCache will remove the cache directory and its contents
+func purgeCache() (bool, error) {
+	log.Debugf("purgeCache")
+
+	reader := bufio.NewReader(os.Stdin)
+	fmt.Print("Purging: ", cfg.StoragePath, " ... CTRL+C to abort")
+	reader.ReadString('\n')
+
+	if err := os.RemoveAll(cfg.StoragePath); err != nil {
+		log.Errorf("Problem purging cache: %v", err)
+		return false, err
+	}
+	return true, nil
+}
+
+// saveCache creates a local copy in JSON format
+// key: the hostname alias for SSH
+// data : the SSH configuration
+func saveCache(key string, data map[string]interface{}) (bool, error) {
+	log.Debugf("saveCache: %v", key)
+	makeCachePath()
+
+	if err := os.MkdirAll(cfg.StoragePath, os.ModePerm); err != nil {
+		log.Errorf("Failed to create cache directory '%v': %v", cfg.StoragePath, err)
+		return false, err
+	}
+
+	buff, err := json.Marshal(data)
+	if err != nil {
+		log.Errorf("Failed to generate JSON to cache '%v': %v", key, err)
+		return false, err
+	}
+
+	if err := ioutil.WriteFile(getCachePath(key), []byte(string(buff)), 0640); err != nil {
+		log.Errorf("Failed to save cache for '%v': %v", key, err)
+		return false, err
+	}
+	return true, nil
 }
 
 // getRawConnection retrieves the secret from Vault

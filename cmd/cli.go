@@ -8,6 +8,7 @@ import (
 
 	"github.com/cezmunsta/ssh_ms/config"
 	"github.com/cezmunsta/ssh_ms/log"
+	"github.com/cezmunsta/ssh_ms/ssh"
 	vaultApi "github.com/hashicorp/vault/api"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -27,6 +28,15 @@ var (
 		Run: func(cmd *cobra.Command, args []string) {
 			cmd.Usage()
 			os.Exit(1)
+		},
+	}
+
+	connectCmd = &cobra.Command{
+		Use:   "connect CONNECTION",
+		Short: "Connect to a host",
+		Long:  "Connect to a host using the stored configuration",
+		Run: func(cmd *cobra.Command, args []string) {
+			connect(getVaultClient(), ssh.UserEnv{User: cfg.User, Simulate: cfg.Simulate}, args)
 		},
 	}
 
@@ -54,6 +64,19 @@ var (
 		Long:  "Print full command that would be used to connect",
 		Run: func(cmd *cobra.Command, args []string) {
 			printConnection(getVaultClient(), args[0])
+		},
+	}
+
+	purgeCmd = &cobra.Command{
+		Use:   "purge",
+		Short: "Purge the cache",
+		Long:  "Remove all of the cached configurations",
+		Example: `                                                                                                            
+    ssh_ms purge                                                                                                              
+        `,
+		Run: func(cmd *cobra.Command, args []string) {
+			// TODO: add logic to allow selective purge
+			purgeCache()
 		},
 	}
 
@@ -109,9 +132,11 @@ var (
 
 func init() {
 	rootCmd.AddCommand(
+		connectCmd,
 		deleteCmd,
 		listCmd,
 		printCmd,
+		purgeCmd,
 		showCmd,
 		versionCmd,
 		writeCmd,
