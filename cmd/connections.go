@@ -142,7 +142,7 @@ func updateConnection(vc *vaultApi.Client, key string, args []string) bool {
 	}
 
 	if cfg.Simulate {
-		log.Infof("Simulate update of '%v'", key, conn.Data)
+		log.Infof("Simulate update of '%v': %v", key, conn.Data)
 		return true
 	}
 
@@ -213,7 +213,7 @@ func prepareConnection(vc *vaultApi.Client, args []string) ([]string, ssh.Connec
 // env: UserEnv configuration
 // args : extra args passed by the user
 func connect(vc *vaultApi.Client, env ssh.UserEnv, args []string) {
-	log.Debug("connect: %v", args[0])
+	log.Debug("connect:", args[0])
 	sshArgs, sshClient := prepareConnection(vc, args)
 
 	log.Debugf("%v", map[string]interface{}{
