@@ -41,6 +41,7 @@ var (
 		`-ldflags "-X github.com/cezmunsta/ssh_ms/ssh.EnvSSHDefaultUsername=xxx"`
 
 	*/
+
 	// EnvSSHDefaultUsername is used to authenticate with SSH
 	EnvSSHDefaultUsername = os.Getenv("USER")
 )

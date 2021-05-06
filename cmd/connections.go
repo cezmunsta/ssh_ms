@@ -22,6 +22,7 @@ import (
 
 type secretData map[string]interface{}
 
+// CacheExpireAfter sets the threshold for cleaning stales caches
 const CacheExpireAfter = (7 * 24) * time.Hour
 
 // listConnections from Vault
