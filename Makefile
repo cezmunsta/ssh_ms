@@ -43,6 +43,8 @@ binary-linux: binary-prep
 build: binary-prep
 	@go build -o "${BUILD_DIR}/ssh_ms" ${LDFLAGS}
 
+dev-vault:
+	@${SHELL} scripts/dev-vault.sh 
 test:
 	@go test "${PACKAGE}/ssh" "${PACKAGE}/cmd" "${PACKAGE}/vault"
 
