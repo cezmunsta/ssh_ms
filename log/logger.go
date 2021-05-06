@@ -25,6 +25,11 @@ func Println(args ...interface{}) {
 	logger.Println(args...)
 }
 
+// Printf out to the console
+func Printf(format string, args ...interface{}) {
+	logger.Printf(format, args...)
+}
+
 // Panic logs a message and panics
 func Panic(args ...interface{}) {
 	logger.Panic(args...)
