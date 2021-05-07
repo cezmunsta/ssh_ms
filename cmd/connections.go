@@ -48,39 +48,22 @@ func listConnections(vc *vaultApi.Client) bool {
 // showConnection details suitable for use with ssh_config
 func showConnection(vc *vaultApi.Client, key string) bool {
 	log.Debugf("showConnection: %v", key)
-	conn, err := getRawConnection(vc, key)
-
-	if err != nil {
-		log.Debug("Unable to show connection", key)
-		return false
-	}
-
-	if conn.Data["ConfigComment"] != "" {
-		fmt.Println("#", conn.Data["ConfigComment"])
-	}
-
-	sshClient := ssh.Connection{}
-	sshArgs := sshClient.BuildConnection(conn.Data, key, cfg.User)
-	config := sshClient.Cache.Config
+	sshArgs, sshClient, configComment := prepareConnection(vc, []string{key})
 
 	log.Info("SSH cmd:", sshArgs)
-
-	fmt.Println(config)
+	if len(configComment) > 0 {
+		fmt.Println("#", configComment)
+	} else {
+		fmt.Println("#", key)
+	}
+	fmt.Println(sshClient.Cache.Config)
 	return true
 }
 
 // printConnection details suitable for use on the command line
 func printConnection(vc *vaultApi.Client, key string) bool {
 	log.Debugf("printConnection: %v", key)
-	conn, err := getRawConnection(vc, key)
-
-	if err != nil {
-		log.Debug("Unable to print connection", key)
-		return false
-	}
-
-	sshClient := ssh.Connection{}
-	sshArgs := sshClient.BuildConnection(conn.Data, key, cfg.User)
+	sshArgs, _, _ := prepareConnection(vc, []string{key})
 
 	fmt.Printf("ssh %v\n", strings.Join(sshArgs, " "))
 	return true
@@ -90,13 +73,13 @@ func printConnection(vc *vaultApi.Client, key string) bool {
 func writeConnection(vc *vaultApi.Client, key string, args []string) bool {
 	log.Debugf("writeConnection: %v", key)
 	_, err := getRawConnection(vc, key)
-	secret := make(secretData)
+	conn := make(secretData)
 
 	if err != nil {
 		// New connection
 		for i := 0; i < len(args); i++ {
 			s := strings.Split(args[i], "=")
-			secret[s[0]] = s[1]
+			conn[s[0]] = s[1]
 		}
 	} else {
 		// Existing connection
@@ -104,18 +87,19 @@ func writeConnection(vc *vaultApi.Client, key string, args []string) bool {
 		return false
 	}
 
-	secret["ConfigComment"] = cfg.ConfigComment
+	conn["ConfigComment"] = cfg.ConfigComment
 
 	if cfg.Simulate {
 		log.Infof("simulated write to '%v': %v", key, args)
 		return true
 	}
 
-	status, err := vaultHelper.WriteSecret(vc, fmt.Sprintf("%s/%s", SecretPath, key), secret)
+	status, err := vaultHelper.WriteSecret(vc, fmt.Sprintf("%s/%s", SecretPath, key), conn)
 	if err != nil {
 		log.Errorf("Failed to write '%v': %v", key, err)
 		return false
 	}
+	saveCache(key, conn)
 	return status
 }
 
@@ -151,6 +135,7 @@ func updateConnection(vc *vaultApi.Client, key string, args []string) bool {
 		log.Errorf("Failed to write '%v': %v", key, err)
 		return false
 	}
+	saveCache(key, conn.Data)
 	return status
 }
 
@@ -181,31 +166,44 @@ func deleteConnection(vc *vaultApi.Client, key string) bool {
 // vc : Vault client
 // args : options for inspection
 // verbose : enable informational output
-func prepareConnection(vc *vaultApi.Client, args []string) ([]string, ssh.Connection) {
+func prepareConnection(vc *vaultApi.Client, args []string) ([]string, ssh.Connection, string) {
 	log.Debugf("prepareConnection: %v", args)
-
 	var sshArgs []string
-	var config map[string]interface{}
+	var configComment string
 
 	if len(args) == 0 {
 		log.Fatal("Minimum requirement is to specify an alias")
 	}
 	key := args[0]
-	config, _ = getCache(key)
+	config := lookupConnection(vc, key)
+	configComment = key
 
-	if config == nil {
-		config, _ = getRemoteCache(vc, key)
+	if val, ok := config["ConfigComment"]; ok {
+		log.Debugf("Found comment for '%v': %v", key, val)
+		configComment = fmt.Sprintf("%v", val)
 	}
 
 	if config == nil {
-		return sshArgs, ssh.Connection{}
+		return sshArgs, ssh.Connection{}, key
 	}
 
 	log.Debugf("config: %v", config)
 	sshClient := ssh.Connection{}
 	sshArgs = append(sshClient.BuildConnection(config, key, cfg.User), args[1:]...)
 	log.Debugf("sshArgs: %v", sshArgs)
-	return sshArgs, sshClient
+	return sshArgs, sshClient, configComment
+}
+
+// lookupConnection tries local cache and then remote to acquire connection details
+func lookupConnection(vc *vaultApi.Client, key string) map[string]interface{} {
+	log.Debug("lookupConnection: ", key)
+	config, _ := getCache(key)
+
+	if config == nil {
+		config, _ = getRemoteCache(vc, key)
+	}
+
+	return config
 }
 
 // connect using SSH
@@ -214,21 +212,21 @@ func prepareConnection(vc *vaultApi.Client, args []string) ([]string, ssh.Connec
 // args : extra args passed by the user
 func connect(vc *vaultApi.Client, env ssh.UserEnv, args []string) {
 	log.Debug("connect:", args[0])
-	sshArgs, sshClient := prepareConnection(vc, args)
+	sshArgs, sshClient, configComment := prepareConnection(vc, args)
 
 	log.Debugf("%v", map[string]interface{}{
-		"env": env,
-		//"expertMode": cfg.ExpertMode
+		"env":  env,
 		"args": args,
 	})
-
-	for i := 0; i < len(sshClient.LocalForward); i++ {
-		fmt.Printf("FWD: https://127.0.0.1:%d -> %d\n", sshClient.LocalForward[i].LocalPort, sshClient.LocalForward[i].RemotePort)
-	}
 
 	if cfg.Simulate {
 		printConnection(vc, args[0])
 		return
+	}
+
+	fmt.Println("Connecting to: ", configComment)
+	for i := 0; i < len(sshClient.LocalForward); i++ {
+		fmt.Printf("FWD: https://127.0.0.1:%d -> %d\n", sshClient.LocalForward[i].LocalPort, sshClient.LocalForward[i].RemotePort)
 	}
 	ssh.Connect(sshArgs, env)
 }
@@ -239,6 +237,7 @@ func getCachePath(key string) string {
 	return filepath.Join(cfg.StoragePath, key+".json")
 }
 
+// makeCachePath manages the creation of the cfg.StoragePath
 func makeCachePath() (bool, error) {
 	log.Debugf("makeCachePath: %v", cfg.StoragePath)
 	if err := os.MkdirAll(cfg.StoragePath, os.ModePerm); err != nil {
