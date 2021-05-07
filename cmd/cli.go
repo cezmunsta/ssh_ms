@@ -36,6 +36,7 @@ var (
 		Short: "Connect to a host",
 		Long:  "Connect to a host using the stored configuration",
 		Run: func(cmd *cobra.Command, args []string) {
+			checkArgs(args, 1)
 			connect(getVaultClient(), ssh.UserEnv{User: cfg.User, Simulate: cfg.Simulate}, args)
 		},
 	}
@@ -45,6 +46,7 @@ var (
 		Short: "Delete a connection",
 		Long:  "Lookup the requested connection and remove it when present",
 		Run: func(cmd *cobra.Command, args []string) {
+			checkArgs(args, 1)
 			deleteConnection(getVaultClient(), args[0])
 		},
 	}
@@ -63,6 +65,7 @@ var (
 		Short: "Print out the SSH command for a connection",
 		Long:  "Print full command that would be used to connect",
 		Run: func(cmd *cobra.Command, args []string) {
+			checkArgs(args, 1)
 			printConnection(getVaultClient(), args[0])
 		},
 	}
@@ -88,6 +91,7 @@ var (
     ssh_ms show gateway
         `,
 		Run: func(cmd *cobra.Command, args []string) {
+			checkArgs(args, 1)
 			showConnection(getVaultClient(), args[0])
 		},
 	}
@@ -106,6 +110,7 @@ var (
 		Short: "Update an existing connection to storage",
 		Long:  "TBD",
 		Run: func(cmd *cobra.Command, args []string) {
+			checkArgs(args, 1)
 			updateConnection(getVaultClient(), args[0], args[1:])
 		},
 	}
@@ -115,6 +120,7 @@ var (
 		Short: "Add a new connection to storage",
 		Long:  "TBD",
 		Run: func(cmd *cobra.Command, args []string) {
+			checkArgs(args, 1)
 			writeConnection(getVaultClient(), args[0], args[1:])
 		},
 	}
@@ -167,6 +173,13 @@ func init() {
 
 	log := log.GetLogger(log.GetDefaultLevel(), "")
 	cfg.LogLevel = log.GetLevel()
+}
+
+// checkArgs makes sure that at least a certain number of args exist
+func checkArgs(args []string, min int) {
+	if len(args) < min {
+		log.Fatal("Missing argument for connection")
+	}
 }
 
 // getVersion information for the application
