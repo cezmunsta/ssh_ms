@@ -74,8 +74,8 @@ var (
 		Use:   "purge",
 		Short: "Purge the cache",
 		Long:  "Remove all of the cached configurations",
-		Example: `                                                                                                            
-    ssh_ms purge                                                                                                              
+		Example: `
+	ssh_ms purge
         `,
 		Run: func(cmd *cobra.Command, args []string) {
 			// TODO: add logic to allow selective purge
@@ -88,7 +88,7 @@ var (
 		Short: "Search for a connection",
 		Long:  "Search the list of connections using a pattern",
 		Example: `
-    ssh_ms search gate
+	ssh_ms search gate
 	ssh_ms search '^g.*'
 	ssh_ms search 'way$'
         `,

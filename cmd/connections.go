@@ -70,7 +70,7 @@ func searchConnections(vc *vaultApi.Client, pattern string) bool {
 		if pattern != ".*" && !search.MatchString(s) {
 			continue
 		}
-		c += 1
+		c++
 		if math.Mod(float64(c), 3) == 0 && c > 0 {
 			m += "\n"
 		}
