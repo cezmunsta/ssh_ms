@@ -254,10 +254,10 @@ func getCache(key string) (map[string]interface{}, error) {
 	var data map[string]interface{}
 	makeCachePath()
 
-	/*if err := expireLocalCache(host); err != nil {
-		log.Println(err)
-		return nil
-	}*/
+	if _, err := expireCache(key); err != nil {
+		log.Warning("Failed to expireCache: ", err)
+		return nil, err
+	}
 
 	read, err := ioutil.ReadFile(getCachePath(key))
 	if err != nil {
@@ -282,7 +282,7 @@ func getRemoteCache(vc *vaultApi.Client, key string) (map[string]interface{}, er
 		return nil, err
 	}
 
-	if status, err := saveCache(key, conn.Data); err != nil || status == false {
+	if status, err := saveCache(key, conn.Data); err != nil || !status {
 		return nil, err
 	}
 	return conn.Data, nil
