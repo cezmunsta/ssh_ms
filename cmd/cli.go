@@ -83,6 +83,21 @@ var (
 		},
 	}
 
+	searchCmd = &cobra.Command{
+		Use:   "search PATTERN [flags]",
+		Short: "Search for a connection",
+		Long:  "Search the list of connections using a pattern",
+		Example: `
+    ssh_ms search gate
+	ssh_ms search '^g.*'
+	ssh_ms search 'way$'
+        `,
+		Run: func(cmd *cobra.Command, args []string) {
+			checkArgs(args, 1)
+			searchConnections(getVaultClient(), args[0])
+		},
+	}
+
 	showCmd = &cobra.Command{
 		Use:   "show CONNECTION [flags]",
 		Short: "Display a connection",
@@ -152,6 +167,7 @@ func init() {
 		listCmd,
 		printCmd,
 		purgeCmd,
+		searchCmd,
 		showCmd,
 		versionCmd,
 		updateCmd,

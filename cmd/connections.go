@@ -10,6 +10,7 @@ import (
 	"os"
 	"path/filepath"
 	"reflect"
+	"regexp"
 	"strings"
 	"time"
 
@@ -25,18 +26,52 @@ type secretData map[string]interface{}
 // CacheExpireAfter sets the threshold for cleaning stale caches
 const CacheExpireAfter = (7 * 24) * time.Hour
 
+// getConnections from Vault
+func getConnections(vc *vaultApi.Client) ([]string, error) {
+	var connections []string
+	secrets, err := vaultHelper.ListSecrets(vc, SecretPath)
+
+	if err != nil {
+		log.Panic("Unable to get connections:", err)
+	} else if secrets == nil || secrets.Data["keys"] == nil {
+		return nil, errors.New("no data returned")
+	}
+
+	switch reflect.TypeOf(secrets.Data["keys"]).Kind() {
+	case reflect.Slice:
+		s := reflect.ValueOf(secrets.Data["keys"])
+		for i := 0; i < s.Len(); i++ {
+			connections = append(connections, fmt.Sprintf("%s", s.Index(i)))
+		}
+	}
+	return connections, nil
+}
+
 // listConnections from Vault
 func listConnections(vc *vaultApi.Client) bool {
 	log.Debugf("listConnections")
-	connections, err := getConnections(vc)
+	return searchConnections(vc, ".*")
+}
 
-	if err != nil {
+// searchConnections filters the list of connections
+func searchConnections(vc *vaultApi.Client, pattern string) bool {
+	log.Debug("searchConnections: ", pattern)
+	connections, err := getConnections(vc)
+	search := regexp.MustCompile(pattern)
+	c := 0
+
+	if connections == nil || err != nil {
 		fmt.Println("no available connections")
 		return false
 	}
-	for i, s := range connections {
+
+	for _, s := range connections {
 		m := " "
-		if math.Mod(float64(i), 3) == 0 && i > 0 {
+		if pattern != ".*" && !search.MatchString(s) {
+			continue
+		}
+		c += 1
+		if math.Mod(float64(c), 3) == 0 && c > 0 {
 			m += "\n"
 		}
 		fmt.Print(s, m)
@@ -371,25 +406,4 @@ func getRawConnection(vc *vaultApi.Client, key string) (*vaultApi.Secret, error)
 		return nil, errors.New("no match found")
 	}
 	return secret, nil
-}
-
-// getConnections from Vault
-func getConnections(vc *vaultApi.Client) ([]string, error) {
-	var connections []string
-	secrets, err := vaultHelper.ListSecrets(vc, SecretPath)
-
-	if err != nil {
-		log.Panic("Unable to get connections:", err)
-	} else if secrets == nil || secrets.Data["keys"] == nil {
-		return nil, errors.New("no data returned")
-	}
-
-	switch reflect.TypeOf(secrets.Data["keys"]).Kind() {
-	case reflect.Slice:
-		s := reflect.ValueOf(secrets.Data["keys"])
-		for i := 0; i < s.Len(); i++ {
-			connections = append(connections, fmt.Sprintf("%s", s.Index(i)))
-		}
-	}
-	return connections, nil
 }
