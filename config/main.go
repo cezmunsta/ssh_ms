@@ -38,7 +38,7 @@ var (
 	EnvSSHUsername = "SSH_MS_USERNAME"
 
 	// EnvSSHIdentityFile is used for SSH authentication
-	EnvSSHIdentityFile = "id_rsa"
+	EnvSSHIdentityFile = filepath.Join("~", ".ssh", "id_ed25519")
 )
 
 // ToJSON returns the config in JSON format
