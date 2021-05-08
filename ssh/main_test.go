@@ -1,6 +1,7 @@
 package ssh
 
 import (
+	"fmt"
 	"strings"
 	"testing"
 )
@@ -68,5 +69,18 @@ func TestRewriteUsername(t *testing.T) {
 		if strings.Contains(user.FullName, "@") && !strings.Contains(n, "@") {
 			t.Fatalf("expected: templates to be parsed got: %v", user.FullName)
 		}
+	}
+}
+
+func TestConnection(t *testing.T) {
+	conn := Connection{
+		HostName: "localhost",
+		User:     "dummy",
+		Port:     uint16(29022),
+	}
+	conn.BuildConnection(map[string]interface{}{}, "dummy", conn.User)
+	expected := fmt.Sprintf("cp_%s_%s_%d", conn.User, conn.HostName, conn.Port)
+	if !strings.HasSuffix(conn.ControlPath, expected) {
+		t.Fatalf("expected: %v, got: %v", expected, conn.ControlPath)
 	}
 }

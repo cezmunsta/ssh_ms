@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
 	"net"
 	"os"
 	"os/exec"
@@ -70,9 +71,9 @@ type Connection struct {
 	ServerAliveInterval uint16
 	ServerAliveCountMax uint16
 	Cache               CachedConnection
+	ControlPath         string
 	//Compression bool
 	//ControlMaster bool
-	//ControlPath string
 	//ControlPersist uint16
 }
 
@@ -295,11 +296,75 @@ func setProxy(sshArgs *Connection, args map[string]interface{}) {
 	sshArgs.ProxyJump = option
 }
 
+// setControlPath for the connection
+func setControlPath(sshArgs *Connection, args map[string]interface{}) {
+	log.Debug("setControlPath: ", sshArgs)
+	option := "cp"
+
+	for _, v := range []string{"User", "HostName", "Port"} {
+		if val, ok := args[v]; ok {
+			option += fmt.Sprintf("_%s", val.(string))
+		} else {
+			switch v {
+			case "User":
+				option += fmt.Sprintf("_%s", sshArgs.User)
+			case "HostName":
+				option += fmt.Sprintf("_%s", sshArgs.HostName)
+			case "Port":
+				option += fmt.Sprintf("_%d", sshArgs.Port)
+			}
+		}
+	}
+	if option == "cp" || option == "cp___" {
+		option = "%r@%h:%p"
+	}
+	sshArgs.ControlPath = fmt.Sprintf("%s/%s", cfg.StoragePath, option)
+}
+
 // setPortForwarding for the connection
 // sshArgs : Connection properties for SSH
 func setPortForwarding(sshArgs *Connection) {
 	var lf LocalForward
+	var data map[string]interface{}
+
+	_, err := os.Stat(sshArgs.ControlPath)
+	if err == nil {
+		log.Debug("ControlPath exists")
+		read, err := ioutil.ReadFile(sshArgs.ControlPath + ".json")
+		if err == nil {
+			log.Debug("Reading cached port-forwards")
+			if err := json.Unmarshal(read, &data); err == nil {
+				for _, k := range []string{"NGINX", "PMM"} {
+					log.Debug("Setting port for: ", k)
+					if val, ok := data[k]; ok {
+						p, _ := strconv.ParseUint(val.(string), 10, 0)
+						_, err := acquirePort(uint16(p), uint16(p))
+						if err != nil {
+							log.Debugf("Found port '%v' in use, reusing", val)
+							rp := 0
+							switch k {
+							case "NGINX":
+								rp = 443
+							case "PMM":
+								rp = 8443
+							}
+							sshArgs.LocalForward = append(sshArgs.LocalForward, LocalForward{uint16(p), uint16(rp), "127.0.0.1"})
+						}
+					}
+				}
+				if len(sshArgs.LocalForward) == 2 {
+					return
+				}
+				sshArgs.LocalForward = []LocalForward{}
+			}
+		}
+
+	}
 	p := localForwardPortMin
+	data = map[string]interface{}{
+		"NGINX": "",
+		"PMM":   "",
+	}
 
 	for _, rp := range []uint16{443, 8443} {
 		lp, err := acquirePort(p, localForwardPortMax)
@@ -309,6 +374,23 @@ func setPortForwarding(sshArgs *Connection) {
 		p = lp + 1
 		lf = LocalForward{lp, rp, "127.0.0.1"}
 		sshArgs.LocalForward = append(sshArgs.LocalForward, lf)
+		key := ""
+		switch rp {
+		case 443:
+			key = "NGINX"
+		case 8443:
+			key = "PMM"
+		}
+		data[key] = fmt.Sprintf("%d", lp)
+	}
+
+	buff, err := json.Marshal(data)
+	if err != nil {
+		log.Errorf("Failed to generate JSON to cache '%v': %v", sshArgs.ControlPath, err)
+	}
+
+	if err := ioutil.WriteFile(sshArgs.ControlPath+".json", []byte(string(buff)), 0640); err != nil {
+		log.Errorf("Failed to save cache for '%v': %v", sshArgs.ControlPath, err)
 	}
 }
 
@@ -322,9 +404,10 @@ func (c *Connection) BuildConnection(args map[string]interface{}, key string, te
 	setIdentity(c, args)
 	setProxy(c, args)
 	setHostname(c, args)
+	setControlPath(c, args)
 	setPortForwarding(c)
 
-	d := reflect.ValueOf(&*c).Elem()
+	d := reflect.ValueOf(c).Elem()
 	t := d.Type()
 	ind := "  "
 
