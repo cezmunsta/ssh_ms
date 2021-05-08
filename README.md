@@ -22,7 +22,7 @@ $ go get -u github.com/cezmunsta/ssh_ms
 
 For ease of use, ensure that `${GOPATH}/bin` is in your `PATH` to use the tools with ease.
 
-- `go` : `1.13.7`
+- `go` : `1.15.2`
 - `vault`: `1.3.2`
 
 #### Go
@@ -45,23 +45,29 @@ Usage:
   ssh_ms [command]
 
 Available Commands:
-  connect     Connect via SSH
+  completion  Generate completion script
+  connect     Connect to a host
+  delete      Delete a connection
   help        Help about any command
   list        List available connections
+  print       Print out the SSH command for a connection
   purge       Purge the cache
+  search      Search for a connection
   show        Display a connection
-  write       Write, or update a config
+  update      Update an existing connection to storage
+  version     Show the version
+  write       Add a new connection to storage
 
 Flags:
-  -n, --dry-run              Display commands rather than executing them
+  -d, --debug                Provide addition output
+  -n, --dry-run              Prevent certain commands without full execution
   -h, --help                 help for ssh_ms
-  -s, --storage string       Storage path for caching (default "~/.ssh/cache")
-      --stored-token         Use a stored token from 'vault login' (overrides --vault-token)
+  -s, --storage string       Storage path for caching (default "/home/ceri/.ssh/cache")
+      --stored-token         Use a stored token from 'vault login' (overrides --vault-token, auto-enabled when no token is specified)
   -u, --user string          Your SSH username for templated configs
       --vault-addr string    Specify the Vault address
       --vault-token string   Specify the Vault token
   -v, --verbose              Provide addition output
-  -V, --version              Show the version
 
 Use "ssh_ms [command] --help" for more information about a command.
 ```
@@ -145,8 +151,10 @@ Host gateway-us-1
 ### Finding available connections
 ```sh
 $ ssh_ms list
-available connections:
 localhost testing gateway-us-1
+
+$ ssh_ms search local
+localhost
 
 $ ssh_ms show localhost
 Host localhost
