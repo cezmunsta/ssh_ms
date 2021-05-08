@@ -26,6 +26,86 @@ type secretData map[string]interface{}
 // CacheExpireAfter sets the threshold for cleaning stale caches
 const CacheExpireAfter = (7 * 24) * time.Hour
 
+// LockPrefix is used to manage locking
+const LockPrefix = "ssh_ms_lock_"
+
+// getLockName produces a lock path
+func getLockName(key string) string {
+	return fmt.Sprintf("%s_%s", LockPrefix, key)
+}
+
+// getLockPath produces the full lock path
+func getLockPath(ln string) string {
+	return fmt.Sprintf("%s/%s", SecretPath, ln)
+}
+
+// acquireLock creates a lock to control writes
+func acquireLock(vc *vaultApi.Client, key string) (bool, string) {
+	log.Debug("acquireLock: ", key)
+	loc, _ := time.LoadLocation("UTC")
+	ln := getLockName(key)
+
+	conn := make(secretData)
+	conn["User"] = os.Getenv(cfg.EnvSSHUsername)
+
+	// TODO: Auto-handle expired locks if necessary
+	/*
+		if existingLock, err := getRawConnection(vc, key); err != nil || existingLock != nil {
+			loc, _ := time.LoadLocation("UTC")
+			if val, ok := existingLock.Data["Expires"]; ok {
+				et, _ := time.ParseInLocation(time.RFC3339, fmt.Sprintf("%v", val), loc)
+				if time.Now().In(loc).After(et) {
+					vault.DeleteSecret()
+				} else {
+
+				}
+			} else {
+				log.Panicf("Unexpected situation, lock appears to be missing expiry date: ", existingLock.Data)
+			}
+		}
+	*/
+
+	if existingLock, err := getRawConnection(vc, ln); existingLock != nil {
+		log.Warningf("The record for '%v' appears to be locked: %v", key, existingLock)
+		if err != nil {
+			log.Fatal("existingLock error:", err)
+		}
+		return false, "nolock"
+	}
+
+	conn["Expires"] = time.Now().In(loc).Add(10 * time.Minute)
+
+	status, err := vaultHelper.WriteSecret(vc, getLockPath(ln), conn)
+	if err != nil {
+		log.Fatalf("Failed to acquire lock for '%v': %v", key, err)
+		return false, "nolock"
+	}
+	return status, ln
+}
+
+// releaseLock will remove the acquired lock
+func releaseLock(vc *vaultApi.Client, ln string) (bool, error) {
+	log.Debug("releaseLock:", ln)
+	existingLock, err := getRawConnection(vc, ln)
+
+	if err != nil {
+		log.Error("existingLock error:", err)
+		return false, err
+	}
+
+	if existingLock == nil {
+		log.Debug("Unable to find lock for:", ln)
+		return false, nil
+	}
+
+	status, err := vaultHelper.DeleteSecret(vc, getLockPath(ln))
+	if err != nil {
+		log.Errorf("Failed to release lock for '%v': %v", ln, err)
+		return false, err
+	}
+	return status, nil
+}
+
 // getConnections from Vault
 func getConnections(vc *vaultApi.Client) ([]string, error) {
 	var connections []string
@@ -58,6 +138,7 @@ func searchConnections(vc *vaultApi.Client, pattern string) bool {
 	log.Debug("searchConnections: ", pattern)
 	connections, err := getConnections(vc)
 	search := regexp.MustCompile(pattern)
+	ignore := regexp.MustCompile("^" + LockPrefix + ".*")
 	c := 0
 
 	if connections == nil || err != nil {
@@ -67,7 +148,7 @@ func searchConnections(vc *vaultApi.Client, pattern string) bool {
 
 	for _, s := range connections {
 		m := " "
-		if pattern != ".*" && !search.MatchString(s) {
+		if (pattern != ".*" && !search.MatchString(s)) || ignore.MatchString(s) {
 			continue
 		}
 		c++
@@ -129,6 +210,13 @@ func writeConnection(vc *vaultApi.Client, key string, args []string) bool {
 		return true
 	}
 
+	if status, lockName := acquireLock(vc, key); status && lockName != "nolock" {
+		defer releaseLock(vc, lockName)
+	} else {
+		log.Fatal("Failed to acquire lock for writeConnection")
+		return false
+	}
+
 	status, err := vaultHelper.WriteSecret(vc, fmt.Sprintf("%s/%s", SecretPath, key), conn)
 	if err != nil {
 		log.Errorf("Failed to write '%v': %v", key, err)
@@ -165,6 +253,14 @@ func updateConnection(vc *vaultApi.Client, key string, args []string) bool {
 		return true
 	}
 
+	if status, lockName := acquireLock(vc, key); status && lockName != "nolock" {
+		defer releaseLock(vc, lockName)
+	} else {
+		log.Debugf("status: %v, lockName: %v", status, lockName)
+		log.Fatal("Failed to acquire lock for updateConnection")
+		return false
+	}
+
 	status, err := vaultHelper.WriteSecret(vc, fmt.Sprintf("%s/%s", SecretPath, key), conn.Data)
 	if err != nil {
 		log.Errorf("Failed to write '%v': %v", key, err)
@@ -187,6 +283,13 @@ func deleteConnection(vc *vaultApi.Client, key string) bool {
 	if cfg.Simulate {
 		log.Infof("simulated delete of '%v'", key)
 		return true
+	}
+
+	if status, lockName := acquireLock(vc, key); status && lockName != "nolock" {
+		defer releaseLock(vc, lockName)
+	} else {
+		log.Fatal("Failed to acquire lock for deleteConnection")
+		return false
 	}
 
 	status, err := vaultHelper.DeleteSecret(vc, fmt.Sprintf("%s/%s", SecretPath, key))
