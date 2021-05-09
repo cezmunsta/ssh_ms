@@ -112,7 +112,7 @@ func getConnections(vc *vaultApi.Client) ([]string, error) {
 	secrets, err := vaultHelper.ListSecrets(vc, SecretPath)
 
 	if err != nil {
-		log.Panic("Unable to get connections:", err)
+		log.Fatalf("Unable to get connections for %v: %v", vc.Address(), err)
 	} else if secrets == nil || secrets.Data["keys"] == nil {
 		return nil, errors.New("no data returned")
 	}
@@ -393,7 +393,7 @@ func getCache(key string) (map[string]interface{}, error) {
 	makeCachePath()
 
 	if _, err := expireCache(key); err != nil {
-		log.Warning("Failed to expireCache: ", err)
+		log.Info("Failed to expireCache: ", err)
 		return nil, err
 	}
 
