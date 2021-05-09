@@ -153,9 +153,6 @@ var (
 	// EnvVaultAddr is the default location for Vault
 	EnvVaultAddr = vaultApi.EnvVaultAddress
 
-	// SecretPath is the location used for connection manangement
-	SecretPath = "secret/ssh_ms"
-
 	// Version of the code
 	Version = "1.0"
 )

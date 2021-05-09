@@ -14,7 +14,7 @@ type Settings struct {
 	LogLevel                                       logrus.Level
 	Debug, Simulate, StoredToken, Verbose, Version bool
 	ConfigComment, EnvSSHDefaultUsername, EnvSSHIdentityFile,
-	EnvSSHUsername, Show, StoragePath, User, VaultAddr, VaultToken string
+	EnvSSHUsername, SecretPath, Show, StoragePath, User, VaultAddr, VaultToken string
 }
 
 var (
@@ -39,6 +39,9 @@ var (
 
 	// EnvSSHIdentityFile is used for SSH authentication
 	EnvSSHIdentityFile = filepath.Join("~", ".ssh", "id_ed25519")
+
+	// SecretPath is the location used for connection manangement
+	SecretPath = "secret/ssh_ms"
 )
 
 // ToJSON returns the config in JSON format
@@ -60,6 +63,7 @@ func GetConfig() *Settings {
 			EnvSSHIdentityFile:    EnvSSHIdentityFile,
 			EnvSSHUsername:        EnvSSHUsername,
 			LogLevel:              logrus.WarnLevel,
+			SecretPath:            SecretPath,
 			Simulate:              false,
 			StoragePath:           EnvBasePath,
 			StoredToken:           false,
