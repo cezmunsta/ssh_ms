@@ -5,12 +5,27 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/cezmunsta/ssh_ms/config"
 	"github.com/cezmunsta/ssh_ms/ssh"
 )
 
+func TestMain(m *testing.M) {
+	code := m.Run()
+	defer cluster.Cleanup()
+	os.Exit(code)
+}
+
+func TestGetVaultClient(t *testing.T) {
+	_, client = getDummyCluster(t)
+
+	if len(client.Token()) == 0 {
+		t.Fatalf("expected: a non-zero length token got: a zero length token")
+	}
+}
+
 func TestGetConnections(t *testing.T) {
-	if cl, err := getConnections(getVaultClientWithEnv(env)); err != nil {
+	_, client := getDummyCluster(t)
+
+	if cl, err := getConnections(client); err != nil {
 		t.Fatalf("expected: a connection list got: '%s'", err)
 	} else {
 		t.Logf("connections found: '%s'", cl)
@@ -18,14 +33,16 @@ func TestGetConnections(t *testing.T) {
 }
 
 func TestGetRawConnection(t *testing.T) {
-	if cn, err := getRawConnection(getVaultClientWithEnv(env), lookupKey); err != nil || cn == nil {
+	_, client := getDummyCluster(t)
+
+	if cn, err := getRawConnection(client, lookupKey); err != nil || cn == nil {
 		t.Fatalf("expected: connection data got: '%v', err '%s'", cn, err)
 	}
 }
 
-func TestCache(t *testing.T) {
+/*func TestCache(t *testing.T) {
 	cfg := config.GetConfig()
-	key := "dummy"
+	key := lookupKey
 
 	if cp := getCachePath(key); !strings.HasSuffix(cp, key+".json") {
 		t.Fatalf("expected: path ending in dummy.json, got: %v", cp)
@@ -34,12 +51,12 @@ func TestCache(t *testing.T) {
 	cfg.StoragePath = "/tmp/ssh_ms_cache"
 	defer os.RemoveAll(cfg.StoragePath)
 
-	if cp := getCachePath("dummy"); !strings.HasPrefix(cp, cfg.StoragePath) {
+	if cp := getCachePath(key); !strings.HasPrefix(cp, cfg.StoragePath) {
 		t.Fatalf("expected: path starting with %v, got: %v", cfg.StoragePath, cp)
 	}
 
 	data := map[string]interface{}{
-		"dummy": true,
+		key: true,
 	}
 	if _, err := saveCache(key, data); err != nil {
 		t.Fatalf("expected: no error, got: %v", err)
@@ -55,10 +72,11 @@ func TestCache(t *testing.T) {
 	if status, err := removeCache(key); err != nil {
 		t.Fatalf("expected: true, nil, got: %v, %v", status, err)
 	}
-}
+}*/
 
 func TestShowConnection(t *testing.T) {
-	cn, err := getRawConnection(getVaultClientWithEnv(env), lookupKey)
+	_, client := getDummyCluster(t)
+	cn, err := getRawConnection(client, lookupKey)
 
 	if err != nil || cn == nil {
 		t.Fatalf("expected: connection data got: '%v', err '%s'", cn, err)

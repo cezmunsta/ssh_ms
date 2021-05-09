@@ -23,11 +23,32 @@ import (
 
 type secretData map[string]interface{}
 
-// CacheExpireAfter sets the threshold for cleaning stale caches
-const CacheExpireAfter = (7 * 24) * time.Hour
+const (
+	// CacheExpireAfter sets the threshold for cleaning stale caches
+	CacheExpireAfter = (7 * 24) * time.Hour
 
-// LockPrefix is used to manage locking
-const LockPrefix = "ssh_ms_lock_"
+	// LockPrefix is used to manage locking
+	LockPrefix = "ssh_ms_lock_"
+)
+
+// getVaultClient by authenticating using flags
+func getVaultClient() *vaultApi.Client {
+	env := vaultHelper.UserEnv{
+		Addr:     cfg.VaultAddr,
+		Token:    cfg.VaultToken,
+		Simulate: cfg.Simulate,
+	}
+	return getVaultClientWithEnv(env)
+}
+
+// getVaultClientWithEnv by authenticating using UserEnv
+func getVaultClientWithEnv(env vaultHelper.UserEnv) *vaultApi.Client {
+	if cfg.Verbose {
+		log.Debug("Vault Address:", env.Addr)
+		log.Debug("Simulate:", cfg.Simulate)
+	}
+	return vaultHelper.Authenticate(env, cfg.StoredToken)
+}
 
 // getLockName produces a lock path
 func getLockName(key string) string {
@@ -36,7 +57,7 @@ func getLockName(key string) string {
 
 // getLockPath produces the full lock path
 func getLockPath(ln string) string {
-	return fmt.Sprintf("%s/%s", SecretPath, ln)
+	return fmt.Sprintf("%s/%s", cfg.SecretPath, ln)
 }
 
 // acquireLock creates a lock to control writes
@@ -109,7 +130,7 @@ func releaseLock(vc *vaultApi.Client, ln string) (bool, error) {
 // getConnections from Vault
 func getConnections(vc *vaultApi.Client) ([]string, error) {
 	var connections []string
-	secrets, err := vaultHelper.ListSecrets(vc, SecretPath)
+	secrets, err := vaultHelper.ListSecrets(vc, cfg.SecretPath)
 
 	if err != nil {
 		log.Fatalf("Unable to get connections for %v: %v", vc.Address(), err)
@@ -217,7 +238,7 @@ func writeConnection(vc *vaultApi.Client, key string, args []string) bool {
 		return false
 	}
 
-	status, err := vaultHelper.WriteSecret(vc, fmt.Sprintf("%s/%s", SecretPath, key), conn)
+	status, err := vaultHelper.WriteSecret(vc, fmt.Sprintf("%s/%s", cfg.SecretPath, key), conn)
 	if err != nil {
 		log.Errorf("Failed to write '%v': %v", key, err)
 		return false
@@ -261,7 +282,7 @@ func updateConnection(vc *vaultApi.Client, key string, args []string) bool {
 		return false
 	}
 
-	status, err := vaultHelper.WriteSecret(vc, fmt.Sprintf("%s/%s", SecretPath, key), conn.Data)
+	status, err := vaultHelper.WriteSecret(vc, fmt.Sprintf("%s/%s", cfg.SecretPath, key), conn.Data)
 	if err != nil {
 		log.Errorf("Failed to write '%v': %v", key, err)
 		return false
@@ -292,7 +313,7 @@ func deleteConnection(vc *vaultApi.Client, key string) bool {
 		return false
 	}
 
-	status, err := vaultHelper.DeleteSecret(vc, fmt.Sprintf("%s/%s", SecretPath, key))
+	status, err := vaultHelper.DeleteSecret(vc, fmt.Sprintf("%s/%s", cfg.SecretPath, key))
 	if err != nil {
 		log.Warning("Unable to delete connection", key)
 		return false
@@ -502,7 +523,7 @@ func saveCache(key string, data map[string]interface{}) (bool, error) {
 
 // getRawConnection retrieves the secret from Vault
 func getRawConnection(vc *vaultApi.Client, key string) (*vaultApi.Secret, error) {
-	secret, err := vaultHelper.ReadSecret(vc, fmt.Sprintf("%s/%s", SecretPath, key))
+	secret, err := vaultHelper.ReadSecret(vc, fmt.Sprintf("%s/%s", cfg.SecretPath, key))
 
 	if err != nil || secret == nil {
 		log.Warning("Unable to find connection for: ", key)

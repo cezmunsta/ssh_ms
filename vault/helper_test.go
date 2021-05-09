@@ -2,6 +2,7 @@ package vault
 
 import (
 	"fmt"
+	"sync"
 	"testing"
 
 	"github.com/cezmunsta/ssh_ms/config"
@@ -13,55 +14,54 @@ import (
 )
 
 var (
-	// cfg stores all of the settings
-	cfg = config.GetConfig()
-
-	// vaultSecretPath is used to store in the KV
+	cfg             = config.GetConfig()
+	client          *vaultApi.Client
+	cluster         *vault.TestCluster
+	once            sync.Once
 	vaultSecretPath = cfg.SecretPath
 )
 
 const (
-	// vaultKvVersion sets the version used with the KV
 	vaultKvVersion = "1"
-
-	// vaultTestToken is used with unit tests and a test cluster
 	vaultTestToken = "iamadummytoken"
 )
 
 func GetDummyCluster(t *testing.T) (*vault.TestCluster, *vaultApi.Client) {
-	cluster := vault.NewTestCluster(t, &vault.CoreConfig{
-		DevToken: vaultTestToken,
-		LogicalBackends: map[string]logical.Factory{
-			"kv": vaultKv.Factory,
-		},
-	}, &vault.TestClusterOptions{
-		HandlerFunc: vaultHttp.Handler,
+	once.Do(func() {
+		cluster = vault.NewTestCluster(t, &vault.CoreConfig{
+			DevToken: vaultTestToken,
+			LogicalBackends: map[string]logical.Factory{
+				"kv": vaultKv.Factory,
+			},
+		}, &vault.TestClusterOptions{
+			HandlerFunc: vaultHttp.Handler,
+		})
+		cluster.Start()
+
+		// Create KV V1 mount
+		if err := cluster.Cores[0].Client.Sys().Mount("kv", &vaultApi.MountInput{
+			Type: "kv",
+			Options: map[string]string{
+				"version": vaultKvVersion, // TODO: update to test version 2 later
+			},
+		}); err != nil {
+			t.Fatal(err)
+		}
+		// Create Secret mount
+		cluster.Cores[0].Client.Sys().Unmount("secret")
+		if err := cluster.Cores[0].Client.Sys().Mount(vaultSecretPath, &vaultApi.MountInput{
+			Type: "kv",
+			Options: map[string]string{
+				"version": vaultKvVersion, // TODO: update to test version 2 later
+			},
+		}); err != nil {
+			t.Fatal(err)
+		}
+
+		core := cluster.Cores[0].Core
+		vault.TestWaitActive(t, core)
+		client = cluster.Cores[0].Client
 	})
-	cluster.Start()
-
-	// Create KV V1 mount
-	if err := cluster.Cores[0].Client.Sys().Mount("kv", &vaultApi.MountInput{
-		Type: "kv",
-		Options: map[string]string{
-			"version": vaultKvVersion, // TODO: update to test version 2 later
-		},
-	}); err != nil {
-		t.Fatal(err)
-	}
-	// Create Secret mount
-	cluster.Cores[0].Client.Sys().Unmount("secret")
-	if err := cluster.Cores[0].Client.Sys().Mount(vaultSecretPath, &vaultApi.MountInput{
-		Type: "kv",
-		Options: map[string]string{
-			"version": vaultKvVersion, // TODO: update to test version 2 later
-		},
-	}); err != nil {
-		t.Fatal(err)
-	}
-
-	core := cluster.Cores[0].Core
-	vault.TestWaitActive(t, core)
-	client := cluster.Cores[0].Client
 	return cluster, client
 }
 
