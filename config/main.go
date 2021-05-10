@@ -28,6 +28,7 @@ var (
 		`-ldflags "-X github.com/cezmunsta/ssh_ms/config.EnvSSHUserName=xxx"`
 
 	*/
+
 	// EnvBasePath is the parent location used to prefix storage paths
 	EnvBasePath = filepath.Join(os.Getenv("HOME"), ".ssh", "cache")
 

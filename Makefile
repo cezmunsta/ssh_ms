@@ -45,23 +45,27 @@ build: binary-prep
 
 dev-vault:
 	@${SHELL} scripts/dev-vault.sh
+
 test:
 	@go test "${PACKAGE}/ssh" "${PACKAGE}/cmd" "${PACKAGE}/vault" "${PACKAGE}/log" "${PACKAGE}/config"
 
 lint:
-	@golint -set_exit_status ssh vault cmd
+	@golint -set_exit_status "${PACKAGE}/ssh" "${PACKAGE}/cmd" "${PACKAGE}/vault" "${PACKAGE}/log" "${PACKAGE}/config"
 
+format: export PACKAGE=./
 format:
-	@gofmt -w ssh vault cmd
+	@gofmt -w "${PACKAGE}/ssh" "${PACKAGE}/cmd" "${PACKAGE}/vault" "${PACKAGE}/log" "${PACKAGE}/config"
 
+simplify: export PACKAGE=./
 simplify:
-	@gofmt -s -w ssh vault cmd
+	@gofmt -s -w "${PACKAGE}/ssh" "${PACKAGE}/cmd" "${PACKAGE}/vault" "${PACKAGE}/log" "${PACKAGE}/config"
 
 vet:
 	@go vet "${PACKAGE}/ssh" "${PACKAGE}/cmd" "${PACKAGE}/vault"
 
+fix: export PACKAGE=./
 fix:
-	@go tool fix -diff ssh vault cmd
+	@go tool fix -diff "${PACKAGE}/ssh" "${PACKAGE}/cmd" "${PACKAGE}/vault" "${PACKAGE}/log" "${PACKAGE}/config"
 
 clean:
 	@find "${BUILD_DIR}" -type f -delete
