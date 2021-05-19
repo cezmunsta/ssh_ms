@@ -2,9 +2,11 @@ package cmd
 
 import (
 	"bufio"
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"html/template"
 	"io/ioutil"
 	"math"
 	"os"
@@ -22,6 +24,10 @@ import (
 )
 
 type secretData map[string]interface{}
+
+type configMotdTpl struct {
+	Comment, Motd, Name string
+}
 
 const (
 	// CacheExpireAfter sets the threshold for cleaning stale caches
@@ -185,7 +191,7 @@ func searchConnections(vc *vaultApi.Client, pattern string) bool {
 // showConnection details suitable for use with ssh_config
 func showConnection(vc *vaultApi.Client, key string) bool {
 	log.Debugf("showConnection: %v", key)
-	sshArgs, sshClient, configComment := prepareConnection(vc, []string{key})
+	sshArgs, sshClient, configComment, _ := prepareConnection(vc, []string{key})
 
 	log.Info("SSH cmd:", sshArgs)
 	if len(configComment) > 0 {
@@ -200,7 +206,7 @@ func showConnection(vc *vaultApi.Client, key string) bool {
 // printConnection details suitable for use on the command line
 func printConnection(vc *vaultApi.Client, key string) bool {
 	log.Debugf("printConnection: %v", key)
-	sshArgs, _, _ := prepareConnection(vc, []string{key})
+	sshArgs, _, _, _ := prepareConnection(vc, []string{key})
 
 	fmt.Printf("ssh %v\n", strings.Join(sshArgs, " "))
 	return true
@@ -225,6 +231,7 @@ func writeConnection(vc *vaultApi.Client, key string, args []string) bool {
 	}
 
 	conn["ConfigComment"] = cfg.ConfigComment
+	conn["ConfigMotd"] = cfg.ConfigMotd
 
 	if cfg.Simulate {
 		log.Infof("simulated write to '%v': %v", key, args)
@@ -267,6 +274,10 @@ func updateConnection(vc *vaultApi.Client, key string, args []string) bool {
 
 	if len(cfg.ConfigComment) > 0 {
 		conn.Data["ConfigComment"] = cfg.ConfigComment
+	}
+
+	if len(cfg.ConfigMotd) > 0 {
+		conn.Data["ConfigMotd"] = cfg.ConfigMotd
 	}
 
 	if cfg.Simulate {
@@ -325,10 +336,12 @@ func deleteConnection(vc *vaultApi.Client, key string) bool {
 // vc : Vault client
 // args : options for inspection
 // verbose : enable informational output
-func prepareConnection(vc *vaultApi.Client, args []string) ([]string, ssh.Connection, string) {
+func prepareConnection(vc *vaultApi.Client, args []string) ([]string, ssh.Connection, string, string) {
 	log.Debugf("prepareConnection: %v", args)
 	var sshArgs []string
+	var svc string
 	var configComment string
+	var configMotd string
 
 	if len(args) == 0 {
 		log.Fatal("Minimum requirement is to specify an alias")
@@ -336,21 +349,56 @@ func prepareConnection(vc *vaultApi.Client, args []string) ([]string, ssh.Connec
 	key := args[0]
 	config := lookupConnection(vc, key)
 	configComment = key
+	configMotd = ""
 
 	if val, ok := config["ConfigComment"]; ok {
 		log.Debugf("Found comment for '%v': %v", key, val)
 		configComment = fmt.Sprintf("%v", val)
 	}
 
+	if val, ok := config["ConfigMotd"]; ok {
+		log.Debugf("Found Motd for '%v': %v", key, val)
+		configMotd = fmt.Sprintf("%v\n", val)
+	}
+
 	if config == nil {
-		return sshArgs, ssh.Connection{}, key
+		return sshArgs, ssh.Connection{}, key, configMotd
 	}
 
 	log.Debugf("config: %v", config)
 	sshClient := ssh.Connection{}
 	sshArgs = append(sshClient.BuildConnection(config, key, cfg.User), args[1:]...)
 	log.Debugf("sshArgs: %v", sshArgs)
-	return sshArgs, sshClient, configComment
+
+	for i := 0; i < len(sshClient.LocalForward); i++ {
+		switch sshClient.LocalForward[i].RemotePort {
+		case 443:
+			svc = "NGINX"
+		case 8443:
+			svc = "PMM"
+		default:
+			svc = "Unknown service :|"
+		}
+		configMotd += fmt.Sprintf("\nFWD: https://127.0.0.1:%d - %s (%d)", sshClient.LocalForward[i].LocalPort, svc, sshClient.LocalForward[i].RemotePort)
+	}
+
+	if configAutoMotdTpl, err := template.New("configAutoMotd").Parse(`
+***************************************************************
+# {{.Comment}}
+Server connection: {{.Name}}
+
+{{.Motd}}
+***************************************************************
+
+	`); err != nil {
+		log.Warningf("Failed to proces MOTD for '%v': %v", key, err)
+	} else {
+		b := bytes.Buffer{}
+		configAutoMotdTpl.Execute(&b, configMotdTpl{Comment: configComment, Motd: configMotd, Name: key})
+		configMotd = b.String()
+	}
+
+	return sshArgs, sshClient, configComment, configMotd
 }
 
 // lookupConnection tries local cache and then remote to acquire connection details
@@ -371,7 +419,7 @@ func lookupConnection(vc *vaultApi.Client, key string) map[string]interface{} {
 // args : extra args passed by the user
 func connect(vc *vaultApi.Client, env ssh.UserEnv, args []string) {
 	log.Debug("connect:", args[0])
-	sshArgs, sshClient, configComment := prepareConnection(vc, args)
+	sshArgs, _, _, configMotd := prepareConnection(vc, args)
 
 	log.Debugf("%v", map[string]interface{}{
 		"env":  env,
@@ -383,10 +431,7 @@ func connect(vc *vaultApi.Client, env ssh.UserEnv, args []string) {
 		return
 	}
 
-	fmt.Println("Connecting to: ", configComment)
-	for i := 0; i < len(sshClient.LocalForward); i++ {
-		fmt.Printf("FWD: https://127.0.0.1:%d -> %d\n", sshClient.LocalForward[i].LocalPort, sshClient.LocalForward[i].RemotePort)
-	}
+	fmt.Println(configMotd)
 	ssh.Connect(sshArgs, env)
 }
 

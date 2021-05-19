@@ -180,7 +180,40 @@ bob@testing: ~ $
 Each connection that is retrieved from `Vault` is cached locally for 1 week. Should you need to
 force this to be cleared then you can use the `purge` command:
 ```sh
-ssh_ms purge
+$ ssh_ms purge
+```
+
+### Setting comments and message of the day
+To help identify connections, or to give some extra information when a user connects, you can set
+a comment and/or a message of the day that will be displayed. When these are not set there will still
+be a sort of motd that displays the current connection and any port forwarding.
+```sh
+$ ssh_ms update testing --comment "This is a comment" --motd "This is the motd"
+$ ssh_ms show testing
+# This is a comment
+Host testing
+   HostName localhost
+   Port 22
+   User bob
+   IdentityFile ~/.ssh/custom_rsa
+   IdentitiesOnly yes
+   ProxyJump none
+   ControlPath /home/bob/.ssh/cache/cp_bob_localhost_22
+
+$ ssh_ms connect testing date
+
+***************************************************************
+# This is a comment
+Server connection: testing
+
+This is the motd
+
+FWD: https://127.0.0.1:18000 - NGINX (443)
+FWD: https://127.0.0.1:18001 - PMM (8443)
+***************************************************************
+
+Wed 19 May 17:20:44 BST 2021
+Shared connection to localhost closed.
 ```
 
 ## Build

@@ -115,6 +115,7 @@ func WriteSecret(c *api.Client, key string, data map[string]interface{}) (bool, 
 		"serveralivecountmax": "ServerAliveCountMax",
 		"cache":               "Cache",
 		"configcomment":       "ConfigComment",
+		"configmotd":          "ConfigMotd",
 		"expires":             "Expires",
 	}
 
