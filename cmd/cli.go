@@ -181,8 +181,10 @@ func init() {
 	rootCmd.PersistentFlags().BoolVarP(&cfg.Simulate, "dry-run", "n", false, "Prevent certain commands without full execution")
 	rootCmd.PersistentFlags().BoolVarP(&cfg.Verbose, "verbose", "v", false, "Provide addition output")
 
-	updateCmd.Flags().StringVarP(&cfg.ConfigComment, "comment", "c", "", "Set thecomment for the config entry")
+	updateCmd.Flags().StringVarP(&cfg.ConfigComment, "comment", "c", "", "Set the comment for the config entry")
 	writeCmd.Flags().StringVarP(&cfg.ConfigComment, "comment", "c", "", "Add a comment for the config entry")
+	updateCmd.Flags().StringVarP(&cfg.ConfigMotd, "motd", "m", "", "Set the Motd for the config entry")
+	writeCmd.Flags().StringVarP(&cfg.ConfigMotd, "motd", "m", "", "Add a Motd comment for the config entry")
 
 	log := log.GetLogger(log.GetDefaultLevel(), "")
 	cfg.LogLevel = log.GetLevel()

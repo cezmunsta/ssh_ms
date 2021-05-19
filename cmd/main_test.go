@@ -22,6 +22,9 @@ var (
 )
 
 const (
+	dummyComment = "This is a comment"
+	dummyMotd    = "This is the motd"
+
 	vaultKvVersion = "1"
 	vaultTestToken = "iamadummytoken"
 )
@@ -70,6 +73,8 @@ func generateDummyData(t *testing.T, frag string) {
 	key := fmt.Sprintf("%s/%s", vaultSecretPath, frag)
 	data := make(secretData)
 	data["User"] = frag
+	data["ConfigComment"] = dummyComment
+	data["ConfigMotd"] = dummyMotd
 
 	if status, err := vaultHelper.WriteSecret(client, key, data); err != nil || !status {
 		t.Fatalf("writeSecret expected: %v, got: %v, %v", data, status, err)

@@ -13,7 +13,7 @@ import (
 type Settings struct {
 	LogLevel                                       logrus.Level
 	Debug, Simulate, StoredToken, Verbose, Version bool
-	ConfigComment, EnvSSHDefaultUsername, EnvSSHIdentityFile,
+	ConfigComment, ConfigMotd, EnvSSHDefaultUsername, EnvSSHIdentityFile,
 	EnvSSHUsername, SecretPath, Show, StoragePath, User, VaultAddr, VaultToken string
 }
 
@@ -60,6 +60,7 @@ func GetConfig() *Settings {
 	once.Do(func() {
 		settings = Settings{
 			ConfigComment:         "",
+			ConfigMotd:            "",
 			EnvSSHDefaultUsername: EnvSSHDefaultUsername,
 			EnvSSHIdentityFile:    EnvSSHIdentityFile,
 			EnvSSHUsername:        EnvSSHUsername,

@@ -90,3 +90,27 @@ func TestShowConnection(t *testing.T) {
 		t.Fatalf("expected: got: ")
 	}
 }
+
+func TestPrepareConnection(t *testing.T) {
+	_, client := getDummyCluster(t)
+	cn, err := getRawConnection(client, lookupKey)
+
+	if err != nil || cn == nil {
+		t.Fatalf("expected: connection data got: '%v', err '%s'", cn, err)
+	}
+
+	_, sshClient, configComment, configMotd := prepareConnection(client, []string{lookupKey})
+
+	if sshClient.User != lookupKey {
+		t.Fatalf("expected user '%v', got '%v'", lookupKey, sshClient.User)
+	}
+
+	if configComment != dummyComment {
+		t.Fatalf("expected comment '%v', got '%v'", dummyComment, configComment)
+	}
+
+	if !strings.Contains(configMotd, dummyMotd) {
+		t.Fatalf("expected motd to contain '%v', got '%v'", dummyMotd, configMotd)
+	}
+
+}
