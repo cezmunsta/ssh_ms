@@ -339,6 +339,7 @@ func deleteConnection(vc *vaultApi.Client, key string) bool {
 func prepareConnection(vc *vaultApi.Client, args []string) ([]string, ssh.Connection, string, string) {
 	log.Debugf("prepareConnection: %v", args)
 	var sshArgs []string
+	var svc string
 	var configComment string
 	var configMotd string
 
@@ -370,7 +371,15 @@ func prepareConnection(vc *vaultApi.Client, args []string) ([]string, ssh.Connec
 	log.Debugf("sshArgs: %v", sshArgs)
 
 	for i := 0; i < len(sshClient.LocalForward); i++ {
-		configMotd += fmt.Sprintf("\nFWD: https://127.0.0.1:%d -> %d", sshClient.LocalForward[i].LocalPort, sshClient.LocalForward[i].RemotePort)
+		switch sshClient.LocalForward[i].RemotePort {
+		case 443:
+			svc = "NGINX"
+		case 8443:
+			svc = "PMM"
+		default:
+			svc = "Unknown service :|"
+		}
+		configMotd += fmt.Sprintf("\nFWD: https://127.0.0.1:%d - %s (%d)", sshClient.LocalForward[i].LocalPort, svc, sshClient.LocalForward[i].RemotePort)
 	}
 
 	if configAutoMotdTpl, err := template.New("configAutoMotd").Parse(`
