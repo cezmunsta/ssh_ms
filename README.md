@@ -222,10 +222,13 @@ Should you wish to build the binary to have some defaults preset for you, then y
 along with `make build`:
 - `BUILD_DIR` : Set the location for the binary
 - `RELEASE_VER` : Sets `cmd.Version`
-- `DEFAULT_VAULT_ADDR` : Sets `cmd.EnvVaultAddr`
-- `SSH_DEFAULT_USERNAME` : Sets `ssh.EnvSSHDefaultUsername`
-- `SSH_MS_USERNAME` : Sets `cmd.EnvSSHUsername`
-- `SSH_ID_FILE` : Sets `cmd.EnvSSHIdentityFile`
+- `SSH_MS_BASEPATH`: Sets `config.EnvBasePath`
+- `SSH_MS_DEFAULT_VAULT_ADDR`: Sets `config.EnvVaultAddr`, bypassing environment lookup of `VAULT_ADDR`
+- `SSH_MS_DEFAULT_USERNAME`: Sets `config.EnvSSHDefaultUsername`, bypassing environment lookup of `USER`
+- `SSH_MS_USERNAME`: Sets `config.EnvSSHUsername` template variable, used in templated usernames
+- `SSH_MS_ID_FILE`:  Sets `config.EnvSSHIdentityFile`
+- `SSH_MS_SYNC_HOST`: Sets the destination host for a binary push via `rsync`
+- `SSH_MS_SYNC_PATH`: Sets the destination path for a binary push via `rsync`
 
 To set the build version (e.g. if you are making a custom build, etc) you can use `make build` to set
 the build version (by default it will set it to `git rev-parse HEAD`), e.g.

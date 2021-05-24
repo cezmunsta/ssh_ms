@@ -150,9 +150,6 @@ var (
 
 	*/
 
-	// EnvVaultAddr is the default location for Vault
-	EnvVaultAddr = vaultApi.EnvVaultAddress
-
 	// Version of the code
 	Version = "1.0"
 )
@@ -170,7 +167,7 @@ func init() {
 		updateCmd,
 		writeCmd,
 	)
-	rootCmd.PersistentFlags().StringVar(&cfg.VaultAddr, "vault-addr", os.Getenv(vaultApi.EnvVaultAddress), "Specify the Vault address")
+	rootCmd.PersistentFlags().StringVar(&cfg.VaultAddr, "vault-addr", cfg.EnvVaultAddr, "Specify the Vault address")
 	rootCmd.PersistentFlags().StringVar(&cfg.VaultToken, "vault-token", os.Getenv(vaultApi.EnvVaultToken), "Specify the Vault token")
 
 	rootCmd.PersistentFlags().StringVarP(&cfg.StoragePath, "storage", "s", cfg.StoragePath, "Storage path for caching")
@@ -206,6 +203,11 @@ func getVersion() [][]string {
 	} else {
 		lines = append(lines, []string{"Version:", Version})
 		lines = append(lines, []string{"Arch:", runtime.GOOS, runtime.GOARCH})
+		lines = append(lines, []string{"Base path:", config.EnvBasePath})
+		lines = append(lines, []string{"Default Vault address:", config.EnvVaultAddr})
+		lines = append(lines, []string{"Default SSH username:", config.EnvSSHDefaultUsername})
+		lines = append(lines, []string{"SSH template username:", config.EnvSSHUsername})
+		lines = append(lines, []string{"SSH identity file:", config.EnvSSHIdentityFile})
 	}
 	return lines
 }
@@ -230,9 +232,6 @@ func updateSettings() {
 		cfg.StoredToken = true
 	}
 
-	if cfg.VaultAddr == "" {
-		cfg.VaultAddr = EnvVaultAddr
-	}
 	log.Debug("config: ", cfg.ToJSON())
 }
 

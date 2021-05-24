@@ -99,6 +99,7 @@ func TestPrepareConnection(t *testing.T) {
 		t.Fatalf("expected: connection data got: '%v', err '%s'", cn, err)
 	}
 
+	removeCache(lookupKey)
 	_, sshClient, configComment, configMotd := prepareConnection(client, []string{lookupKey})
 
 	if sshClient.User != lookupKey {

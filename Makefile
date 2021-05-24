@@ -4,16 +4,16 @@ SHELL=/bin/bash
 BUILD_DIR?="./bin"
 RELEASE_VER?="`git rev-parse HEAD`"
 
-DEFAULT_VAULT_ADDR?="https://127.0.0.1:8200"
+SSH_MS_BASEPATH?=~/.ssh/cache
+SSH_MS_DEFAULT_VAULT_ADDR?=https://127.0.0.1:8200
+SSH_MS_DEFAULT_USERNAME?="${USER}"
+SSH_MS_USERNAME?=SSH_MS_USERNAME
+SSH_MS_ID_FILE?=~/.ssh/id_rsa
+SSH_MS_SYNC_HOST?=localhost
+SSH_MS_SYNC_PATH?=/usr/share/nginx/html/downloads/ssh_ms/
 
-SSH_DEFAULT_USERNAME?="${USER}"
-SSH_MS_USERNAME?="SSH_MS_USERNAME"
-SSH_ID_FILE?="id_rsa"
-SSH_MS_SYNC_HOST?="localhost"
-SSH_MS_SYNC_PATH?="/usr/share/nginx/html/downloads/ssh_ms/"
-
-PACKAGE="github.com/cezmunsta/ssh_ms"
-LDFLAGS=-ldflags "-w -X ${PACKAGE}/cmd.Version=${RELEASE_VER} -X ${PACKAGE}/config.EnvSSHUsername=${SSH_MS_USERNAME} -X ${PACKAGE}/config.EnvSSHIdentityFile=${SSH_ID_FILE} -X ${PACKAGE}/config.EnvSSHDefaultUsername=${SSH_DEFAULT_USERNAME} -X ${PACKAGE}/cmd.EnvVaultAddr=${DEFAULT_VAULT_ADDR}"
+PACKAGE=github.com/cezmunsta/ssh_ms
+LDFLAGS=-ldflags "-w -X ${PACKAGE}/config.EnvBasePath=${SSH_MS_BASEPATH} -X ${PACKAGE}/cmd.Version=${RELEASE_VER} -X ${PACKAGE}/config.EnvSSHUsername=${SSH_MS_USERNAME} -X ${PACKAGE}/config.EnvSSHIdentityFile=${SSH_MS_ID_FILE} -X ${PACKAGE}/config.EnvSSHDefaultUsername=${SSH_MS_DEFAULT_USERNAME} -X ${PACKAGE}/config.EnvVaultAddr=${SSH_MS_DEFAULT_VAULT_ADDR}"
 
 all: lint format test binaries
 
@@ -31,17 +31,17 @@ binary-prep:
 binary-mac: export GOOS=darwin
 binary-mac: export GOARCH=amd64
 binary-mac: binary-prep
-	@go build -o "${BUILD_DIR}/${GOOS}/${GOARCH}/ssh_ms" ${LDFLAGS};
+	@go build -trimpath -o "${BUILD_DIR}/${GOOS}/${GOARCH}/ssh_ms" ${LDFLAGS};
 	@xz -fkez9 "${BUILD_DIR}/${GOOS}/${GOARCH}/ssh_ms";
 
 binary-linux: export GOOS=linux
 binary-linux: export GOARCH=amd64
 binary-linux: binary-prep
-	@go build -o "${BUILD_DIR}/${GOOS}/${GOARCH}/ssh_ms" ${LDFLAGS};
+	@go build -race -trimpath -o "${BUILD_DIR}/${GOOS}/${GOARCH}/ssh_ms" ${LDFLAGS};
 	@xz -fkez9 "${BUILD_DIR}/${GOOS}/${GOARCH}/ssh_ms";
 
 build: binary-prep
-	@go build -o "${BUILD_DIR}/ssh_ms" ${LDFLAGS}
+	@go build -race -trimpath -o "${BUILD_DIR}/ssh_ms" ${LDFLAGS}
 
 dev-vault:
 	@${SHELL} scripts/dev-vault.sh
@@ -68,4 +68,7 @@ fix:
 	@go tool fix -diff "${PACKAGE}/ssh" "${PACKAGE}/cmd" "${PACKAGE}/vault" "${PACKAGE}/log" "${PACKAGE}/config"
 
 clean:
-	@find "${BUILD_DIR}" -type f -delete
+	@find "${BUILD_DIR}" -type f -delete;
+	@go clean -x
+	@go clean -x -cache
+	@go clean -x -testcache

@@ -34,17 +34,6 @@ var (
 		"@@USER_FIRSTNAME":                 "{{.FirstName}}",
 		"@@" + cfg.EnvSSHUsername:          "{{.FullName}}",
 	}
-
-	/*
-		The following support overrides during builds, which can be done
-		by setting ldflags, e.g.
-
-		`-ldflags "-X github.com/cezmunsta/ssh_ms/ssh.EnvSSHDefaultUsername=xxx"`
-
-	*/
-
-	// EnvSSHDefaultUsername is used to authenticate with SSH
-	EnvSSHDefaultUsername = os.Getenv("USER")
 )
 
 // UserEnv contains settings from the ENV
@@ -240,7 +229,7 @@ func setHostname(sshArgs *Connection, args map[string]interface{}) {
 // sshArgs : Connection properties for SSH
 // args : options provided for inspection
 func setUser(sshArgs *Connection, args map[string]interface{}, templateUser string) {
-	option := EnvSSHDefaultUsername
+	option := cfg.EnvSSHDefaultUsername
 	log.Debugf("original user: %v", templateUser)
 	if val, ok := args["User"]; ok {
 		option = val.(string)
