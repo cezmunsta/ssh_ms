@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"sync"
 
+	vaultApi "github.com/hashicorp/vault/api"
 	"github.com/sirupsen/logrus"
 )
 
@@ -14,7 +15,7 @@ type Settings struct {
 	LogLevel                                       logrus.Level
 	Debug, Simulate, StoredToken, Verbose, Version bool
 	ConfigComment, ConfigMotd, EnvSSHDefaultUsername, EnvSSHIdentityFile,
-	EnvSSHUsername, SecretPath, Show, StoragePath, User, VaultAddr, VaultToken string
+	EnvSSHUsername, EnvVaultAddr, SecretPath, Show, StoragePath, User, VaultAddr, VaultToken string
 }
 
 var (
@@ -29,17 +30,24 @@ var (
 
 	*/
 
-	// EnvBasePath is the parent location used to prefix storage paths
-	EnvBasePath = filepath.Join(os.Getenv("HOME"), ".ssh", "cache")
+	// EnvBasePath is the parent location used to prefix storage paths,
+	// default value is filepath.Join(os.Getenv("HOME"), ".ssh", "cache")
+	EnvBasePath string
 
-	// EnvSSHDefaultUsername sets the default used in connections
-	EnvSSHDefaultUsername = os.Getenv("USER")
+	// EnvSSHDefaultUsername sets the default used in connections,
+	// default value is os.Getenv("USER")
+	EnvSSHDefaultUsername string
 
 	// EnvSSHUsername is used to authenticate with SSH
 	EnvSSHUsername = "SSH_MS_USERNAME"
 
-	// EnvSSHIdentityFile is used for SSH authentication
-	EnvSSHIdentityFile = filepath.Join("~", ".ssh", "id_ed25519")
+	// EnvSSHIdentityFile is used for SSH authentication,
+	// default value is filepath.Join("~", ".ssh", "id_ed25519")
+	EnvSSHIdentityFile string
+
+	// EnvVaultAddr is the default location for Vault,
+	// default value is os.Getenv(vaultApi.EnvVaultAddress)
+	EnvVaultAddr string
 
 	// SecretPath is the location used for connection manangement
 	SecretPath = "secret/ssh_ms"
@@ -58,12 +66,25 @@ func (s *Settings) ToJSON() string {
 // ensuring that only one instance is ever returned
 func GetConfig() *Settings {
 	once.Do(func() {
+		if EnvBasePath == "" {
+			EnvBasePath = filepath.Join(os.Getenv("HOME"), ".ssh", "cache")
+		}
+		if EnvSSHDefaultUsername == "" {
+			EnvSSHDefaultUsername = os.Getenv("USER")
+		}
+		if EnvSSHIdentityFile == "" {
+			EnvSSHIdentityFile = filepath.Join("~", ".ssh", "id_ed25519")
+		}
+		if EnvVaultAddr == "" {
+			EnvVaultAddr = os.Getenv(vaultApi.EnvVaultAddress)
+		}
 		settings = Settings{
 			ConfigComment:         "",
 			ConfigMotd:            "",
 			EnvSSHDefaultUsername: EnvSSHDefaultUsername,
 			EnvSSHIdentityFile:    EnvSSHIdentityFile,
 			EnvSSHUsername:        EnvSSHUsername,
+			EnvVaultAddr:          EnvVaultAddr,
 			LogLevel:              logrus.WarnLevel,
 			SecretPath:            SecretPath,
 			Simulate:              false,
