@@ -151,7 +151,7 @@ var (
 	*/
 
 	// Version of the code
-	Version = "1.0"
+	Version = "1.2.1"
 )
 
 func init() {
