@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 2021-06-15: v1.2.1
+
+- Ensure EnvBasePath exists (#45)
+  Fixes the issue where the storage path is absent and is not automatically created
+
 ## 2021-06-15: v1.2.0
 
 - Added missing entries from the changelog (#43)
