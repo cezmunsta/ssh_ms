@@ -1,5 +1,25 @@
 # CHANGELOG
 
+## 2021-06-15: v1.2.0
+
+- Added missing entries from the changelog (#43)
+- Fix override variables that aren't strings (#42)
+  Some of the overrides were no longer working due to being defined in a way other than as an
+  explicit string, which caused issues when building with overrides.
+- Added support for message of the day (#37)
+  A "message of the day" can now be added to the stored configuration, allowing messages to
+  be displayed during the connection phase, including whatever relevant information is necessary.
+  This also allows the message to be managed without accessing an instance, which is where the motd
+  would normally be set; on-host motd messaging is not affected by this feature
+- Updated Go-based tasks in Makefile (#36)
+- Added extra tests to Makefile (#35)
+- Added Vault tests (#34)
+  Vault TestCluster has now been integrated into the test suits, allowing tests
+  to run without access to a running Vault instance
+- Update log level for messages (#33)
+  Changed levels for some getConnections messages
+
+
 ## 2020-05-08: v1.1.0
 
 - Updated README (#32)
@@ -13,13 +33,13 @@
   then we can specify identical `LocalForward` entries without an issue.
 - Added locking mechanism for write operations (#30):
   In multi-user environments it is possible that more than one user attempts to perform
-  operations against the same key in Vault storage. The user's operation must now 
+  operations against the same key in Vault storage. The user's operation must now
   acquire a lock to be able to perform a write operation against the storage layer
 - Add connection search (#29):
   The user can now `search` the existing list of connection using partial patterns,
   or even regular expressions; partial expressions must still compile as a regex
 - Added argument checker for better UX (#28):
-  Some basic argument checking is performed to help avoid common issues and 
+  Some basic argument checking is performed to help avoid common issues and
   aborting early on in the execution process.
 - Enhance caching (#27):
   Caching operations and updates now take part when performing write operations
@@ -27,12 +47,12 @@
   operations take part during this process.
 - Added support for representing the config in JSON format (#26):
   For use internally, the config can now be converted to JSON by calling the
-  `Settings.ToJSON` function. 
+  `Settings.ToJSON` function.
 - Added dev-vault to Makefile (#25):
   A test Vault container can be created and unlocked using `make dev-vault`
 - Partial updates (#24):
   The user can now apply an update to an existing connection by using `update`
-  instead of `write`. An error will now occur when trying to use `write` with 
+  instead of `write`. An error will now occur when trying to use `write` with
   an existing entry, or trying to use `update` with a non-existent one.
 - Major refactor of code (#22):
   Extensive code rewrite to solve some problems that arose when adding new
@@ -48,7 +68,7 @@ Please see [README.md](README.md) for more details.
   Added `--comment` to enable users to add contextual information, useful when
   generating content for `~/.ssh/config`, etc
 - Format port forwarding links to allow "open link" (#16):
-  HTTP links are generated, which the user's terminal should interpret and 
+  HTTP links are generated, which the user's terminal should interpret and
   allow them to open in their browser.
 - Force xz compression (#14):
   Use `-f` when compressing the binaries so as to be able to avoid
@@ -59,7 +79,7 @@ Please see [README.md](README.md) for more details.
   Support has been added to build both Linux and MacOS binaries and
   optionally rsync them to target destination for downloading.
 - Refactor vault.WriteSecret (#9):
-  `vault.WriteSecret` is now aligned with the other helpers. It now accepts a 
+  `vault.WriteSecret` is now aligned with the other helpers. It now accepts a
   preformatted path instead of just the key.
 - Add option to delete entries (#8):
   User may now remove entries without the need for direct use of the Vault client.
