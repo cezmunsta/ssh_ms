@@ -3,6 +3,7 @@ package config
 import (
 	"os"
 
+	"github.com/cezmunsta/ssh_ms/log"
 	"github.com/gabriel-vasile/mimetype"
 )
 
@@ -22,6 +23,14 @@ var (
 	}
 )
 
+func ensureDirExists(path string) (bool, error) {
+	if err := os.MkdirAll(path, os.ModePerm); err != nil {
+		log.Errorf("Failed to create directory '%v': %v", path, err)
+		return false, err
+	}
+	return true, nil
+}
+
 // GetFileType will return the mimetype of a file
 // fh : file handle
 func GetFileType(fh *os.File) (uint, error) {
@@ -32,7 +41,7 @@ func GetFileType(fh *os.File) (uint, error) {
 
 	ct, exists := formatLookup[mt.String()]
 	if !exists {
-		ct, _ = formatLookup["default"]
+		ct = formatLookup["default"]
 	}
 	return ct, nil
 }

@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	names = []string{"ceri", "ceri.williams", "ceriwilliams"}
+	names = []string{"first", "firstname.lastname", "firstnamelastname"}
 )
 
 func init() {

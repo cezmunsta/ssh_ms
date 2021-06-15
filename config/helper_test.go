@@ -60,3 +60,17 @@ func TestGetFileType(t *testing.T) {
 		t.Fatalf("expected: '%v' got: '%v'", FormatUnknown, ct)
 	}
 }
+
+func TestEnsureDirExists(t *testing.T) {
+	ts := "/ensureDirExists"
+	td := os.TempDir() + ts
+	defer os.RemoveAll(td)
+
+	if ok, err := ensureDirExists(td); !ok {
+		t.Fatalf("expected: %v exists, got: %v", td, err)
+	}
+
+	if ok, err := ensureDirExists(ts); ok {
+		t.Fatalf("expected: %v to not exist, got: %v", ts, err)
+	}
+}
