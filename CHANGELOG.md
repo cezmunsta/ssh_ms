@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 2021-06-21: v1.2.2
+
+- Handle tilde in config.EnvBasePath (#47)
+  The tilde from the build option is not being parsed before use
+
+
 ## 2021-06-15: v1.2.1
 
 - Ensure EnvBasePath exists (#45)
