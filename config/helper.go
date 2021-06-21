@@ -2,6 +2,7 @@ package config
 
 import (
 	"os"
+	"strings"
 
 	"github.com/cezmunsta/ssh_ms/log"
 	"github.com/gabriel-vasile/mimetype"
@@ -24,11 +25,21 @@ var (
 )
 
 func ensureDirExists(path string) (bool, error) {
-	if err := os.MkdirAll(path, os.ModePerm); err != nil {
+	if err := os.MkdirAll(NormalizePath(path), os.ModePerm); err != nil {
 		log.Errorf("Failed to create directory '%v': %v", path, err)
 		return false, err
 	}
 	return true, nil
+}
+
+// NormalizePath will handle the shell expansion of tilde
+func NormalizePath(path string) string {
+	spath := path
+	if strings.HasPrefix(spath, "~") {
+		spath = strings.Replace(spath, "~", os.Getenv("HOME"), 1)
+		log.Debugf("Updated path %s to %s", path, spath)
+	}
+	return spath
 }
 
 // GetFileType will return the mimetype of a file
