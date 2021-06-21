@@ -69,6 +69,7 @@ func GetConfig() *Settings {
 		if EnvBasePath == "" {
 			EnvBasePath = filepath.Join(os.Getenv("HOME"), ".ssh", "cache")
 		}
+		EnvBasePath = NormalizePath(EnvBasePath)
 		ensureDirExists(EnvBasePath)
 
 		if EnvSSHDefaultUsername == "" {
