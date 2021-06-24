@@ -6,12 +6,16 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/cezmunsta/ssh_ms/config"
 	"github.com/cezmunsta/ssh_ms/ssh"
 )
 
 func TestMain(m *testing.M) {
+	cfg := config.GetConfig()
+	cfg.StoragePath = "/tmp/ssh_ms_cache"
 	code := m.Run()
 	defer cluster.Cleanup()
+	os.RemoveAll(cfg.StoragePath)
 	os.Exit(code)
 }
 
@@ -45,16 +49,13 @@ func TestGetRawConnection(t *testing.T) {
 	}
 }
 
-/*func TestCache(t *testing.T) {
+func TestCache(t *testing.T) {
 	cfg := config.GetConfig()
 	key := lookupKey
 
 	if cp := getCachePath(key); !strings.HasSuffix(cp, key+".json") {
 		t.Fatalf("expected: path ending in dummy.json, got: %v", cp)
 	}
-
-	cfg.StoragePath = "/tmp/ssh_ms_cache"
-	defer os.RemoveAll(cfg.StoragePath)
 
 	if cp := getCachePath(key); !strings.HasPrefix(cp, cfg.StoragePath) {
 		t.Fatalf("expected: path starting with %v, got: %v", cfg.StoragePath, cp)
@@ -77,7 +78,7 @@ func TestGetRawConnection(t *testing.T) {
 	if status, err := removeCache(key); err != nil {
 		t.Fatalf("expected: true, nil, got: %v, %v", status, err)
 	}
-}*/
+}
 
 func TestShowConnection(t *testing.T) {
 	_, client := getDummyCluster(t)
