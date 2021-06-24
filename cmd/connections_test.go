@@ -6,6 +6,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/cezmunsta/ssh_ms/config"
 	"github.com/cezmunsta/ssh_ms/ssh"
 )
 
@@ -45,7 +46,7 @@ func TestGetRawConnection(t *testing.T) {
 	}
 }
 
-/*func TestCache(t *testing.T) {
+func TestCache(t *testing.T) {
 	cfg := config.GetConfig()
 	key := lookupKey
 
@@ -77,7 +78,7 @@ func TestGetRawConnection(t *testing.T) {
 	if status, err := removeCache(key); err != nil {
 		t.Fatalf("expected: true, nil, got: %v, %v", status, err)
 	}
-}*/
+}
 
 func TestShowConnection(t *testing.T) {
 	_, client := getDummyCluster(t)
