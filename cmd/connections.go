@@ -571,8 +571,11 @@ func getRawConnection(vc *vaultApi.Client, key string) (*vaultApi.Secret, error)
 	secret, err := vaultHelper.ReadSecret(vc, fmt.Sprintf("%s/%s", cfg.SecretPath, key))
 
 	if err != nil || secret == nil {
-		log.Warning("Unable to find connection for: ", key)
-		return nil, errors.New("no match found")
+		if !strings.HasPrefix(key, LockPrefix) {
+			log.Warning("Unable to find connection for: ", key)
+			return nil, errors.New("no match found")
+		}
+		return nil, errors.New("no lock found")
 	}
 	return secret, nil
 }
