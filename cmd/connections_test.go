@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 	"strings"
 	"testing"
@@ -37,6 +38,10 @@ func TestGetRawConnection(t *testing.T) {
 
 	if cn, err := getRawConnection(client, lookupKey); err != nil || cn == nil {
 		t.Fatalf("expected: connection data got: '%v', err '%s'", cn, err)
+	}
+
+	if _, err := getRawConnection(client, getLockName(lookupKey)); err == nil || fmt.Sprintf("%s", err) != "no lock found" {
+		t.Fatalf("expected: no lock found got: '%v'", err)
 	}
 }
 
