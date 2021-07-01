@@ -2,9 +2,11 @@ package cmd
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 	"runtime"
 	"strings"
+	"time"
 
 	"github.com/cezmunsta/ssh_ms/config"
 	"github.com/cezmunsta/ssh_ms/log"
@@ -183,6 +185,8 @@ func init() {
 	updateCmd.Flags().StringVarP(&cfg.ConfigMotd, "motd", "m", "", "Set the Motd for the config entry")
 	writeCmd.Flags().StringVarP(&cfg.ConfigMotd, "motd", "m", "", "Add a Motd comment for the config entry")
 
+	versionCmd.Flags().BoolVarP(&cfg.VersionCheck, "check", "c", false, "Check for the latest version")
+
 	log := log.GetLogger(log.GetDefaultLevel(), "")
 	cfg.LogLevel = log.GetLevel()
 }
@@ -194,9 +198,55 @@ func checkArgs(args []string, min int) {
 	}
 }
 
+// checkVersion against the latest release
+func checkVersion() [][]string {
+	var lines [][]string
+	var redirectUrl []string
+
+	url := "https://github.com/cezmunsta/ssh_ms/releases/latest"
+	req, err := http.NewRequest("HEAD", url, nil)
+
+	if err != nil {
+		log.Fatal("Error reading request. ", err)
+	}
+
+	req.Header.Set("Cache-Control", "no-cache")
+	client := &http.Client{
+		CheckRedirect: func(req *http.Request, via []*http.Request) error {
+			redirectUrl = req.Response.Header["Location"]
+			return http.ErrUseLastResponse
+		},
+		Timeout: time.Second * 10,
+	}
+
+	if _, err := client.Do(req); err != nil {
+		log.Debugf("Request: %v", req)
+		log.Fatalf("Failed to lookup %s", url)
+	}
+
+	if parts := strings.Split(redirectUrl[0], "/"); parts != nil {
+		ver := strings.Replace(parts[len(parts)-1], "v", "", 1)
+
+		if ver != Version {
+			lines = append(lines, []string{"Latest Version:", ver})
+			lines = append(lines, []string{"Download the latest version from", redirectUrl[0]})
+		} else {
+			lines = append(lines, []string{"You are using the latest version"})
+		}
+	}
+
+	return lines
+}
+
 // getVersion information for the application
 func getVersion() [][]string {
 	var lines [][]string
+
+	if cfg.VersionCheck {
+		for _, line := range checkVersion() {
+			lines = append(lines, line)
+		}
+	}
 
 	if !cfg.Verbose && !cfg.Debug {
 		lines = append(lines, []string{Version})

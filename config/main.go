@@ -12,8 +12,8 @@ import (
 
 // Settings contains the configuration details
 type Settings struct {
-	LogLevel                                       logrus.Level
-	Debug, Simulate, StoredToken, Verbose, Version bool
+	LogLevel                                                     logrus.Level
+	Debug, Simulate, StoredToken, Verbose, Version, VersionCheck bool
 	ConfigComment, ConfigMotd, EnvSSHDefaultUsername, EnvSSHIdentityFile,
 	EnvSSHUsername, EnvVaultAddr, SecretPath, Show, StoragePath, User, VaultAddr, VaultToken string
 }
