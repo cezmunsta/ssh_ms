@@ -253,6 +253,8 @@ func getVersion() [][]string {
 	} else {
 		lines = append(lines, []string{"Version:", Version})
 		lines = append(lines, []string{"Arch:", runtime.GOOS, runtime.GOARCH})
+		lines = append(lines, []string{"Go Version:", runtime.Version()})
+		lines = append(lines, []string{"Vault Version:", cfg.VaultVersion})
 		lines = append(lines, []string{"Base path:", config.EnvBasePath})
 		lines = append(lines, []string{"Default Vault address:", config.EnvVaultAddr})
 		lines = append(lines, []string{"Default SSH username:", config.EnvSSHDefaultUsername})

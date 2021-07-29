@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	vaultApi "github.com/hashicorp/vault/api"
+	vaultVersion "github.com/hashicorp/vault/sdk/version"
 	"github.com/sirupsen/logrus"
 )
 
@@ -15,7 +16,7 @@ type Settings struct {
 	LogLevel                                                     logrus.Level
 	Debug, Simulate, StoredToken, Verbose, Version, VersionCheck bool
 	ConfigComment, ConfigMotd, EnvSSHDefaultUsername, EnvSSHIdentityFile,
-	EnvSSHUsername, EnvVaultAddr, SecretPath, Show, StoragePath, User, VaultAddr, VaultToken string
+	EnvSSHUsername, EnvVaultAddr, SecretPath, Show, StoragePath, User, VaultAddr, VaultToken, VaultVersion string
 }
 
 var (
@@ -93,6 +94,7 @@ func GetConfig() *Settings {
 			Simulate:              false,
 			StoragePath:           EnvBasePath,
 			StoredToken:           false,
+			VaultVersion:          vaultVersion.Version,
 		}
 	})
 	return &settings
