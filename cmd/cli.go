@@ -201,7 +201,7 @@ func checkArgs(args []string, min int) {
 // checkVersion against the latest release
 func checkVersion() [][]string {
 	var lines [][]string
-	var redirectUrl []string
+	var redirectURL []string
 
 	url := "https://github.com/cezmunsta/ssh_ms/releases/latest"
 	req, err := http.NewRequest("HEAD", url, nil)
@@ -213,7 +213,7 @@ func checkVersion() [][]string {
 	req.Header.Set("Cache-Control", "no-cache")
 	client := &http.Client{
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
-			redirectUrl = req.Response.Header["Location"]
+			redirectURL = req.Response.Header["Location"]
 			return http.ErrUseLastResponse
 		},
 		Timeout: time.Second * 10,
@@ -224,12 +224,12 @@ func checkVersion() [][]string {
 		log.Fatalf("Failed to lookup %s", url)
 	}
 
-	if parts := strings.Split(redirectUrl[0], "/"); parts != nil {
+	if parts := strings.Split(redirectURL[0], "/"); parts != nil {
 		ver := strings.Replace(parts[len(parts)-1], "v", "", 1)
 
 		if ver != Version {
 			lines = append(lines, []string{"Latest Version:", ver})
-			lines = append(lines, []string{"Download the latest version from", redirectUrl[0]})
+			lines = append(lines, []string{"Download the latest version from", redirectURL[0]})
 		} else {
 			lines = append(lines, []string{"You are using the latest version"})
 		}
