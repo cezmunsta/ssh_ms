@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## 2021-07-29: v1.3.0
+
+- Extra information for versionCmd (#56)
+  The Go and Vault versions are now shown when using `version --verbose`
+- Update Vault dependencies (#55)
+  Upgraded Vault to v1.8.0
+- Add option to check for the latest release (#52)
+  The user is now able to check for the latest release with `version --check`
+- Enable cmd.TestCache (#50)
+  Caching is now tested during `cmd` tests
+- Ignore misses for lock requests (#49)
+  Due to the locking mechanism sharing code with standard requests, warning messages
+  were always emitted during a request when the lock is absent (ideal state). These
+  are now hidden based upon the lock prefix
+
+
 ## 2021-06-21: v1.2.2
 
 - Handle tilde in config.EnvBasePath (#47)
