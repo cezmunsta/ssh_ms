@@ -2,6 +2,8 @@
 SHELL=/bin/bash
 
 BUILD_DIR?="./bin"
+GO?="`which go`"
+GOLINT?="`which golint`"
 RELEASE_VER?="`git rev-parse HEAD`"
 
 SSH_MS_BASEPATH?=~/.ssh/cache
@@ -31,26 +33,26 @@ binary-prep:
 binary-mac: export GOOS=darwin
 binary-mac: export GOARCH=amd64
 binary-mac: binary-prep
-	@go build -trimpath -o "${BUILD_DIR}/${GOOS}/${GOARCH}/ssh_ms" ${LDFLAGS};
+	@"${GO}" build -trimpath -o "${BUILD_DIR}/${GOOS}/${GOARCH}/ssh_ms" ${LDFLAGS};
 	@xz -fkez9 "${BUILD_DIR}/${GOOS}/${GOARCH}/ssh_ms";
 
 binary-linux: export GOOS=linux
 binary-linux: export GOARCH=amd64
 binary-linux: binary-prep
-	@go build -race -trimpath -o "${BUILD_DIR}/${GOOS}/${GOARCH}/ssh_ms" ${LDFLAGS};
+	@"${GO}" build -race -trimpath -o "${BUILD_DIR}/${GOOS}/${GOARCH}/ssh_ms" ${LDFLAGS};
 	@xz -fkez9 "${BUILD_DIR}/${GOOS}/${GOARCH}/ssh_ms";
 
 build: binary-prep
-	@go build -race -trimpath -o "${BUILD_DIR}/ssh_ms" ${LDFLAGS}
+	@"${GO}" build -race -trimpath -o "${BUILD_DIR}/ssh_ms" ${LDFLAGS}
 
 dev-vault:
 	@${SHELL} scripts/dev-vault.sh
 
 test:
-	@go test "${PACKAGE}/ssh" "${PACKAGE}/cmd" "${PACKAGE}/vault" "${PACKAGE}/log" "${PACKAGE}/config"
+	@"${GO}" test "${PACKAGE}/ssh" "${PACKAGE}/cmd" "${PACKAGE}/vault" "${PACKAGE}/log" "${PACKAGE}/config"
 
 lint:
-	@golint -set_exit_status "${PACKAGE}/ssh" "${PACKAGE}/cmd" "${PACKAGE}/vault" "${PACKAGE}/log" "${PACKAGE}/config"
+	@"${GOLINT}" -set_exit_status "${PACKAGE}/ssh" "${PACKAGE}/cmd" "${PACKAGE}/vault" "${PACKAGE}/log" "${PACKAGE}/config"
 
 format: export PACKAGE=./
 format:
@@ -61,14 +63,14 @@ simplify:
 	@gofmt -s -w "${PACKAGE}/ssh" "${PACKAGE}/cmd" "${PACKAGE}/vault" "${PACKAGE}/log" "${PACKAGE}/config"
 
 vet:
-	@go vet "${PACKAGE}/ssh" "${PACKAGE}/cmd" "${PACKAGE}/vault"
+	@"${GO}" vet "${PACKAGE}/ssh" "${PACKAGE}/cmd" "${PACKAGE}/vault"
 
 fix: export PACKAGE=./
 fix:
-	@go tool fix -diff "${PACKAGE}/ssh" "${PACKAGE}/cmd" "${PACKAGE}/vault" "${PACKAGE}/log" "${PACKAGE}/config"
+	@"${GO}" tool fix -diff "${PACKAGE}/ssh" "${PACKAGE}/cmd" "${PACKAGE}/vault" "${PACKAGE}/log" "${PACKAGE}/config"
 
 clean:
 	@find "${BUILD_DIR}" -type f -delete;
-	@go clean -x
-	@go clean -x -cache
-	@go clean -x -testcache
+	@"${GO}" clean -x
+	@"${GO}" clean -x -cache
+	@"${GO}" clean -x -testcache
