@@ -381,6 +381,8 @@ github.com/hashicorp/serf v0.8.3 h1:MWYcmct5EtKz0efYooPcL0yNkem+7kWxqXDi/UIh+8k=
 github.com/hashicorp/serf v0.8.3/go.mod h1:UpNcs7fFbpKIyZaUuSW6EPiH+eZC7OuyFD+wc1oal+k=
 github.com/hashicorp/vault v1.3.2 h1:6KPAGWBFLUG9KnkUr956f4o1LK6pjifDpEC4ax7ZYAU=
 github.com/hashicorp/vault v1.3.2/go.mod h1:WkKVSwqFg5Z9o8AEmukEMxuxvfwLwXWc84fgPGq4Lwk=
+github.com/hashicorp/vault v1.3.9 h1:2nT/mqX6EnHxlphxoOdxB9FzYbQ61RBwbthaDH/ZzTQ=
+github.com/hashicorp/vault v1.3.9/go.mod h1:wzame01bZfk6uDwA0HLw86+ce0t1PgS7FJ52qG42eKg=
 github.com/hashicorp/vault-plugin-auth-alicloud v0.5.3 h1:csNfo6K5iXqL4jBvIuCsO+OKtjaSe5Tl6uJ/pZ7DZVU=
 github.com/hashicorp/vault-plugin-auth-alicloud v0.5.3/go.mod h1:BcdV0SALJOcVOopZHMvBsiwagmfeqEjQaEbv/hxJtQ8=
 github.com/hashicorp/vault-plugin-auth-azure v0.5.3 h1:6TeV+8VrnAZcscsF42wvKefsCNpNAbfpENnKiS+7fUk=
@@ -422,6 +424,8 @@ github.com/hashicorp/vault/sdk v0.1.14-0.20191108161836-82f2b5571044/go.mod h1:P
 github.com/hashicorp/vault/sdk v0.1.14-0.20200117231345-460d63e36490/go.mod h1:PcekaFGiPJyHnFy+NZhP6ll650zEw51Ag7g/YEa+EOU=
 github.com/hashicorp/vault/sdk v0.1.14-0.20200121232954-73f411823aa0 h1:19FHdWKzeCtqcRA5dmXuv7/EZzkBMJRtcx+u7zsEnTs=
 github.com/hashicorp/vault/sdk v0.1.14-0.20200121232954-73f411823aa0/go.mod h1:PcekaFGiPJyHnFy+NZhP6ll650zEw51Ag7g/YEa+EOU=
+github.com/hashicorp/vault/sdk v0.1.14-0.20200702105825-83f81919384e h1:0VeNC6mVpW3JS2xz8FmwpStk7786631M1pk8kc747n8=
+github.com/hashicorp/vault/sdk v0.1.14-0.20200702105825-83f81919384e/go.mod h1:j1/9jH17W51fokxw1a/qSly/OdF7HUMGxbqtP9a3PR8=
 github.com/hashicorp/yamux v0.0.0-20180604194846-3520598351bb/go.mod h1:+NfK9FKeTrX5uv1uIXGdwYDTeHna2qgaIlx54MXqjAM=
 github.com/hashicorp/yamux v0.0.0-20181012175058-2f1d1f20f75d h1:kJCB4vdITiW1eC1vq2e6IsrXKrZit1bv/TDYFGMp4BQ=
 github.com/hashicorp/yamux v0.0.0-20181012175058-2f1d1f20f75d/go.mod h1:+NfK9FKeTrX5uv1uIXGdwYDTeHna2qgaIlx54MXqjAM=
