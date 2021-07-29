@@ -22,8 +22,8 @@ $ go get -u github.com/cezmunsta/ssh_ms
 
 For ease of use, ensure that `${GOPATH}/bin` is in your `PATH` to use the tools with ease.
 
-- `go` : `1.15.2`
-- `vault`: `1.3.2`
+- `go` : `1.16.6`
+- `vault`: `1.8.0`
 
 #### Go
 
