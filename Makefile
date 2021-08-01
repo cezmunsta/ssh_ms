@@ -51,6 +51,10 @@ dev-vault:
 test:
 	@"${GO}" test "${PACKAGE}/ssh" "${PACKAGE}/cmd" "${PACKAGE}/vault" "${PACKAGE}/log" "${PACKAGE}/config"
 
+mod-updates:
+	@"${GO}" list -m -u all > updates.log
+	@cat updates.log
+
 lint:
 	@"${GOLINT}" -set_exit_status "${PACKAGE}/ssh" "${PACKAGE}/cmd" "${PACKAGE}/vault" "${PACKAGE}/log" "${PACKAGE}/config"
 
