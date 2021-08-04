@@ -14,8 +14,14 @@ SSH_MS_ID_FILE?=~/.ssh/id_rsa
 SSH_MS_SYNC_HOST?=localhost
 SSH_MS_SYNC_PATH?=/usr/share/nginx/html/downloads/ssh_ms/
 
+DEBUG_BUILD=$(shell test "${DEBUG}" = "1" && echo 1 || echo 0)
+
 PACKAGE=github.com/cezmunsta/ssh_ms
+ifeq ($(DEBUG_BUILD), 1)
+LDFLAGS=-ldflags "-X ${PACKAGE}/config.EnvBasePath=${SSH_MS_BASEPATH} -X ${PACKAGE}/cmd.Version=${RELEASE_VER} -X ${PACKAGE}/config.EnvSSHUsername=${SSH_MS_USERNAME} -X ${PACKAGE}/config.EnvSSHIdentityFile=${SSH_MS_ID_FILE} -X ${PACKAGE}/config.EnvSSHDefaultUsername=${SSH_MS_DEFAULT_USERNAME} -X ${PACKAGE}/config.EnvVaultAddr=${SSH_MS_DEFAULT_VAULT_ADDR}"
+else
 LDFLAGS=-ldflags "-w -X ${PACKAGE}/config.EnvBasePath=${SSH_MS_BASEPATH} -X ${PACKAGE}/cmd.Version=${RELEASE_VER} -X ${PACKAGE}/config.EnvSSHUsername=${SSH_MS_USERNAME} -X ${PACKAGE}/config.EnvSSHIdentityFile=${SSH_MS_ID_FILE} -X ${PACKAGE}/config.EnvSSHDefaultUsername=${SSH_MS_DEFAULT_USERNAME} -X ${PACKAGE}/config.EnvVaultAddr=${SSH_MS_DEFAULT_VAULT_ADDR}"
+endif
 
 all: lint format test binaries
 
@@ -43,7 +49,11 @@ binary-linux: binary-prep
 	@xz -fkez9 "${BUILD_DIR}/${GOOS}/${GOARCH}/ssh_ms";
 
 build: binary-prep
+ifeq ($(DEBUG_BUILD), 1)
+	@"${GO}" build -o "${BUILD_DIR}/ssh_ms.debug" ${LDFLAGS}
+else
 	@"${GO}" build -race -trimpath -o "${BUILD_DIR}/ssh_ms" ${LDFLAGS}
+endif
 
 dev-vault:
 	@${SHELL} scripts/dev-vault.sh
