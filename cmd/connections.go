@@ -377,7 +377,7 @@ func prepareConnection(vc *vaultApi.Client, args []string) ([]string, ssh.Connec
 		case 8443:
 			svc = "PMM"
 		default:
-			svc = "Unknown service :|"
+			svc = "Custom forwarding"
 		}
 		configMotd += fmt.Sprintf("\nFWD: https://127.0.0.1:%d - %s (%d)", sshClient.LocalForward[i].LocalPort, svc, sshClient.LocalForward[i].RemotePort)
 	}

@@ -2,8 +2,11 @@ package ssh
 
 import (
 	"fmt"
+	"io/ioutil"
 	"strings"
 	"testing"
+
+	"github.com/cezmunsta/ssh_ms/config"
 )
 
 var (
@@ -78,9 +81,57 @@ func TestConnection(t *testing.T) {
 		User:     "dummy",
 		Port:     uint16(29022),
 	}
+	// Test default connections
 	conn.BuildConnection(map[string]interface{}{}, "dummy", conn.User)
 	expected := fmt.Sprintf("cp_%s_%s_%d", conn.User, conn.HostName, conn.Port)
 	if !strings.HasSuffix(conn.ControlPath, expected) {
 		t.Fatalf("expected: %v, got: %v", expected, conn.ControlPath)
+	}
+	if len(conn.LocalForward) != 2 {
+		t.Fatalf("expected: 2 LocalFoward rules, got: %v", conn.LocalForward)
+	}
+	for _, lf := range conn.LocalForward {
+		switch lf.RemotePort {
+		case 443, 8443:
+			continue
+		default:
+			t.Fatalf("unexpected remote port: %v", lf.RemotePort)
+		}
+	}
+
+	// Test custom LocalForward rules
+	cfg := config.GetConfig()
+	cfg.CustomLocalForward = "9998,9999"
+	conn = Connection{
+		HostName: "localhost",
+		User:     "dummy",
+		Port:     uint16(29022),
+	}
+	totalCustom := len(strings.Split(cfg.CustomLocalForward, ","))
+	conn.BuildConnection(map[string]interface{}{}, "dummy", conn.User)
+	if len(conn.LocalForward) != totalCustom {
+		t.Fatalf("expected: %v LocalFoward rules, got: %v", totalCustom, conn.LocalForward)
+	}
+	for _, lf := range conn.LocalForward {
+		switch lf.RemotePort {
+		case 9998, 9999:
+			continue
+		default:
+			t.Fatalf("unexpected remote port: %v", lf.RemotePort)
+		}
+	}
+
+	// Test loading custom LocalForward ports from cache
+	if err := ioutil.WriteFile(conn.ControlPath, []byte(""), 0600); err != nil {
+		t.Fatal("failed to write dummy ControlPath:", conn.ControlPath, err)
+	}
+	setPortForwarding(&conn)
+	for _, lf := range conn.LocalForward {
+		switch lf.RemotePort {
+		case 9998, 9999:
+			continue
+		default:
+			t.Fatalf("unexpected remote port: %v", lf.RemotePort)
+		}
 	}
 }

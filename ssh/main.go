@@ -36,6 +36,11 @@ var (
 	}
 )
 
+const (
+	nginxPort = int(443)
+	pmmPort   = int(8443)
+)
+
 // UserEnv contains settings from the ENV
 type UserEnv struct {
 	User     string
@@ -315,6 +320,17 @@ func setControlPath(sshArgs *Connection, args map[string]interface{}) {
 func setPortForwarding(sshArgs *Connection) {
 	var lf LocalForward
 	var data map[string]interface{}
+	var targets []string
+
+	cfg := config.GetConfig()
+
+	if len(cfg.CustomLocalForward) != 0 {
+		for _, k := range strings.Split(cfg.CustomLocalForward, ",") {
+			targets = append(targets, fmt.Sprintf("CUSTOM%s", k))
+		}
+	} else {
+		targets = []string{"NGINX", "PMM"}
+	}
 
 	_, err := os.Stat(sshArgs.ControlPath)
 	if err == nil {
@@ -323,7 +339,7 @@ func setPortForwarding(sshArgs *Connection) {
 		if err == nil {
 			log.Debug("Reading cached port-forwards")
 			if err := json.Unmarshal(read, &data); err == nil {
-				for _, k := range []string{"NGINX", "PMM"} {
+				for _, k := range targets {
 					log.Debug("Setting port for: ", k)
 					if val, ok := data[k]; ok {
 						p, _ := strconv.ParseUint(val.(string), 10, 0)
@@ -333,15 +349,17 @@ func setPortForwarding(sshArgs *Connection) {
 							rp := 0
 							switch k {
 							case "NGINX":
-								rp = 443
+								rp = nginxPort
 							case "PMM":
-								rp = 8443
+								rp = pmmPort
+							default:
+								rp, _ = strconv.Atoi(strings.Replace(k, "CUSTOM", "", 1))
 							}
 							sshArgs.LocalForward = append(sshArgs.LocalForward, LocalForward{uint16(p), uint16(rp), "127.0.0.1"})
 						}
 					}
 				}
-				if len(sshArgs.LocalForward) == 2 {
+				if len(sshArgs.LocalForward) == len(targets) {
 					return
 				}
 				sshArgs.LocalForward = []LocalForward{}
@@ -349,13 +367,23 @@ func setPortForwarding(sshArgs *Connection) {
 		}
 
 	}
+
 	p := localForwardPortMin
-	data = map[string]interface{}{
-		"NGINX": "",
-		"PMM":   "",
+	data = map[string]interface{}{}
+	utargets := []uint16{}
+
+	if targets[0] != "NGINX" {
+		for _, port := range targets {
+			custom := strings.Replace(port, "CUSTOM", "", 1)
+			if iport, err := strconv.Atoi(custom); err == nil {
+				utargets = append(utargets, uint16(iport))
+			}
+		}
+	} else {
+		utargets = []uint16{uint16(nginxPort), uint16(pmmPort)}
 	}
 
-	for _, rp := range []uint16{443, 8443} {
+	for _, rp := range utargets {
 		lp, err := acquirePort(p, localForwardPortMax)
 		if err != nil {
 			panic(err)
@@ -365,10 +393,12 @@ func setPortForwarding(sshArgs *Connection) {
 		sshArgs.LocalForward = append(sshArgs.LocalForward, lf)
 		key := ""
 		switch rp {
-		case 443:
+		case uint16(nginxPort):
 			key = "NGINX"
-		case 8443:
+		case uint16(pmmPort):
 			key = "PMM"
+		default:
+			key = fmt.Sprintf("CUSTOM%d", rp)
 		}
 		data[key] = fmt.Sprintf("%d", lp)
 	}

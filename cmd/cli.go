@@ -175,10 +175,14 @@ func init() {
 	rootCmd.PersistentFlags().StringVarP(&cfg.StoragePath, "storage", "s", cfg.StoragePath, "Storage path for caching")
 	rootCmd.PersistentFlags().StringVarP(&cfg.User, "user", "u", os.Getenv(cfg.EnvSSHUsername), "Your SSH username for templated configs")
 
-	rootCmd.PersistentFlags().BoolVarP(&cfg.StoredToken, "stored-token", "", false, "Use a stored token from 'vault login' (overrides --vault-token, auto-enabled when no token is specified)")
+	rootCmd.PersistentFlags().BoolVarP(&cfg.StoredToken, "stored-token", "", false,
+		"Use a stored token from 'vault login' (overrides --vault-token, auto-enabled when no token is specified)")
 	rootCmd.PersistentFlags().BoolVarP(&cfg.Debug, "debug", "d", false, "Provide addition output")
 	rootCmd.PersistentFlags().BoolVarP(&cfg.Simulate, "dry-run", "n", false, "Prevent certain commands without full execution")
 	rootCmd.PersistentFlags().BoolVarP(&cfg.Verbose, "verbose", "v", false, "Provide addition output")
+
+	connectCmd.Flags().StringVarP(&cfg.CustomLocalForward, "local-forward", "l", "",
+		"Define adhoc LocalForward rules by specifying the target ports, e.g. -l 8080,3306")
 
 	updateCmd.Flags().StringVarP(&cfg.ConfigComment, "comment", "c", "", "Set the comment for the config entry")
 	writeCmd.Flags().StringVarP(&cfg.ConfigComment, "comment", "c", "", "Add a comment for the config entry")
