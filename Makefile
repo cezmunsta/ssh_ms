@@ -23,6 +23,8 @@ else
 LDFLAGS=-ldflags "-w -X ${PACKAGE}/config.EnvBasePath=${SSH_MS_BASEPATH} -X ${PACKAGE}/cmd.Version=${RELEASE_VER} -X ${PACKAGE}/config.EnvSSHUsername=${SSH_MS_USERNAME} -X ${PACKAGE}/config.EnvSSHIdentityFile=${SSH_MS_ID_FILE} -X ${PACKAGE}/config.EnvSSHDefaultUsername=${SSH_MS_DEFAULT_USERNAME} -X ${PACKAGE}/config.EnvVaultAddr=${SSH_MS_DEFAULT_VAULT_ADDR}"
 endif
 
+VETFLAGS?=( -unusedresult -bools -copylocks -framepointer -httpresponse -json -stdmethods -printf -stringintconv -unmarshal -unsafeptr )
+
 all: lint format test binaries
 
 binaries: binary-linux binary-mac
@@ -71,13 +73,15 @@ lint:
 format: export PACKAGE=./
 format:
 	@gofmt -w "${PACKAGE}/ssh" "${PACKAGE}/cmd" "${PACKAGE}/vault" "${PACKAGE}/log" "${PACKAGE}/config"
+	@git diff --exit-code --quiet "${PACKAGE}/ssh" "${PACKAGE}/cmd" "${PACKAGE}/vault" "${PACKAGE}/log" "${PACKAGE}/config"
 
 simplify: export PACKAGE=./
 simplify:
 	@gofmt -s -w "${PACKAGE}/ssh" "${PACKAGE}/cmd" "${PACKAGE}/vault" "${PACKAGE}/log" "${PACKAGE}/config"
+	@git diff --exit-code --quiet "${PACKAGE}/ssh" "${PACKAGE}/cmd" "${PACKAGE}/vault" "${PACKAGE}/log" "${PACKAGE}/config"
 
 vet:
-	@"${GO}" vet "${PACKAGE}/ssh" "${PACKAGE}/cmd" "${PACKAGE}/vault"
+	@"${GO}" vet "${VETFLAGS[@]}" "${PACKAGE}/ssh" "${PACKAGE}/cmd" "${PACKAGE}/vault"
 
 fix: export PACKAGE=./
 fix:
