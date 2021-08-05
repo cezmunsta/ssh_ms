@@ -47,6 +47,20 @@ func TestGetRawConnection(t *testing.T) {
 	if _, err := getRawConnection(client, getLockName(lookupKey)); err == nil || fmt.Sprintf("%s", err) != "no lock found" {
 		t.Fatalf("expected: no lock found got: '%v'", err)
 	}
+
+	for _, cmd := range []string{"connect", "write", "update", "delete", "list", "search", "show", "print", "purge"} {
+		currentCommand = cmd
+		switch cmd {
+		case "write":
+			if _, err := getRawConnection(client, "thisisnotavaliditem"); err == nil || fmt.Sprintf("%s", err) != "no lock found" {
+				t.Fatalf("expected: 'no lock found', got: %v", err)
+			}
+		default:
+			if _, err := getRawConnection(client, "thisisnotavaliditem"); err == nil || fmt.Sprintf("%s", err) != "no match found" {
+				t.Fatalf("expected: 'no match found' present, got: %v", err)
+			}
+		}
+	}
 }
 
 func TestCache(t *testing.T) {

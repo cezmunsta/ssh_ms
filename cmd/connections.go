@@ -29,6 +29,10 @@ type configMotdTpl struct {
 	Comment, Motd, Name string
 }
 
+var (
+	currentCommand string
+)
+
 const (
 	// CacheExpireAfter sets the threshold for cleaning stale caches
 	CacheExpireAfter = (7 * 24) * time.Hour
@@ -157,12 +161,14 @@ func getConnections(vc *vaultApi.Client) ([]string, error) {
 // listConnections from Vault
 func listConnections(vc *vaultApi.Client) bool {
 	log.Debugf("listConnections")
+	currentCommand = "list"
 	return searchConnections(vc, ".*")
 }
 
 // searchConnections filters the list of connections
 func searchConnections(vc *vaultApi.Client, pattern string) bool {
 	log.Debug("searchConnections: ", pattern)
+	currentCommand = "search"
 	connections, err := getConnections(vc)
 	search := regexp.MustCompile(pattern)
 	ignore := regexp.MustCompile("^" + LockPrefix + ".*")
@@ -191,6 +197,7 @@ func searchConnections(vc *vaultApi.Client, pattern string) bool {
 // showConnection details suitable for use with ssh_config
 func showConnection(vc *vaultApi.Client, key string) bool {
 	log.Debugf("showConnection: %v", key)
+	currentCommand = "show"
 	sshArgs, sshClient, configComment, _ := prepareConnection(vc, []string{key})
 
 	log.Info("SSH cmd:", sshArgs)
@@ -206,6 +213,7 @@ func showConnection(vc *vaultApi.Client, key string) bool {
 // printConnection details suitable for use on the command line
 func printConnection(vc *vaultApi.Client, key string) bool {
 	log.Debugf("printConnection: %v", key)
+	currentCommand = "print"
 	sshArgs, _, _, _ := prepareConnection(vc, []string{key})
 
 	fmt.Printf("ssh %v\n", strings.Join(sshArgs, " "))
@@ -215,6 +223,7 @@ func printConnection(vc *vaultApi.Client, key string) bool {
 // writeConnection creates a new entry, or updates an existing one
 func writeConnection(vc *vaultApi.Client, key string, args []string) bool {
 	log.Debugf("writeConnection: %v", key)
+	currentCommand = "write"
 	_, err := getRawConnection(vc, key)
 	conn := make(secretData)
 
@@ -257,6 +266,7 @@ func writeConnection(vc *vaultApi.Client, key string, args []string) bool {
 // updateConnection performs a partial update of an existing connection
 func updateConnection(vc *vaultApi.Client, key string, args []string) bool {
 	log.Debugf("updateConnection: %v", key)
+	currentCommand = "update"
 	conn, err := getRawConnection(vc, key)
 
 	if err != nil {
@@ -305,6 +315,7 @@ func updateConnection(vc *vaultApi.Client, key string, args []string) bool {
 // deleteConnection removes an entry from Vault
 func deleteConnection(vc *vaultApi.Client, key string) bool {
 	log.Debugf("deleteConnection: %v", key)
+	currentCommand = "delete"
 	_, err := getRawConnection(vc, key)
 
 	if err != nil {
@@ -419,6 +430,7 @@ func lookupConnection(vc *vaultApi.Client, key string) map[string]interface{} {
 // args : extra args passed by the user
 func connect(vc *vaultApi.Client, env ssh.UserEnv, args []string) {
 	log.Debug("connect:", args[0])
+	currentCommand = "connect"
 	sshArgs, _, _, configMotd := prepareConnection(vc, args)
 
 	log.Debugf("%v", map[string]interface{}{
@@ -529,6 +541,7 @@ func expireCache(key string) (bool, error) {
 // purgeCache will remove the cache directory and its contents
 func purgeCache() (bool, error) {
 	log.Debugf("purgeCache")
+	currentCommand = "purge"
 
 	reader := bufio.NewReader(os.Stdin)
 	fmt.Print("Purging: ", cfg.StoragePath, " ... CTRL+C to abort")
@@ -571,7 +584,7 @@ func getRawConnection(vc *vaultApi.Client, key string) (*vaultApi.Secret, error)
 	secret, err := vaultHelper.ReadSecret(vc, fmt.Sprintf("%s/%s", cfg.SecretPath, key))
 
 	if err != nil || secret == nil {
-		if !strings.HasPrefix(key, LockPrefix) {
+		if !strings.HasPrefix(key, LockPrefix) && currentCommand != "write" {
 			log.Warning("Unable to find connection for: ", key)
 			return nil, errors.New("no match found")
 		}
