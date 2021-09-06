@@ -117,6 +117,7 @@ func WriteSecret(c *api.Client, key string, data map[string]interface{}) (bool, 
 		"configcomment":       "ConfigComment",
 		"configmotd":          "ConfigMotd",
 		"expires":             "Expires",
+		"forwardagent":        "ForwardAgent",
 	}
 
 	for k, v := range data {

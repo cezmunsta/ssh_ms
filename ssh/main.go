@@ -66,6 +66,7 @@ type Connection struct {
 	ServerAliveCountMax uint16
 	Cache               CachedConnection
 	ControlPath         string
+	ForwardAgent        string
 	//Compression bool
 	//ControlMaster bool
 	//ControlPersist uint16
@@ -413,6 +414,16 @@ func setPortForwarding(sshArgs *Connection) {
 	}
 }
 
+// setForwardAgent for the connection
+// args : options provided for inspection
+func setForwardAgent(sshArgs *Connection, args map[string]interface{}) {
+	option := "no"
+	if val, ok := args["ForwardAgent"]; ok {
+		option = val.(string)
+	}
+	sshArgs.ForwardAgent = option
+}
+
 // BuildConnection creates the SSH command for execution
 // args : options provided for inspection
 func (c *Connection) BuildConnection(args map[string]interface{}, key string, templateUser string) []string {
@@ -425,6 +436,7 @@ func (c *Connection) BuildConnection(args map[string]interface{}, key string, te
 	setHostname(c, args)
 	setControlPath(c, args)
 	setPortForwarding(c)
+	setForwardAgent(c, args)
 
 	d := reflect.ValueOf(c).Elem()
 	t := d.Type()
