@@ -1,4 +1,4 @@
-![](https://github.com/cezmunsta/ssh_ms/actions/workflows/pr-go/badge.svg)
+![](https://github.com/cezmunsta/ssh_ms/actions/workflows/CI/badge.svg)
 
 # ssh_ms
 
