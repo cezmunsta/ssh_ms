@@ -99,6 +99,11 @@ func TestConnection(t *testing.T) {
 		}
 	}
 
+	// Test default ForwardAgent is set to "no"
+	if conn.ForwardAgent != "no" {
+		t.Fatalf("ForwardAgent is not set to 'no'")
+	}
+
 	// Test custom LocalForward rules
 	cfg := config.GetConfig()
 	cfg.CustomLocalForward = "9998,9999"

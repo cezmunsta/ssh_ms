@@ -1,3 +1,5 @@
+![](https://github.com/cezmunsta/ssh_ms/actions/workflows/pr-go.yaml/badge.svg)
+
 # ssh_ms
 
 Integrate with [HashiCorp Vault](https://github.com/hashicorp/vault) to store SSH configs and ease your remote life.

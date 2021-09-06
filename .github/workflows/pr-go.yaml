@@ -1,9 +1,13 @@
 ---
-name: Go
+name: CI
 on:
-  push:
+  pull_request:
+    branches:
+    - master
     paths:
     - '**.go'
+    - 'go.mod'
+    - 'go.sum'
 jobs:
   build:
     runs-on: ubuntu-20.04
