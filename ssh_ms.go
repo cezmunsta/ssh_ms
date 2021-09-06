@@ -23,7 +23,6 @@ import (
 )
 
 func main() {
-	// Exit with the code returned from cmd.Execute
 	if exitCode, err := cmd.Execute(); err != nil {
 		os.Exit(exitCode)
 	}
