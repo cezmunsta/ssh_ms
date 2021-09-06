@@ -1,5 +1,25 @@
 # CHANGELOG
 
+## 2021-09-06: v1.4.0
+
+- Upgrade Vault and Logrus (#64)
+  Vault has been upgraded to v1.8.2 and Logrus to v1.7.0
+- Add support for ForwardAgent (#62)
+  Whilst `ForwardAgent` is normally disabled for security reasons, there
+  are certain circumstances where it is required. An example of
+  required usage is where a third-party requires 2FA and a \
+  certificate and key are injected into the user’s ssh-agent upon
+  successful authentication.
+- Adding PR workflow (#63)
+- Updated Vault to v1.8.1 (#61)
+- Added push workflow for Go source code (#60)
+- Remove warning during write (#59)
+  When writing a new connection, an unnecessary warning appeared:
+  ```shell
+  level=warning msg="Unable to find connection for: xxx"
+  ```
+  This is no longer shown.
+
 ## 2021-07-29: v1.3.0
 
 - Extra information for versionCmd (#56)
