@@ -2,7 +2,7 @@ package ssh
 
 import (
 	"bytes"
-	"crypto/sha256"
+	"crypto/sha1"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -314,7 +314,7 @@ func setControlPath(sshArgs *Connection, args map[string]interface{}) {
 	if option == "cp" || option == "cp___" {
 		option = "%C"
 	} else if _, err := os.Stat(fmt.Sprintf("%s/%s", cfg.StoragePath, option)); err != nil {
-		option = fmt.Sprintf("%x", sha256.Sum256([]byte(option)))
+		option = fmt.Sprintf("%x", sha1.Sum([]byte(option)))
 	}
 	sshArgs.ControlPath = fmt.Sprintf("%s/%s", cfg.StoragePath, option)
 }

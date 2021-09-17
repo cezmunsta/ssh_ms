@@ -1,7 +1,7 @@
 package ssh
 
 import (
-	"crypto/sha256"
+	"crypto/sha1"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -109,7 +109,7 @@ func TestControlPath(t *testing.T) {
 
 	// New socket for ControlPath
 	conn.BuildConnection(dummyArgs, "dummy", conn.User)
-	expected = fmt.Sprintf("%x", sha256.Sum256([]byte(fmt.Sprintf("cp_%s_%s_%d", conn.User, conn.HostName, conn.Port))))
+	expected = fmt.Sprintf("%x", sha1.Sum([]byte(fmt.Sprintf("cp_%s_%s_%d", conn.User, conn.HostName, conn.Port))))
 	if !strings.HasSuffix(conn.ControlPath, expected) {
 		t.Fatalf("expected: %v, got: %v", expected, conn.ControlPath)
 	}
