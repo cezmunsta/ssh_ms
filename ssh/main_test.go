@@ -95,9 +95,9 @@ func TestControlPath(t *testing.T) {
 
 	// Existing socket for ControlPath
 	expected := fmt.Sprintf("cp_%s_%s_%d", conn.User, conn.HostName, conn.Port)
-	raw_cp := fmt.Sprintf("%s/%s", cfg.StoragePath, expected)
+	rawCp := fmt.Sprintf("%s/%s", cfg.StoragePath, expected)
 
-	if err := ioutil.WriteFile(raw_cp, []byte("dummy"), 0640); err != nil {
+	if err := ioutil.WriteFile(rawCp, []byte("dummy"), 0640); err != nil {
 		t.Fatalf("expected: a dummy file to be created, got: %v", err)
 	}
 
@@ -105,7 +105,7 @@ func TestControlPath(t *testing.T) {
 	if !strings.HasSuffix(conn.ControlPath, expected) {
 		t.Fatalf("expected: %v, got: %v", expected, conn.ControlPath)
 	}
-	os.Remove(raw_cp)
+	os.Remove(rawCp)
 
 	// New socket for ControlPath
 	conn.BuildConnection(dummyArgs, "dummy", conn.User)
