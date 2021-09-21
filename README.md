@@ -105,7 +105,8 @@ used along with `--stored-token`.
 When either using in a shared environment, or when wishing to reuse a connection with a choice of User values, templated entries are supported.
 You can view the supported templates using the `inspect` command, e.g.
 ```shell
-$ ssh_ms inspect placeholders@@USER_FIRSTNAME.@@USER_LASTNAME
+$ ssh_ms inspect placeholders
+@@USER_FIRSTNAME.@@USER_LASTNAME
 @@USER_FIRSTNAME
 @@SSH_MS_USERNAME
 @@USER_INITIAL_LASTNAME
