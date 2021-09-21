@@ -2,6 +2,7 @@ package ssh
 
 import (
 	"bytes"
+	"crypto/sha1"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -99,6 +100,16 @@ func acquirePort(min uint16, max uint16) (uint16, error) {
 		return i, nil
 	}
 	return 0, errNoFreePort
+}
+
+// exists checks to see if a value is already present
+func (c Connection) exists(lf LocalForward) bool {
+	for _, item := range c.LocalForward {
+		if lf == item {
+			return true
+		}
+	}
+	return false
 }
 
 // doMarshal of userName to JSON format
@@ -311,7 +322,9 @@ func setControlPath(sshArgs *Connection, args map[string]interface{}) {
 		}
 	}
 	if option == "cp" || option == "cp___" {
-		option = "%r@%h:%p"
+		option = "%C"
+	} else if _, err := os.Stat(fmt.Sprintf("%s/%s", cfg.StoragePath, option)); err != nil {
+		option = fmt.Sprintf("%x", sha1.Sum([]byte(option)))
 	}
 	sshArgs.ControlPath = fmt.Sprintf("%s/%s", cfg.StoragePath, option)
 }
@@ -391,6 +404,9 @@ func setPortForwarding(sshArgs *Connection) {
 		}
 		p = lp + 1
 		lf = LocalForward{lp, rp, "127.0.0.1"}
+		if sshArgs.exists(lf) { // Ignore duplicate rules, should they appear
+			continue
+		}
 		sshArgs.LocalForward = append(sshArgs.LocalForward, lf)
 		key := ""
 		switch rp {

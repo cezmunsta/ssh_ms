@@ -6,6 +6,8 @@ GO?="`which go`"
 GOLINT?="`which golint`"
 RELEASE_VER?="`git rev-parse HEAD`"
 
+XZ_COMPRESS?=1
+
 SSH_MS_BASEPATH?=~/.ssh/cache
 SSH_MS_DEFAULT_VAULT_ADDR?=https://127.0.0.1:8200
 SSH_MS_DEFAULT_USERNAME?="${USER}"
@@ -15,6 +17,7 @@ SSH_MS_SYNC_HOST?=localhost
 SSH_MS_SYNC_PATH?=/usr/share/nginx/html/downloads/ssh_ms/
 
 DEBUG_BUILD=$(shell test "${DEBUG}" = "1" && echo 1 || echo 0)
+COMPRESS_BINARY=$(shell test "${XZ_COMPRESS}" = "1" && echo 1 || echo 0)
 
 PACKAGE=github.com/cezmunsta/ssh_ms
 ifeq ($(DEBUG_BUILD), 1)
@@ -42,13 +45,17 @@ binary-mac: export GOOS=darwin
 binary-mac: export GOARCH=amd64
 binary-mac: binary-prep
 	@"${GO}" build -trimpath -o "${BUILD_DIR}/${GOOS}/${GOARCH}/ssh_ms" ${LDFLAGS};
+ifeq ($(COMPRESS_BINARY), 1)
 	@xz -fkez9 "${BUILD_DIR}/${GOOS}/${GOARCH}/ssh_ms";
+endif
 
 binary-linux: export GOOS=linux
 binary-linux: export GOARCH=amd64
 binary-linux: binary-prep
 	@"${GO}" build -race -trimpath -o "${BUILD_DIR}/${GOOS}/${GOARCH}/ssh_ms" ${LDFLAGS};
+ifeq ($(COMPRESS_BINARY), 1)
 	@xz -fkez9 "${BUILD_DIR}/${GOOS}/${GOARCH}/ssh_ms";
+endif
 
 build: binary-prep
 ifeq ($(DEBUG_BUILD), 1)

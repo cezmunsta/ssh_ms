@@ -1,8 +1,10 @@
 package ssh
 
 import (
+	"crypto/sha1"
 	"fmt"
 	"io/ioutil"
+	"os"
 	"strings"
 	"testing"
 
@@ -10,12 +12,25 @@ import (
 )
 
 var (
-	names = []string{"first", "firstname.lastname", "firstnamelastname"}
+	conn      Connection
+	dummyArgs map[string]interface{}
+	names     = []string{"first", "firstname.lastname", "firstnamelastname"}
 )
 
 func init() {
 	for marker := range Placeholders {
 		names = append(names, marker)
+	}
+
+	conn = Connection{
+		HostName: "localhost",
+		User:     "dummy",
+		Port:     uint16(29022),
+	}
+	dummyArgs = map[string]interface{}{
+		"HostName": conn.HostName,
+		"User":     conn.User,
+		"Port":     fmt.Sprintf("%d", conn.Port),
 	}
 }
 
@@ -75,18 +90,36 @@ func TestRewriteUsername(t *testing.T) {
 	}
 }
 
-func TestConnection(t *testing.T) {
-	conn := Connection{
-		HostName: "localhost",
-		User:     "dummy",
-		Port:     uint16(29022),
-	}
-	// Test default connections
-	conn.BuildConnection(map[string]interface{}{}, "dummy", conn.User)
+func TestControlPath(t *testing.T) {
+	cfg := config.GetConfig()
+
+	// Existing socket for ControlPath
 	expected := fmt.Sprintf("cp_%s_%s_%d", conn.User, conn.HostName, conn.Port)
+	rawCp := fmt.Sprintf("%s/%s", cfg.StoragePath, expected)
+
+	if err := ioutil.WriteFile(rawCp, []byte("dummy"), 0640); err != nil {
+		t.Fatalf("expected: a dummy file to be created, got: %v", err)
+	}
+
+	conn.BuildConnection(dummyArgs, "dummy", conn.User)
 	if !strings.HasSuffix(conn.ControlPath, expected) {
 		t.Fatalf("expected: %v, got: %v", expected, conn.ControlPath)
 	}
+	os.Remove(rawCp)
+
+	// New socket for ControlPath
+	conn.BuildConnection(dummyArgs, "dummy", conn.User)
+	expected = fmt.Sprintf("%x", sha1.Sum([]byte(fmt.Sprintf("cp_%s_%s_%d", conn.User, conn.HostName, conn.Port))))
+	if !strings.HasSuffix(conn.ControlPath, expected) {
+		t.Fatalf("expected: %v, got: %v", expected, conn.ControlPath)
+	}
+}
+
+func TestConnection(t *testing.T) {
+	cfg := config.GetConfig()
+
+	// Test default connections
+	conn.BuildConnection(dummyArgs, "dummy", conn.User)
 	if len(conn.LocalForward) != 2 {
 		t.Fatalf("expected: 2 LocalFoward rules, got: %v", conn.LocalForward)
 	}
@@ -105,7 +138,6 @@ func TestConnection(t *testing.T) {
 	}
 
 	// Test custom LocalForward rules
-	cfg := config.GetConfig()
 	cfg.CustomLocalForward = "9998,9999"
 	conn = Connection{
 		HostName: "localhost",
@@ -113,7 +145,7 @@ func TestConnection(t *testing.T) {
 		Port:     uint16(29022),
 	}
 	totalCustom := len(strings.Split(cfg.CustomLocalForward, ","))
-	conn.BuildConnection(map[string]interface{}{}, "dummy", conn.User)
+	conn.BuildConnection(dummyArgs, "dummy", conn.User)
 	if len(conn.LocalForward) != totalCustom {
 		t.Fatalf("expected: %v LocalFoward rules, got: %v", totalCustom, conn.LocalForward)
 	}
