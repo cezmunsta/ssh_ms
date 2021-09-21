@@ -142,6 +142,17 @@ var (
 		},
 	}
 
+	// Internals
+	inspectCmd = &cobra.Command{
+		Use:   "inspect ITEM",
+		Short: "Inspect the value of an internal item",
+		Long:  "TBD",
+		Run: func(cmd *cobra.Command, args []string) {
+			checkArgs(args, 1)
+			inspectItem(args[0])
+		},
+	}
+
 	cfg = config.GetConfig()
 
 	/*
@@ -160,6 +171,7 @@ func init() {
 	rootCmd.AddCommand(
 		connectCmd,
 		deleteCmd,
+		inspectCmd,
 		listCmd,
 		printCmd,
 		purgeCmd,
@@ -266,6 +278,21 @@ func getVersion() [][]string {
 		lines = append(lines, []string{"SSH identity file:", config.EnvSSHIdentityFile})
 	}
 	return lines
+}
+
+// inspectItem allows display the value of an item in the allow-list
+func inspectItem(item string) {
+	switch item {
+	case "placeholders":
+	case "ph":
+		for k, v := range ssh.Placeholders {
+			if cfg.Verbose {
+				fmt.Printf("%v = %v\n", k, v)
+			} else {
+				fmt.Println(k)
+			}
+		}
+	}
 }
 
 // printVersion of the application

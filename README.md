@@ -101,6 +101,36 @@ It is also possible to use either the `VAULT_TOKEN` environment variable, or `--
 your token should you need to. Whenever possible, the pre-authenticated, more secure method should be
 used along with `--stored-token`.
 
+### Using templated usernames
+When either using in a shared environment, or when wishing to reuse a connection with a choice of User values, templated entries are supported.
+You can view the supported templates using the `inspect` command, e.g.
+```shell
+$ ssh_ms inspect placeholders@@USER_FIRSTNAME.@@USER_LASTNAME
+@@USER_FIRSTNAME
+@@SSH_MS_USERNAME
+@@USER_INITIAL_LASTNAME
+@@USER_LASTNAME_INITIAL
+@@USER_FIRSTNAME_INITIAL
+```
+
+When using `--verbose` mode you will also see the templates associated with these:
+```shell
+$ ssh_ms inspect placeholders -v
+@@USER_LASTNAME_INITIAL = {{.LastName}}{{.FirstNameInitial}}
+@@USER_FIRSTNAME_INITIAL = {{.FirstName}}{{.LastNameInitial}}
+@@USER_FIRSTNAME.@@USER_LASTNAME = {{.FirstName}}.{{.LastName}}
+@@USER_FIRSTNAME = {{.FirstName}}
+@@SSH_MS_USERNAME = {{.FullName}}
+@@USER_INITIAL_LASTNAME = {{.FirstNameInitial}}{{.LastName}}
+```
+
+Using templated usernames will require either an environment variable to be set (`SSH_MS_USERNAME` by default), or by using the `--user` argument.
+Writing these to storage is done the same way as any other connection, except that you specify the template instead of the real user:
+```shell
+$ ssh_ms write test User=@@USER_LASTNAME_INITIAL
+```
+
+
 ### Add a gateway
 
 To make life easier, you may wish to export the address for Vault in your shell profile:
