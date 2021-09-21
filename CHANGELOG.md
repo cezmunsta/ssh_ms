@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## 2021-09-21: v1.5.0
+
+- Add option to view usable placeholders for User (#68)
+  Adding an option for the user to list the available ones makes the use
+  of templated users easier
+  ```shell
+  $ ssh_ms inspect placeholders
+  ```
+- Hash ControlPath socket names by default (#66)
+  Currently, the dynamic ControlPath is done in such a way as to make it easy to determine its purpose. However, should long HostName fields exist then this could potentially exceed the maximum path length for a UNIX socket (UNIX_PATH_MAX). By switching to using a hash, similar to %C in ssh, we can restrict the length of the path
+- Moved go get golint to separate task
+
 ## 2021-09-06: v1.4.0
 
 - Upgrade Vault and Logrus (#64)
