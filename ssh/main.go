@@ -102,6 +102,16 @@ func acquirePort(min uint16, max uint16) (uint16, error) {
 	return 0, errNoFreePort
 }
 
+// exists checks to see if a value is already present
+func (c Connection) exists(lf LocalForward) bool {
+	for _, item := range c.LocalForward {
+		if lf == item {
+			return true
+		}
+	}
+	return false
+}
+
 // doMarshal of userName to JSON format
 func (un *userName) doMarshal() (string, error) {
 	data, err := json.Marshal(un)
@@ -394,6 +404,9 @@ func setPortForwarding(sshArgs *Connection) {
 		}
 		p = lp + 1
 		lf = LocalForward{lp, rp, "127.0.0.1"}
+		if sshArgs.exists(lf) { // Ignore duplicate rules, should they appear
+			continue
+		}
 		sshArgs.LocalForward = append(sshArgs.LocalForward, lf)
 		key := ""
 		switch rp {
