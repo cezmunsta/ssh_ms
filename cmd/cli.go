@@ -283,8 +283,7 @@ func getVersion() [][]string {
 // inspectItem allows display the value of an item in the allow-list
 func inspectItem(item string) {
 	switch item {
-	case "placeholders":
-	case "ph":
+	case "placeholders", "ph":
 		for k, v := range ssh.Placeholders {
 			if cfg.Verbose {
 				fmt.Printf("%v = %v\n", k, v)
