@@ -33,6 +33,12 @@ var (
 		},
 	}
 
+	cacheCmd = &cobra.Command{
+		Use:   "cache",
+		Short: "Cache management",
+		Long:  "Manage your local cached connections stored in " + cfg.StoragePath,
+	}
+
 	connectCmd = &cobra.Command{
 		Use:   "connect CONNECTION",
 		Short: "Connect to a host",
@@ -62,6 +68,17 @@ var (
 		},
 	}
 
+	populateCacheCmd = &cobra.Command{
+		Use:   "populate [flags]",
+		Short: "Populate your local cache for all available connections",
+		Long:  "To speed up your connections, or to assist avoiding issues when Vault might be unavailable, pre-populate your cache",
+		Run: func(cmd *cobra.Command, args []string) {
+			if _, err := populateCache(getVaultClient()); err != nil {
+				log.Error(err)
+			}
+		},
+	}
+
 	printCmd = &cobra.Command{
 		Use:   "print CONNECTION [flags]",
 		Short: "Print out the SSH command for a connection",
@@ -72,12 +89,14 @@ var (
 		},
 	}
 
-	purgeCmd = &cobra.Command{
-		Use:   "purge",
+	purgeCacheCmd = &cobra.Command{
+		Use:   "purge [flags]",
 		Short: "Purge the cache",
 		Long:  "Remove all of the cached configurations",
 		Example: `
 	ssh_ms purge
+	ssh_ms purge -f
+	ssh_ms purge -c conn1
         `,
 		Run: func(cmd *cobra.Command, args []string) {
 			// TODO: add logic to allow selective purge
@@ -163,18 +182,26 @@ var (
 
 	*/
 
+	// Purge flags
+	purgeConnection string
+	purgeForce      bool
+
 	// Version of the code
 	Version = "1.5.0"
 )
 
 func init() {
+	cacheCmd.AddCommand(
+		populateCacheCmd,
+		purgeCacheCmd,
+	)
 	rootCmd.AddCommand(
+		cacheCmd,
 		connectCmd,
 		deleteCmd,
 		inspectCmd,
 		listCmd,
 		printCmd,
-		purgeCmd,
 		searchCmd,
 		showCmd,
 		versionCmd,
@@ -195,6 +222,9 @@ func init() {
 
 	connectCmd.Flags().StringVarP(&cfg.CustomLocalForward, "local-forward", "l", "",
 		"Define adhoc LocalForward rules by specifying the target ports, e.g. -l 8080,3306")
+
+	purgeCacheCmd.Flags().BoolVarP(&purgeForce, "force", "f", false, "Bypass confirmation prompt")
+	purgeCacheCmd.Flags().StringVarP(&purgeConnection, "connection", "c", "", "Select a connection to purge")
 
 	updateCmd.Flags().StringVarP(&cfg.ConfigComment, "comment", "c", "", "Set the comment for the config entry")
 	writeCmd.Flags().StringVarP(&cfg.ConfigComment, "comment", "c", "", "Add a comment for the config entry")

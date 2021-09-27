@@ -322,7 +322,6 @@ func deleteConnection(vc *vaultApi.Client, key string) bool {
 		log.Debug("Unable to retrieve connection", key)
 		return false
 	}
-
 	if cfg.Simulate {
 		log.Infof("simulated delete of '%v'", key)
 		return true
@@ -538,16 +537,56 @@ func expireCache(key string) (bool, error) {
 	return false, nil
 }
 
-// purgeCache will remove the cache directory and its contents
+// populateCache will create cache items for each of the available connections
+func populateCache(vc *vaultApi.Client) (bool, error) {
+	totalConnections := 0
+	totalErrors := 0
+	if connections, err := getConnections(vc); err == nil {
+		totalConnections = len(connections)
+		for _, conn := range connections {
+			if localCache, _ := getCache(conn); localCache != nil {
+				// Ignore any already-cached connections
+				continue
+			}
+			if rawConn, err := getRawConnection(vc, conn); err != nil {
+				log.Error("failed to get connection", conn)
+				totalErrors++
+				continue
+			} else if _, err := saveCache(conn, rawConn.Data); err != nil {
+				log.Errorf("failed to save connection %s : %v", conn, err)
+				totalErrors++
+				continue
+			}
+			log.Debug("populated cache for", conn)
+		}
+
+	}
+	if totalErrors == 0 {
+		return true, nil
+	}
+	return false, fmt.Errorf("failed to populate cache, failure rate %v%%", 100*(totalErrors/totalConnections))
+}
+
+// purgeCache will remove the cache directory and its contents, or an individual item's cache if requested
 func purgeCache() (bool, error) {
 	log.Debugf("purgeCache")
+	var targeted = purgeConnection != "" && purgeConnection != "all"
 	currentCommand = "purge"
 
-	reader := bufio.NewReader(os.Stdin)
-	fmt.Print("Purging: ", cfg.StoragePath, " ... CTRL+C to abort")
-	reader.ReadString('\n')
+	if !purgeForce {
+		reader := bufio.NewReader(os.Stdin)
+		if targeted {
+			fmt.Print("Purging cached item: ", cfg.StoragePath+"/"+purgeConnection, " ... CTRL+C to abort")
+		} else {
+			fmt.Print("Purging entire cache: ", cfg.StoragePath, " ... CTRL+C to abort")
+		}
+		reader.ReadString('\n')
+	}
 
-	if err := os.RemoveAll(cfg.StoragePath); err != nil {
+	if targeted {
+		log.Debug("Purging individual connection:", purgeConnection)
+		return removeCache(purgeConnection)
+	} else if err := os.RemoveAll(cfg.StoragePath); err != nil {
 		log.Errorf("Problem purging cache: %v", err)
 		return false, err
 	}
