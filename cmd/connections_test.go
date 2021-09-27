@@ -66,7 +66,11 @@ func TestGetRawConnection(t *testing.T) {
 func TestCache(t *testing.T) {
 	cfg := config.GetConfig()
 	key := lookupKey
+	data := map[string]interface{}{
+		key: true,
+	}
 
+	// Test core functionality
 	if cp := getCachePath(key); !strings.HasSuffix(cp, key+".json") {
 		t.Fatalf("expected: path ending in dummy.json, got: %v", cp)
 	}
@@ -75,9 +79,6 @@ func TestCache(t *testing.T) {
 		t.Fatalf("expected: path starting with %v, got: %v", cfg.StoragePath, cp)
 	}
 
-	data := map[string]interface{}{
-		key: true,
-	}
 	if _, err := saveCache(key, data); err != nil {
 		t.Fatalf("expected: no error, got: %v", err)
 	}
@@ -89,8 +90,23 @@ func TestCache(t *testing.T) {
 	if status, err := expireCache(key); err != nil || status == true {
 		t.Fatalf("expected: false, nil, got: %v, %v", status, err)
 	}
+
 	if status, err := removeCache(key); err != nil {
 		t.Fatalf("expected: true, nil, got: %v, %v", status, err)
+	}
+
+	// Test purging
+	purgeForce = true
+	purgeCache()
+	if dirInfo, err := os.Stat(cfg.StoragePath); err == nil {
+		t.Fatalf("expected: %v to be absent, got: %v", cfg.StoragePath, dirInfo)
+	}
+
+	// Test population
+	_, client := getDummyCluster(t)
+	populateCache(client)
+	if _, err := getCache(key); err != nil {
+		t.Fatalf("expected: cache file to be present, got: %v", err)
 	}
 }
 
