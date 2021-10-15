@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 2021-10-14: v1.6.0
+
+- Added cache management (#72)
+  A new command, `cache`, has been created with subcommands for supported operations on the cache, which currently is limited to populating and purging.
+  The `purge` command has been replaced by `cache purge`
+- Fix bad switch in cmd.inspectItem (#70)
+
 ## 2021-09-21: v1.5.0
 
 - Add option to view usable placeholders for User (#68)
