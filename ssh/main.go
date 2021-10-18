@@ -38,8 +38,8 @@ var (
 )
 
 const (
-	nginxPort = int(443)
-	pmmPort   = int(8443)
+	nginxPort = uint16(443)
+	pmmPort   = uint16(8443)
 )
 
 // UserEnv contains settings from the ENV
@@ -271,7 +271,7 @@ func setUser(sshArgs *Connection, args map[string]interface{}, templateUser stri
 func setPort(sshArgs *Connection, args map[string]interface{}) {
 	option := uint16(22)
 	if val, ok := args["Port"]; ok {
-		portInt, err := strconv.ParseInt(val.(string), 10, 0)
+		portInt, err := strconv.ParseUint(val.(string), 10, 16)
 		if err != nil {
 			panic(err)
 		}
@@ -356,20 +356,31 @@ func setPortForwarding(sshArgs *Connection) {
 				for _, k := range targets {
 					log.Debug("Setting port for: ", k)
 					if val, ok := data[k]; ok {
-						p, _ := strconv.ParseUint(val.(string), 10, 0)
-						_, err := acquirePort(uint16(p), uint16(p))
-						if err != nil {
+						p := uint16(0)
+						if cp, err := strconv.ParseUint(val.(string), 10, 16); err != nil {
+							log.Warningf("Failed to modify custom port (%v): %v", k, err)
+							continue
+						} else {
+							p = uint16(cp)
+						}
+
+						if _, err := acquirePort(p, p); err != nil {
 							log.Debugf("Found port '%v' in use, reusing", val)
-							rp := 0
+							rp := uint16(0)
 							switch k {
 							case "NGINX":
 								rp = nginxPort
 							case "PMM":
 								rp = pmmPort
 							default:
-								rp, _ = strconv.Atoi(strings.Replace(k, "CUSTOM", "", 1))
+								if cp, err := strconv.ParseUint(strings.Replace(k, "CUSTOM", "", 1), 10, 16); err != nil {
+									log.Warningf("Failed to modify custom port (%v): %v", k, err)
+									continue
+								} else {
+									rp = uint16(cp)
+								}
 							}
-							sshArgs.LocalForward = append(sshArgs.LocalForward, LocalForward{uint16(p), uint16(rp), "127.0.0.1"})
+							sshArgs.LocalForward = append(sshArgs.LocalForward, LocalForward{p, rp, "127.0.0.1"})
 						}
 					}
 				}
@@ -389,7 +400,7 @@ func setPortForwarding(sshArgs *Connection) {
 	if targets[0] != "NGINX" {
 		for _, port := range targets {
 			custom := strings.Replace(port, "CUSTOM", "", 1)
-			if iport, err := strconv.Atoi(custom); err == nil {
+			if iport, err := strconv.ParseUint(custom, 10, 16); err == nil {
 				utargets = append(utargets, uint16(iport))
 			}
 		}
