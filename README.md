@@ -1,4 +1,5 @@
 ![](https://github.com/cezmunsta/ssh_ms/actions/workflows/pr-go.yaml/badge.svg)
+[![CodeQL](https://github.com/cezmunsta/ssh_ms/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/cezmunsta/ssh_ms/actions/workflows/codeql-analysis.yml)
 
 # ssh_ms
 
@@ -25,7 +26,7 @@ $ go get -u github.com/cezmunsta/ssh_ms
 For ease of use, ensure that `${GOPATH}/bin` is in your `PATH` to use the tools with ease.
 
 - `go` : `1.16.6`
-- `vault`: `1.8.0`
+- `vault`: `1.8.4`
 
 #### Go
 
