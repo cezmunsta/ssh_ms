@@ -12,8 +12,4 @@ require (
 	github.com/spf13/cobra v1.2.1
 )
 
-replace github.com/circonus-labs/circonusllhist v0.3.0 => github.com/openhistogram/circonusllhist v0.3.0
-
-replace go.opentelemetry.io/otel/semconv v0.20.0 => github.com/open-telemetry/opentelemetry-go/semconv v1.0.0-RC1
-
 replace google.golang.org/grpc => google.golang.org/grpc v1.29.1
