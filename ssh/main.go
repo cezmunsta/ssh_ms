@@ -35,6 +35,12 @@ var (
 		"@@USER_FIRSTNAME":                 "{{.FirstName}}",
 		"@@" + cfg.EnvSSHUsername:          "{{.FullName}}",
 	}
+
+	// SkipOnEmpty bypasses display and use of empty values for ssh
+	SkipOnEmpty = map[string]string{
+		"ProxyJump": "none",
+		"SendEnv":   "",
+	}
 )
 
 const (
@@ -485,8 +491,8 @@ func (c *Connection) BuildConnection(args map[string]interface{}, key string, te
 	c.Cache.Config = fmt.Sprintln("Host", key)
 
 	for i := 0; i < d.NumField(); i++ {
-		f := d.Field(i)
-		switch t.Field(i).Name {
+		f, n := d.Field(i), t.Field(i).Name
+		switch n {
 		case "HostName":
 			c.Cache.Config += fmt.Sprintln(ind, t.Field(i).Name, f.Interface())
 		case "IdentitiesOnly", "ServerAliveCountMax", "ServerAliveInterval", "Cache":
@@ -504,20 +510,15 @@ func (c *Connection) BuildConnection(args map[string]interface{}, key string, te
 					"-L", fmt.Sprintf("%d:%s:%d", lf.LocalPort, lf.BindHost, lf.RemotePort),
 				}...)
 			}
-		case "ProxyJump":
-			c.Cache.Config += fmt.Sprintln(ind, t.Field(i).Name, f.Interface())
-			if fmt.Sprintf("%s", f.Interface()) == "none" {
-				continue
-			}
-			sshArgsList = append(sshArgsList, []string{
-				"-o", fmt.Sprintf("%s=%s", t.Field(i).Name, f.Interface()),
-			}...)
 		case "Port":
 			c.Cache.Config += fmt.Sprintln(ind, t.Field(i).Name, c.Port)
 			sshArgsList = append(sshArgsList, []string{
 				"-p", fmt.Sprintf("%d", c.Port),
 			}...)
 		default:
+			if val, ok := SkipOnEmpty[n]; ok && val == fmt.Sprintf("%s", f.Interface()) {
+				continue
+			}
 			c.Cache.Config += fmt.Sprintln(ind, t.Field(i).Name, f.Interface())
 			sshArgsList = append(sshArgsList, []string{
 				"-o", fmt.Sprintf("%s=%s", t.Field(i).Name, f.Interface()),

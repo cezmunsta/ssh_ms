@@ -174,7 +174,10 @@ func TestConnection(t *testing.T) {
 
 	// Test SendEnv
 	if conn.SendEnv != "" {
-		t.Fatalf("SendEnv is not an empty string")
+		t.Fatal("SendEnv is not an empty string")
+	}
+	if strings.Contains(conn.Cache.Config, "SendEnv") {
+		t.Fatalf("expected: SendEnv to be absent, got: %v", conn.Cache.Config)
 	}
 	conn = Connection{
 		HostName: "localhost",
@@ -185,5 +188,8 @@ func TestConnection(t *testing.T) {
 	conn.BuildConnection(dummyArgs, "dummy", conn.User)
 	if conn.SendEnv != "USER" {
 		t.Fatalf("expected: USER for SendEnv, got: %v", conn.SendEnv)
+	}
+	if !strings.Contains(conn.Cache.Config, "SendEnv USER") {
+		t.Fatalf("expected: SendEnv USER to be present, got: %v", conn.Cache.Config)
 	}
 }
