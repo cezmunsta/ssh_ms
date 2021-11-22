@@ -35,6 +35,12 @@ var (
 		"@@USER_FIRSTNAME":                 "{{.FirstName}}",
 		"@@" + cfg.EnvSSHUsername:          "{{.FullName}}",
 	}
+
+	// SkipOnEmpty bypasses display and use of empty values for ssh
+	SkipOnEmpty = map[string]string{
+		"ProxyJump": "none",
+		"SendEnv":   "",
+	}
 )
 
 const (
@@ -63,6 +69,7 @@ type Connection struct {
 	IdentityFile        string
 	IdentitiesOnly      bool
 	ProxyJump           string
+	SendEnv             string
 	ServerAliveInterval uint16
 	ServerAliveCountMax uint16
 	Cache               CachedConnection
@@ -451,6 +458,17 @@ func setForwardAgent(sshArgs *Connection, args map[string]interface{}) {
 	sshArgs.ForwardAgent = option
 }
 
+// setSendEnv for the connection
+// args: options provided for inspection
+func setSendEnv(sshArgs *Connection, args map[string]interface{}) {
+	option := ""
+	if val, ok := args["SendEnv"]; ok {
+		option = val.(string)
+		log.Debugf("Sending env %s (%v)", option, os.Getenv(option))
+	}
+	sshArgs.SendEnv = option
+}
+
 // BuildConnection creates the SSH command for execution
 // args : options provided for inspection
 func (c *Connection) BuildConnection(args map[string]interface{}, key string, templateUser string) []string {
@@ -464,6 +482,7 @@ func (c *Connection) BuildConnection(args map[string]interface{}, key string, te
 	setControlPath(c, args)
 	setPortForwarding(c)
 	setForwardAgent(c, args)
+	setSendEnv(c, args)
 
 	d := reflect.ValueOf(c).Elem()
 	t := d.Type()
@@ -472,15 +491,11 @@ func (c *Connection) BuildConnection(args map[string]interface{}, key string, te
 	c.Cache.Config = fmt.Sprintln("Host", key)
 
 	for i := 0; i < d.NumField(); i++ {
-		f := d.Field(i)
-		switch t.Field(i).Name {
+		f, n := d.Field(i), t.Field(i).Name
+		switch n {
 		case "HostName":
 			c.Cache.Config += fmt.Sprintln(ind, t.Field(i).Name, f.Interface())
-			continue
-		case "IdentitiesOnly":
-		case "ServerAliveCountMax":
-		case "ServerAliveInterval":
-		case "Cache":
+		case "IdentitiesOnly", "ServerAliveCountMax", "ServerAliveInterval", "Cache":
 			continue
 		case "IdentityFile":
 			c.Cache.Config += fmt.Sprintln(ind, strings.Replace(f.Interface().(string), "=", " ", 1))
@@ -495,20 +510,15 @@ func (c *Connection) BuildConnection(args map[string]interface{}, key string, te
 					"-L", fmt.Sprintf("%d:%s:%d", lf.LocalPort, lf.BindHost, lf.RemotePort),
 				}...)
 			}
-		case "ProxyJump":
-			c.Cache.Config += fmt.Sprintln(ind, t.Field(i).Name, f.Interface())
-			if fmt.Sprintf("%s", f.Interface()) == "none" {
-				continue
-			}
-			sshArgsList = append(sshArgsList, []string{
-				"-o", fmt.Sprintf("%s=%s", t.Field(i).Name, f.Interface()),
-			}...)
 		case "Port":
 			c.Cache.Config += fmt.Sprintln(ind, t.Field(i).Name, c.Port)
 			sshArgsList = append(sshArgsList, []string{
 				"-p", fmt.Sprintf("%d", c.Port),
 			}...)
 		default:
+			if val, ok := SkipOnEmpty[n]; ok && val == fmt.Sprintf("%s", f.Interface()) {
+				continue
+			}
 			c.Cache.Config += fmt.Sprintln(ind, t.Field(i).Name, f.Interface())
 			sshArgsList = append(sshArgsList, []string{
 				"-o", fmt.Sprintf("%s=%s", t.Field(i).Name, f.Interface()),
@@ -529,6 +539,16 @@ func Connect(args []string, e UserEnv) {
 		cmd.Stderr = os.Stderr
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout
+
+		for _, opt := range args {
+			if strings.HasPrefix(opt, "SendEnv") {
+				v := strings.ReplaceAll(opt, "SendEnv=", "")
+				for _, e := range strings.Split(v, " ") {
+					cmd.Env = append(cmd.Env, fmt.Sprintf("%s=%s", e, os.Getenv(e)))
+				}
+				break
+			}
+		}
 
 		if err := cmd.Run(); err != nil {
 			log.Fatal(err)

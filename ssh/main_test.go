@@ -171,4 +171,25 @@ func TestConnection(t *testing.T) {
 			t.Fatalf("unexpected remote port: %v", lf.RemotePort)
 		}
 	}
+
+	// Test SendEnv
+	if conn.SendEnv != "" {
+		t.Fatal("SendEnv is not an empty string")
+	}
+	if strings.Contains(conn.Cache.Config, "SendEnv") {
+		t.Fatalf("expected: SendEnv to be absent, got: %v", conn.Cache.Config)
+	}
+	conn = Connection{
+		HostName: "localhost",
+		User:     "dummy",
+		Port:     uint16(29022),
+	}
+	dummyArgs["SendEnv"] = "USER"
+	conn.BuildConnection(dummyArgs, "dummy", conn.User)
+	if conn.SendEnv != "USER" {
+		t.Fatalf("expected: USER for SendEnv, got: %v", conn.SendEnv)
+	}
+	if !strings.Contains(conn.Cache.Config, "SendEnv USER") {
+		t.Fatalf("expected: SendEnv USER to be present, got: %v", conn.Cache.Config)
+	}
 }
