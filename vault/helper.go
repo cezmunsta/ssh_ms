@@ -1,12 +1,12 @@
 package vault
 
 import (
+	"io/ioutil"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/hashicorp/vault/api"
-	credToken "github.com/hashicorp/vault/builtin/credential/token"
-	login "github.com/hashicorp/vault/command"
 
 	"github.com/cezmunsta/ssh_ms/log"
 )
@@ -38,29 +38,20 @@ func Authenticate(e UserEnv, st bool) *api.Client {
 	client, err := api.NewClient(config)
 
 	if st {
-		lc := &login.LoginCommand{
-			BaseCommand: &login.BaseCommand{},
-			Handlers: map[string]login.LoginHandler{
-				"token": &credToken.CLIHandler{},
-			},
-		}
-		th, err := lc.TokenHelper()
-		if err != nil {
-			log.Debug("TokenHelper:", th)
-			log.Panic("Uh oh, the TokenHelper had an issue")
-		}
-		storedToken, err := th.Get()
-		if err != nil {
-			log.Debug("storedToken:", storedToken)
-			log.Panic("Unable to read token from store")
+		storedToken := ""
+		if read, err := ioutil.ReadFile(filepath.Join(os.Getenv("HOME"), ".vault-token")); err != nil {
+			log.Fatalf("Unable to find existing session, please login using vault")
+		} else {
+			storedToken = string(read)
 		}
 		client.SetToken(storedToken)
+		storedToken = ""
 	}
 
 	if err != nil {
 		log.Debug(api.EnvVaultAddress, e.Addr)
 		log.Debug("Client address", client.Address())
-		log.Panic(err)
+		log.Fatal(err)
 	}
 
 	client.Auth()
