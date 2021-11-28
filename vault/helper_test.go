@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sync"
 	"testing"
+	"time"
 
 	"github.com/cezmunsta/ssh_ms/config"
 	vaultKv "github.com/hashicorp/vault-plugin-secrets-kv"
@@ -82,4 +83,18 @@ func TestHelpers(t *testing.T) {
 	if status, err := DeleteSecret(client, key); err != nil || !status {
 		t.Fatalf("DeleteSecret expected: %v, got: %v, %v", data, status, err)
 	}
+
+	expires := time.Now().Add(24 * time.Hour)
+	if !requiresRenewal(map[string]interface{}{
+		"renewable":   true,
+		"expire_time": expires.Format(time.RFC3339)}) {
+		t.Fatalf(("requiresRenewal expected: true"))
+	}
+	expires = expires.Add(24 * 8 * time.Hour)
+	if requiresRenewal(map[string]interface{}{
+		"renewable":   true,
+		"expire_time": expires.Format(time.RFC3339)}) {
+		t.Fatalf(("requiresRenewal expected: false"))
+	}
+
 }

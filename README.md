@@ -26,7 +26,7 @@ $ go get -u github.com/cezmunsta/ssh_ms
 For ease of use, ensure that `${GOPATH}/bin` is in your `PATH` to use the tools with ease.
 
 - `go` : `1.16.6`
-- `vault`: `1.8.4`
+- `vault`: `1.8.5`
 
 #### Go
 
@@ -259,10 +259,11 @@ along with `make build`:
 - `SSH_MS_BASEPATH`: Sets `config.EnvBasePath`
 - `SSH_MS_DEFAULT_VAULT_ADDR`: Sets `config.EnvVaultAddr`, bypassing environment lookup of `VAULT_ADDR`
 - `SSH_MS_DEFAULT_USERNAME`: Sets `config.EnvSSHDefaultUsername`, bypassing environment lookup of `USER`
-- `SSH_MS_USERNAME`: Sets `config.EnvSSHUsername` template variable, used in templated usernames
 - `SSH_MS_ID_FILE`:  Sets `config.EnvSSHIdentityFile`
+- `SSH_MS_RENEW_THRESHOLD`: Sets `vault.RenewThreshold`
 - `SSH_MS_SYNC_HOST`: Sets the destination host for a binary push via `rsync`
 - `SSH_MS_SYNC_PATH`: Sets the destination path for a binary push via `rsync`
+- `SSH_MS_USERNAME`: Sets `config.EnvSSHUsername` template variable, used in templated usernames
 
 To set the build version (e.g. if you are making a custom build, etc) you can use `make build` to set
 the build version (by default it will set it to `git rev-parse HEAD`), e.g.

@@ -2,6 +2,8 @@
 
 set -eux
 
+declare -ir RUN="${1:-1}"
+
 function vault_exists {
     # shellcheck disable=SC2155
     local id="$(podman container ls --filter name=dev-vault --all --quiet)"
@@ -40,8 +42,44 @@ function prepare_vault {
     ssh_ms write test --comment Testing HostName=localhost User=@@USER_FIRSTNAME
 }
 
-if ! vault_exists; then
-    create_vault
-fi
+function create_policy {
+    vault policy write ssh_ms <(cat <<EOS
+path "sys/*" {
+  policy = "deny"
+}
 
-start_vault
+path "secret/ssh_ms/*" {
+  policy = "read"
+  capabilities = ["list", "sudo"]
+}
+EOS
+    )
+}
+
+function add_user {
+    vault auth enable userpass
+    vault write auth/userpass/users/testing \
+        password=my-secret-pw \
+        policies=default,ssh_ms renewable=true ttl=2h
+}
+
+function login_test_user {
+    vault login --method userpass username=testing
+}
+
+function renew_test_token {
+    vault token lookup --format=yaml | grep -Fq 'display_name: userpass-testing' || \
+        echo 'Please login as the test user'
+        return
+    vault token renew --increment=30m
+}
+
+test "${RUN}" -eq 1 && {
+    if ! vault_exists; then
+        create_vault
+    fi
+
+    start_vault
+    create_policy
+    add_user
+}

@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/hashicorp/vault/api"
 
@@ -18,6 +19,9 @@ type UserEnv struct {
 	Addr, Token string
 	Simulate    bool
 }
+
+// RenewThreshold is used to compare against the token expiration time
+var RenewThreshold = "168h"
 
 // Authenticate a user with Vault
 // e : user environment
@@ -55,7 +59,28 @@ func Authenticate(e UserEnv, st bool) *api.Client {
 	}
 
 	client.Auth()
+
+	if lookupSelf, err := client.Auth().Token().LookupSelf(); err == nil {
+		if requiresRenewal(lookupSelf.Data) {
+			log.Warningf("Token will expire at: %v", lookupSelf.Data["expire_time"])
+		}
+	}
 	return client
+}
+
+func requiresRenewal(d map[string]interface{}) bool {
+	log.Debugf("Checking data: %v", d)
+	if val, ok := d["renewable"]; ok && !val.(bool) {
+		return false
+	}
+	if val, ok := d["expire_time"]; ok && val != nil {
+		t, _ := time.Parse(time.RFC3339, val.(string))
+		th, _ := time.ParseDuration(RenewThreshold)
+		if time.Now().Add(th).Before(t) {
+			return false
+		}
+	}
+	return true
 }
 
 // DeleteSecret removes a secret from Vault
