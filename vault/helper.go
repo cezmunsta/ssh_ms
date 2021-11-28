@@ -20,6 +20,7 @@ type UserEnv struct {
 	Simulate    bool
 }
 
+// RenewThreshold is used to compare against the token expiration time
 var RenewThreshold = "168h"
 
 // Authenticate a user with Vault
