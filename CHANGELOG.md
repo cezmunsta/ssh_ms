@@ -1,5 +1,25 @@
 # CHANGELOG
 
+## 2021-11-28: v1.7.0
+- Notify user when their token will soon expire (#81)
+  To help avoid unexpected expiration of tokens, the user is provided with a warning when they use a renewable token and it is due to expire in less than 7 days (default).
+  The threshold for notifying about renewing tokens, `SSH_MS_RENEW_THRESHOLD` can be defined for `make build` and `make binaries`.
+- Use only vault/api in application code (#80)
+  To reduce size as well as simply issues arising from indirect dependencies, replacing the use of HashiCorp `vault/command` with the `api` in the helper code.
+- Add support for SendEnv (#76)
+  In cases where the remote server supports environment variables being passed across, adding support for storing `SendEnv` in the connection's configuration
+- Updated dependencies (#75)
+  - `vault` to v1.8.5
+  - `vault/sdk` to v0.2.2-0.20211101151547-6654f4b913f9
+  - `mimetype` to v1.4.0
+  - `logrus` to v1.8.1
+- Fix incorrect conversion between integer types (#74)
+  Updated NGINX and PMM ports to become uint16 and switched to `strconv.ParseUint`
+- Updated README
+  Added the CodeQL badge and updated the recommended version of Vault
+- Adding CodeQL workflow
+- Upgraded Vault to 1.8.4 (#73)
+
 ## 2021-10-14: v1.6.0
 
 - Added cache management (#72)
