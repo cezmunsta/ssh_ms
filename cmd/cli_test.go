@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"bytes"
-	"fmt"
 	"io/ioutil"
 	"runtime"
 	"strings"
@@ -30,7 +29,7 @@ func TestExecute(t *testing.T) {
 	for _, line := range ver {
 		vb = []byte(strings.Join(line, " "))
 		if string(out) != string(vb) {
-			//t.Fatalf("expected: '%s' got: '%s'", string(vb), string(out))
+			// t.Fatalf("expected: '%s' got: '%s'", string(vb), string(out))
 			continue
 		}
 	}
@@ -66,7 +65,7 @@ func TestCheckVersion(t *testing.T) {
 		t.Fatalf("expected: 1 line, got: %v", lines)
 	}
 
-	if fmt.Sprintf("%s", strings.Join(lines[0], " ")) != latestVersion {
+	if strings.Join(lines[0], " ") != latestVersion {
 		t.Fatalf("expected: %s, got: %v", latestVersion, lines)
 	}
 
