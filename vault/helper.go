@@ -94,12 +94,25 @@ func DeleteSecret(c *api.Client, key string) (bool, error) {
 // ListSecrets reads the list of secrets/data under a path in Vault
 // c : Vault client
 // path : path to secret/data in Vault
-func ListSecrets(c *api.Client, path string) (*api.Secret, error) {
-	secret, err := c.Logical().List(path)
-	if err != nil {
-		return nil, err
+func ListSecrets(c *api.Client, path string) ([]*api.Secret, []error) {
+	errors := []error{}
+	paths := strings.Split(path, ",")
+	secrets := []*api.Secret{}
+
+	for _, p := range paths {
+		secret, err := c.Logical().List(p)
+		if err != nil {
+			errors = append(errors, err)
+		} else {
+			secrets = append(secrets, secret)
+		}
 	}
-	return secret, nil
+
+	if len(errors) > 0 {
+		return nil, errors
+	}
+
+	return secrets, nil
 }
 
 // ReadSecret requests the secret/data from Vault
