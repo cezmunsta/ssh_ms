@@ -16,7 +16,7 @@ type Settings struct {
 	LogLevel                                                     logrus.Level
 	Debug, Simulate, StoredToken, Verbose, Version, VersionCheck bool
 	ConfigComment, ConfigMotd, EnvSSHDefaultUsername, EnvSSHIdentityFile,
-	CustomLocalForward, EnvSSHUsername, EnvVaultAddr, SecretPath, Show, StoragePath, User, VaultAddr, VaultToken, VaultVersion string
+	CustomLocalForward, EnvSSHUsername, EnvVaultAddr, NameSpace, SecretPath, Show, StoragePath, User, VaultAddr, VaultToken, VaultVersion string
 }
 
 var (
@@ -91,6 +91,7 @@ func GetConfig() *Settings {
 			EnvSSHUsername:        EnvSSHUsername,
 			EnvVaultAddr:          EnvVaultAddr,
 			LogLevel:              logrus.WarnLevel,
+			NameSpace:             "",
 			SecretPath:            SecretPath,
 			Simulate:              false,
 			StoragePath:           EnvBasePath,

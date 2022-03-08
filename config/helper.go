@@ -17,12 +17,10 @@ const (
 	FormatUnknown = uint(0)
 )
 
-var (
-	formatLookup = map[string]uint{
-		"application/json": FormatJSON,
-		"default":          FormatText,
-	}
-)
+var formatLookup = map[string]uint{
+	"application/json": FormatJSON,
+	"default":          FormatText,
+}
 
 func ensureDirExists(path string) (bool, error) {
 	if err := os.MkdirAll(NormalizePath(path), os.ModePerm); err != nil {

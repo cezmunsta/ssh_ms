@@ -228,8 +228,13 @@ func init() {
 
 	updateCmd.Flags().StringVarP(&cfg.ConfigComment, "comment", "c", "", "Set the comment for the config entry")
 	writeCmd.Flags().StringVarP(&cfg.ConfigComment, "comment", "c", "", "Add a comment for the config entry")
+
 	updateCmd.Flags().StringVarP(&cfg.ConfigMotd, "motd", "m", "", "Set the Motd for the config entry")
 	writeCmd.Flags().StringVarP(&cfg.ConfigMotd, "motd", "m", "", "Add a Motd comment for the config entry")
+
+	deleteCmd.Flags().StringVarP(&cfg.NameSpace, "namespace", "N", "", "Specify the namespace for the config entry")
+	updateCmd.Flags().StringVarP(&cfg.NameSpace, "namespace", "N", "", "Add a namespace for the config entry")
+	writeCmd.Flags().StringVarP(&cfg.NameSpace, "namespace", "N", "", "Set the namespace for the config entry")
 
 	versionCmd.Flags().BoolVarP(&cfg.VersionCheck, "check", "c", false, "Check for the latest version")
 
@@ -251,7 +256,6 @@ func checkVersion() [][]string {
 
 	url := "https://github.com/cezmunsta/ssh_ms/releases/latest"
 	req, err := http.NewRequest("HEAD", url, nil)
-
 	if err != nil {
 		log.Fatal("Error reading request. ", err)
 	}
@@ -289,9 +293,7 @@ func getVersion() [][]string {
 	var lines [][]string
 
 	if cfg.VersionCheck {
-		for _, line := range checkVersion() {
-			lines = append(lines, line)
-		}
+		lines = append(lines, checkVersion()...)
 	}
 
 	if !cfg.Verbose && !cfg.Debug {
@@ -302,6 +304,7 @@ func getVersion() [][]string {
 		lines = append(lines, []string{"Go Version:", runtime.Version()})
 		lines = append(lines, []string{"Vault Version:", cfg.VaultVersion})
 		lines = append(lines, []string{"Base path:", config.EnvBasePath})
+		lines = append(lines, []string{"Secret path:", config.SecretPath})
 		lines = append(lines, []string{"Default Vault address:", config.EnvVaultAddr})
 		lines = append(lines, []string{"Default SSH username:", config.EnvSSHDefaultUsername})
 		lines = append(lines, []string{"SSH template username:", config.EnvSSHUsername})
