@@ -64,7 +64,6 @@ func TestMarshal(t *testing.T) {
 		newUser, err := user.doUnmarshal(jsonUser)
 		if err != nil {
 			t.Fatalf("expected: %v as userName got: %v with error %v", jsonUser, newUser, err)
-
 		}
 
 		if user.FullName != newUser.FullName {
@@ -97,7 +96,7 @@ func TestControlPath(t *testing.T) {
 	expected := fmt.Sprintf("cp_%s_%s_%d", conn.User, conn.HostName, conn.Port)
 	rawCp := fmt.Sprintf("%s/%s", cfg.StoragePath, expected)
 
-	if err := ioutil.WriteFile(rawCp, []byte("dummy"), 0640); err != nil {
+	if err := ioutil.WriteFile(rawCp, []byte("dummy"), 0o640); err != nil {
 		t.Fatalf("expected: a dummy file to be created, got: %v", err)
 	}
 
@@ -159,7 +158,7 @@ func TestConnection(t *testing.T) {
 	}
 
 	// Test loading custom LocalForward ports from cache
-	if err := ioutil.WriteFile(conn.ControlPath, []byte(""), 0600); err != nil {
+	if err := ioutil.WriteFile(conn.ControlPath, []byte(""), 0o600); err != nil {
 		t.Fatal("failed to write dummy ControlPath:", conn.ControlPath, err)
 	}
 	setPortForwarding(&conn)

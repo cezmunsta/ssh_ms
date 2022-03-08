@@ -149,5 +149,4 @@ func TestPrepareConnection(t *testing.T) {
 	if !strings.Contains(configMotd, dummyMotd) {
 		t.Fatalf("expected motd to contain '%v', got '%v'", dummyMotd, configMotd)
 	}
-
 }

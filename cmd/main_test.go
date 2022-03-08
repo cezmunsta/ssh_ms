@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"strings"
 	"sync"
 	"testing"
 
@@ -52,13 +53,15 @@ func getDummyCluster(t *testing.T) (*vault.TestCluster, *vaultApi.Client) {
 		}
 		// Create Secret mount
 		cluster.Cores[0].Client.Sys().Unmount("secret")
-		if err := cluster.Cores[0].Client.Sys().Mount(vaultSecretPath, &vaultApi.MountInput{
-			Type: "kv",
-			Options: map[string]string{
-				"version": vaultKvVersion, // TODO: update to test version 2 later
-			},
-		}); err != nil {
-			t.Fatal(err)
+		for _, sp := range strings.Split(vaultSecretPath, ",") {
+			if err := cluster.Cores[0].Client.Sys().Mount(sp, &vaultApi.MountInput{
+				Type: "kv",
+				Options: map[string]string{
+					"version": vaultKvVersion, // TODO: update to test version 2 later
+				},
+			}); err != nil {
+				t.Fatal(err)
+			}
 		}
 
 		core := cluster.Cores[0].Core
@@ -70,13 +73,16 @@ func getDummyCluster(t *testing.T) (*vault.TestCluster, *vaultApi.Client) {
 }
 
 func generateDummyData(t *testing.T, frag string) {
-	key := fmt.Sprintf("%s/%s", vaultSecretPath, frag)
-	data := make(secretData)
-	data["User"] = frag
-	data["ConfigComment"] = dummyComment
-	data["ConfigMotd"] = dummyMotd
+	for _, sp := range strings.Split(vaultSecretPath, ",") {
+		key := fmt.Sprintf("%s/%s", sp, frag)
+		data := make(secretData)
 
-	if status, err := vaultHelper.WriteSecret(client, key, data); err != nil || !status {
-		t.Fatalf("writeSecret expected: %v, got: %v, %v", data, status, err)
+		data["User"] = frag
+		data["ConfigComment"] = dummyComment
+		data["ConfigMotd"] = dummyMotd
+
+		if status, err := vaultHelper.WriteSecret(client, key, data); err != nil || !status {
+			t.Fatalf("writeSecret expected: %v, got: %v, %v", data, status, err)
+		}
 	}
 }

@@ -87,14 +87,15 @@ func TestHelpers(t *testing.T) {
 	expires := time.Now().Add(24 * time.Hour)
 	if !requiresRenewal(map[string]interface{}{
 		"renewable":   true,
-		"expire_time": expires.Format(time.RFC3339)}) {
+		"expire_time": expires.Format(time.RFC3339),
+	}) {
 		t.Fatalf(("requiresRenewal expected: true"))
 	}
 	expires = expires.Add(24 * 8 * time.Hour)
 	if requiresRenewal(map[string]interface{}{
 		"renewable":   true,
-		"expire_time": expires.Format(time.RFC3339)}) {
+		"expire_time": expires.Format(time.RFC3339),
+	}) {
 		t.Fatalf(("requiresRenewal expected: false"))
 	}
-
 }
