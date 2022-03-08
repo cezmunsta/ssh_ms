@@ -38,6 +38,8 @@ function prepare_vault {
     vault login -no-store
     vault secrets disable secret/
     vault secrets enable --path=secret/ssh_ms kv
+    vault secrets enable --path=moresecret/ssh_ms kv
+    vault secrets enable --path=secret/ssh_ms_admin kv
 
     ./bin/ssh_ms write test --comment Testing HostName=localhost User=@@USER_FIRSTNAME
 }
@@ -49,6 +51,16 @@ path "sys/*" {
 }
 
 path "secret/ssh_ms/*" {
+  policy = "read"
+  capabilities = ["list", "sudo"]
+}
+
+path "moresecret/ssh_ms/*" {
+  policy = "read"
+  capabilities = ["list", "sudo"]
+}
+
+path "secret/ssh_ms_admin/*" {
   policy = "read"
   capabilities = ["list", "sudo"]
 }
