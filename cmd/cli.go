@@ -233,6 +233,8 @@ func init() {
 	writeCmd.Flags().StringVarP(&cfg.ConfigMotd, "motd", "m", "", "Add a Motd comment for the config entry")
 
 	deleteCmd.Flags().StringVarP(&cfg.NameSpace, "namespace", "N", "", "Specify the namespace for the config entry")
+	listCmd.Flags().StringVarP(&cfg.NameSpace, "namespace", "N", "", "Specify the namespace for the config entry")
+	showCmd.Flags().StringVarP(&cfg.NameSpace, "namespace", "N", "", "Specify the namespace for the config entry")
 	updateCmd.Flags().StringVarP(&cfg.NameSpace, "namespace", "N", "", "Add a namespace for the config entry")
 	writeCmd.Flags().StringVarP(&cfg.NameSpace, "namespace", "N", "", "Set the namespace for the config entry")
 
@@ -304,7 +306,7 @@ func getVersion() [][]string {
 		lines = append(lines, []string{"Go Version:", runtime.Version()})
 		lines = append(lines, []string{"Vault Version:", cfg.VaultVersion})
 		lines = append(lines, []string{"Base path:", config.EnvBasePath})
-		lines = append(lines, []string{"Secret path:", config.SecretPath})
+		lines = append(lines, []string{"Namespaces:\n-", strings.Join(strings.Split(config.SecretPath, ","), "\n- ")})
 		lines = append(lines, []string{"Default Vault address:", config.EnvVaultAddr})
 		lines = append(lines, []string{"Default SSH username:", config.EnvSSHDefaultUsername})
 		lines = append(lines, []string{"SSH template username:", config.EnvSSHUsername})
