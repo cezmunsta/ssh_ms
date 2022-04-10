@@ -61,7 +61,7 @@ endif
 
 build: binary-prep
 ifeq ($(DEBUG_BUILD), 1)
-	@"${GO}" build -o "${BUILD_DIR}/ssh_ms.debug" ${LDFLAGS}
+	@"${GO}" build -race -trimpath -o "${BUILD_DIR}/ssh_ms.debug" ${LDFLAGS} -gcflags="all=-N -l"
 else
 	@"${GO}" build -race -trimpath -o "${BUILD_DIR}/ssh_ms" ${LDFLAGS}
 endif
