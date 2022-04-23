@@ -157,7 +157,13 @@ func releaseLock(vc *vaultApi.Client, ln string) (bool, error) {
 // getConnections from Vault
 func getConnections(vc *vaultApi.Client) ([]string, error) {
 	var connections []string
-	secrets, err := vaultHelper.ListSecrets(vc, cfg.SecretPath)
+
+	sp := cfg.SecretPath
+	if (currentCommand != "list" && currentCommand != "search") || cfg.NameSpace != "" {
+		sp = getSecretPath()
+	}
+
+	secrets, err := vaultHelper.ListSecrets(vc, sp)
 
 	if err != nil {
 		log.Fatalf("Unable to get connections for %v: %v", vc.Address(), err)
