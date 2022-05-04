@@ -9,13 +9,17 @@ on:
     - 'go.mod'
     - 'go.sum'
 jobs:
+  strategy:
+    matrix:
+      os: [ubuntu-latest, macos-latest]
   build:
-    runs-on: ubuntu-20.04
+    runs-on: ${{ matrix.os }}
     steps:
     - name: Prepare Go
-      uses: actions/setup-go@v2
+      uses: actions/setup-go@v3
       with:
         go-version: 1.18
+        check_latest: true
 
     - name: Checkout codebase
       uses: actions/checkout@v2
