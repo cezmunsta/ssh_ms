@@ -18,15 +18,15 @@ of `Go`. Please follow the [official documentation](https://golang.org/doc/insta
 installing `Go`.
 
 ```sh
-$ go get -u github.com/cezmunsta/ssh_ms
+$ go install github.com/cezmunsta/ssh_ms
 ```
 
 ### Recommended versions:
 
 For ease of use, ensure that `${GOPATH}/bin` is in your `PATH` to use the tools with ease.
 
-- `go` : `1.16.6`
-- `vault`: `1.8.5`
+- `go` : `1.18.1`
+- `vault`: `1.9.3`
 
 #### Go
 
