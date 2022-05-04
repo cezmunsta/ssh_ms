@@ -26,7 +26,7 @@ $ go install github.com/cezmunsta/ssh_ms
 For ease of use, ensure that `${GOPATH}/bin` is in your `PATH` to use the tools with ease.
 
 - `go` : `1.18.1`
-- `vault`: `1.9.3`
+- `vault`: `1.10.2`
 
 #### Go
 
