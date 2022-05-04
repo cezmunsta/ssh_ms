@@ -39,7 +39,7 @@ function prepare_vault {
     vault secrets disable secret/
     vault secrets enable --path=secret/ssh_ms kv
 
-    ssh_ms write test --comment Testing HostName=localhost User=@@USER_FIRSTNAME
+    ./bin/ssh_ms write test --comment Testing HostName=localhost User=@@USER_FIRSTNAME
 }
 
 function create_policy {
