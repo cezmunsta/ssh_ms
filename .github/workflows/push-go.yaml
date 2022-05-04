@@ -18,7 +18,7 @@ jobs:
 
     - name: Perform lint checks
       run: |
-        go get -u golang.org/x/lint/golint
+        go install golang.org/x/lint/golint@latest
         make lint
 
     - name: Perform format checks
