@@ -272,8 +272,9 @@ github.com/digitalocean/godo v1.7.5/go.mod h1:h6faOIcZ8lWIwNQ+DN7b3CgX4Kwby5T+nb
 github.com/dimchansky/utfbom v1.1.0/go.mod h1:rO41eb7gLfo8SF1jd9F8HplJm1Fewwi4mQvIirEdv+8=
 github.com/dimchansky/utfbom v1.1.1 h1:vV6w1AhK4VMnhBno/TPVCoK9U/LP0PkLCS9tbxHdi/U=
 github.com/dimchansky/utfbom v1.1.1/go.mod h1:SxdoEBH5qIqFocHMyGOXVAybYJdr71b1Q/j0mACtrfE=
-github.com/dnaeon/go-vcr v1.0.1 h1:r8L/HqC0Hje5AXMu1ooW8oyQyOFv4GxqpL0nRP7SLLY=
 github.com/dnaeon/go-vcr v1.0.1/go.mod h1:aBB1+wY4s93YsC3HHjMBMrwTj2R9FHDzUr9KyGc8n1E=
+github.com/dnaeon/go-vcr v1.2.0 h1:zHCHvJYTMh1N7xnV7zf1m1GPBF9Ad0Jk/whtQ1663qI=
+github.com/dnaeon/go-vcr v1.2.0/go.mod h1:R4UdLID7HZT3taECzJs4YgbbH6PIGXB6W/sc5OLb6RQ=
 github.com/docker/cli v20.10.9+incompatible h1:OJ7YkwQA+k2Oi51lmCojpjiygKpi76P7bg91b2eJxYU=
 github.com/docker/distribution v2.7.1+incompatible h1:a5mlkVzth6W5A4fOsS3D2EO5BUmsJpcB+cRlLU7cSug=
 github.com/docker/distribution v2.7.1+incompatible/go.mod h1:J2gT2udsDAN96Uj4KfcMRqY0/ypR+oyYUYmja8H+y+w=
@@ -624,8 +625,8 @@ github.com/hashicorp/raft-snapshot v1.0.4/go.mod h1:5sL9eUn72lH5DzsFIJ9jaysITbHk
 github.com/hashicorp/serf v0.9.5/go.mod h1:UWDWwZeL5cuWDJdl0C6wrvrUwEqtQ4ZKBKKENpqIUyk=
 github.com/hashicorp/serf v0.9.6 h1:uuEX1kLR6aoda1TBttmJQKDLZE1Ob7KN0NPdE7EtCDc=
 github.com/hashicorp/serf v0.9.6/go.mod h1:TXZNMjZQijwlDvp+r0b63xZ45H7JmCmgg4gpTwn9UV4=
-github.com/hashicorp/vault v1.10.2 h1:+Z6G6x1GMJTzrGSDVK40o9SJ4WS0Suq5Vo/0T0cpB7s=
-github.com/hashicorp/vault v1.10.2/go.mod h1:0iaEiGH8Pfhi03CiJwHOMsRdLQO1wfOLFeDEicxrhHw=
+github.com/hashicorp/vault v1.10.3 h1:QOgzDNyzbS/14rWTxuU4SDAsd4KXor/VK1C+T97QHLs=
+github.com/hashicorp/vault v1.10.3/go.mod h1:BgV2co9MLBBgjiz8By6PHe2hnYQRPDXzQD3zNoqpXF4=
 github.com/hashicorp/vault-plugin-auth-alicloud v0.11.0 h1:lDzAQoxIT+dWy/CemGdcI10ZT4PfLCJV33uwntc3V+0=
 github.com/hashicorp/vault-plugin-auth-azure v0.10.0 h1:eJqLyjEhKzSBM1hPK9OrAS+rDESXNCDE0YHWMsg+f98=
 github.com/hashicorp/vault-plugin-auth-centrify v0.11.0 h1:W1Al8Kw4VvXm/mtDdzgBau1YYWn4p+LRkFfeC9H9WwQ=
@@ -660,8 +661,8 @@ github.com/hashicorp/vault/sdk v0.2.1/go.mod h1:WfUiO1vYzfBkz1TmoE4ZGU7HD0T0Cl/r
 github.com/hashicorp/vault/sdk v0.3.0/go.mod h1:aZ3fNuL5VNydQk8GcLJ2TV8YCRVvyaakYkhZRoVuhj0=
 github.com/hashicorp/vault/sdk v0.3.1-0.20220112143259-b48602fdb885/go.mod h1:LzlzYEnxJWaC5mlt2nOVJimp5R15ecXAucsdjRc7KC0=
 github.com/hashicorp/vault/sdk v0.4.1/go.mod h1:aZ3fNuL5VNydQk8GcLJ2TV8YCRVvyaakYkhZRoVuhj0=
-github.com/hashicorp/vault/sdk v0.4.2-0.20220422204215-a7cef09c9429 h1:bRkZVYj7g5NP6n1tkj8i+qHQgFq05F5uayYmK1nhPLo=
-github.com/hashicorp/vault/sdk v0.4.2-0.20220422204215-a7cef09c9429/go.mod h1:gqE65IIVlvR382JKqtzG1lJX5wVl/wdbdYhsTKTv13o=
+github.com/hashicorp/vault/sdk v0.4.2-0.20220429220057-bdb59a36e632 h1:SOMCNXS3viuyyGC+5c2VpCoR2SG3pryxs5+Y5GgQbZo=
+github.com/hashicorp/vault/sdk v0.4.2-0.20220429220057-bdb59a36e632/go.mod h1:gqE65IIVlvR382JKqtzG1lJX5wVl/wdbdYhsTKTv13o=
 github.com/hashicorp/vic v1.5.1-0.20190403131502-bbfe86ec9443 h1:O/pT5C1Q3mVXMyuqg7yuAWUg/jMZR1/0QTzTRdNR6Uw=
 github.com/hashicorp/vic v1.5.1-0.20190403131502-bbfe86ec9443/go.mod h1:bEpDU35nTu0ey1EXjwNwPjI9xErAsoOCmcMb9GKvyxo=
 github.com/hashicorp/yamux v0.0.0-20180604194846-3520598351bb/go.mod h1:+NfK9FKeTrX5uv1uIXGdwYDTeHna2qgaIlx54MXqjAM=
@@ -686,8 +687,8 @@ github.com/influxdata/influxdb1-client v0.0.0-20200827194710-b269163b24ab h1:HqW
 github.com/jackc/fake v0.0.0-20150926172116-812a484cc733/go.mod h1:WrMFNQdiFJ80sQsxDoMokWK1W5TQtxBFNpzWTD84ibQ=
 github.com/jackc/pgx v3.3.0+incompatible/go.mod h1:0ZGrqGqkRlliWnWB4zKnWtjbSWbGkVEFm4TeybAXq+I=
 github.com/jarcoal/httpmock v0.0.0-20180424175123-9c70cfe4a1da/go.mod h1:ks+b9deReOc7jgqp+e7LuFiCBH6Rm5hL32cLcEAArb4=
-github.com/jarcoal/httpmock v1.0.5 h1:cHtVEcTxRSX4J0je7mWPfc9BpDpqzXSJ5HbymZmyHck=
-github.com/jarcoal/httpmock v1.0.5/go.mod h1:ATjnClrvW/3tijVmpL/va5Z3aAyGvqU3gCT8nX0Txik=
+github.com/jarcoal/httpmock v1.0.7 h1:d1a2VFpSdm5gtjhCPWsQHSnx8+5V3ms5431YwvmkuNk=
+github.com/jarcoal/httpmock v1.0.7/go.mod h1:ATjnClrvW/3tijVmpL/va5Z3aAyGvqU3gCT8nX0Txik=
 github.com/jcmturner/aescts/v2 v2.0.0 h1:9YKLH6ey7H4eDBXW8khjYslgyqG2xZikXP0EQFKrle8=
 github.com/jcmturner/dnsutils/v2 v2.0.0 h1:lltnkeZGL0wILNvrNiVCR6Ro5PGU/SeBvVO/8c/iPbo=
 github.com/jcmturner/gofork v1.0.0 h1:J7uCkflzTEhUZ64xqKnkDxq3kzc96ajM1Gli5ktUem8=
@@ -818,6 +819,7 @@ github.com/modern-go/reflect2 v0.0.0-20180701023420-4b7aa43c6742/go.mod h1:bx2lN
 github.com/modern-go/reflect2 v1.0.1/go.mod h1:bx2lNnkwVCuqBIxFjflWJWanXIb3RllmbCylyMrvgv0=
 github.com/modern-go/reflect2 v1.0.2 h1:xBagoLtFs94CBntxluKeaWgTMpvLxC4ur3nMaC9Gz0M=
 github.com/modern-go/reflect2 v1.0.2/go.mod h1:yWuevngMOJpCy52FWWMvUC8ws7m/LJsjYzDa0/r8luk=
+github.com/modocache/gover v0.0.0-20171022184752-b58185e213c5/go.mod h1:caMODM3PzxT8aQXRPkAt8xlV/e7d7w8GM5g0fa5F0D8=
 github.com/mongodb-forks/digest v1.0.3 h1:ZUK1vyZnBiRMvET0O1SzmnBmv935CkcOTjhfR4zIQ2s=
 github.com/morikuni/aec v1.0.0/go.mod h1:BbKIizmSmc5MMPqRYbxO4ZU0S0+P200+tUnFx7PXmsc=
 github.com/munnerz/goautoneg v0.0.0-20120707110453-a547fc61f48d/go.mod h1:+n7T8mK8HuQTcFwEeznm/DIxMOiR9yIdICNftLE1DvQ=

@@ -4,10 +4,10 @@ go 1.18
 
 require (
 	github.com/gabriel-vasile/mimetype v1.4.0
-	github.com/hashicorp/vault v1.10.2
+	github.com/hashicorp/vault v1.10.3
 	github.com/hashicorp/vault-plugin-secrets-kv v0.11.0
 	github.com/hashicorp/vault/api v1.4.1
-	github.com/hashicorp/vault/sdk v0.4.2-0.20220422204215-a7cef09c9429
+	github.com/hashicorp/vault/sdk v0.4.2-0.20220429220057-bdb59a36e632
 	github.com/sirupsen/logrus v1.8.1
 	github.com/spf13/cobra v1.3.0
 )
@@ -54,6 +54,7 @@ require (
 	github.com/denverdino/aliyungo v0.0.0-20190125010748-a747050bb1ba // indirect
 	github.com/digitalocean/godo v1.7.5 // indirect
 	github.com/dimchansky/utfbom v1.1.1 // indirect
+	github.com/dnaeon/go-vcr v1.2.0 // indirect
 	github.com/duosecurity/duo_api_golang v0.0.0-20190308151101-6c680f768e74 // indirect
 	github.com/envoyproxy/go-control-plane v0.10.1 // indirect
 	github.com/envoyproxy/protoc-gen-validate v0.6.2 // indirect
@@ -112,7 +113,7 @@ require (
 	github.com/huandu/xstrings v1.3.2 // indirect
 	github.com/imdario/mergo v0.3.12 // indirect
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
-	github.com/jarcoal/httpmock v1.0.5 // indirect
+	github.com/jarcoal/httpmock v1.0.7 // indirect
 	github.com/jefferai/isbadcipher v0.0.0-20190226160619-51d2077c035f // indirect
 	github.com/jefferai/jsonx v1.0.0 // indirect
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
