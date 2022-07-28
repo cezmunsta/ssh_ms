@@ -1,6 +1,17 @@
 # CHANGELOG
 
+## 2021-11-28: v1.7.1
+
+- Updated goutils to v1.1.1 (#93)
+- Updated Vault to 1.11.1 (#92)
+- Updated cobra@v1.4.0 (#91)
+- PR workflow improvements (#89)
+- Updated to Go 1.18 (#87)
+- Updated dependencies (#82)
+
+
 ## 2021-11-28: v1.7.0
+
 - Notify user when their token will soon expire (#81)
   To help avoid unexpected expiration of tokens, the user is provided with a warning when they use a renewable token and it is due to expire in less than 7 days (default).
   The threshold for notifying about renewing tokens, `SSH_MS_RENEW_THRESHOLD` can be defined for `make build` and `make binaries`.
