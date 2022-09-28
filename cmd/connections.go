@@ -29,9 +29,7 @@ type configMotdTpl struct {
 	Comment, Motd, Name string
 }
 
-var (
-	currentCommand string
-)
+var currentCommand string
 
 const (
 	// CacheExpireAfter sets the threshold for cleaning stale caches
@@ -67,7 +65,27 @@ func getLockName(key string) string {
 
 // getLockPath produces the full lock path
 func getLockPath(ln string) string {
-	return fmt.Sprintf("%s/%s", cfg.SecretPath, ln)
+	return fmt.Sprintf("%s/%s", getSecretPath(), ln)
+}
+
+// getSecretPath produces the secret path
+func getSecretPath() string {
+	sp := strings.Split(cfg.SecretPath, ",")
+	p := sp[0]
+
+	if len(sp) > 1 && cfg.NameSpace == "" {
+		log.Warningf("multiple namespaces exist (%v), setting --namespace to the default '%s'", cfg.SecretPath, sp[0])
+		cfg.NameSpace = sp[0]
+	}
+
+	for _, ap := range sp {
+		if ap == cfg.NameSpace {
+			p = ap
+			break
+		}
+	}
+
+	return p
 }
 
 // acquireLock creates a lock to control writes
@@ -118,7 +136,6 @@ func acquireLock(vc *vaultApi.Client, key string) (bool, string) {
 func releaseLock(vc *vaultApi.Client, ln string) (bool, error) {
 	log.Debug("releaseLock:", ln)
 	existingLock, err := getRawConnection(vc, ln)
-
 	if err != nil {
 		log.Error("existingLock error:", err)
 		return false, err
@@ -140,19 +157,31 @@ func releaseLock(vc *vaultApi.Client, ln string) (bool, error) {
 // getConnections from Vault
 func getConnections(vc *vaultApi.Client) ([]string, error) {
 	var connections []string
-	secrets, err := vaultHelper.ListSecrets(vc, cfg.SecretPath)
 
-	if err != nil {
+	sp := cfg.SecretPath
+	if (currentCommand != "list" && currentCommand != "search") || cfg.NameSpace != "" {
+		sp = getSecretPath()
+	}
+
+	secrets, err := vaultHelper.ListSecrets(vc, sp)
+
+	if err != nil && len(secrets) == 0 {
 		log.Fatalf("Unable to get connections for %v: %v", vc.Address(), err)
-	} else if secrets == nil || secrets.Data["keys"] == nil {
+	} else if len(secrets) == 0 {
 		return nil, errors.New("no data returned")
 	}
 
-	switch reflect.TypeOf(secrets.Data["keys"]).Kind() {
-	case reflect.Slice:
-		s := reflect.ValueOf(secrets.Data["keys"])
-		for i := 0; i < s.Len(); i++ {
-			connections = append(connections, fmt.Sprintf("%s", s.Index(i)))
+	for _, secret := range secrets {
+		if secret == nil || secret.Data["keys"] == nil {
+			continue
+		}
+
+		switch reflect.TypeOf(secret.Data["keys"]).Kind() {
+		case reflect.Slice:
+			s := reflect.ValueOf(secret.Data["keys"])
+			for i := 0; i < s.Len(); i++ {
+				connections = append(connections, fmt.Sprintf("%s", s.Index(i)))
+			}
 		}
 	}
 	return connections, nil
@@ -254,7 +283,7 @@ func writeConnection(vc *vaultApi.Client, key string, args []string) bool {
 		return false
 	}
 
-	status, err := vaultHelper.WriteSecret(vc, fmt.Sprintf("%s/%s", cfg.SecretPath, key), conn)
+	status, err := vaultHelper.WriteSecret(vc, fmt.Sprintf("%s/%s", getSecretPath(), key), conn)
 	if err != nil {
 		log.Errorf("Failed to write '%v': %v", key, err)
 		return false
@@ -268,7 +297,6 @@ func updateConnection(vc *vaultApi.Client, key string, args []string) bool {
 	log.Debugf("updateConnection: %v", key)
 	currentCommand = "update"
 	conn, err := getRawConnection(vc, key)
-
 	if err != nil {
 		log.Warningf("Unable to retrieve connection '%v', please use write instead", key)
 		return false
@@ -303,7 +331,7 @@ func updateConnection(vc *vaultApi.Client, key string, args []string) bool {
 		return false
 	}
 
-	status, err := vaultHelper.WriteSecret(vc, fmt.Sprintf("%s/%s", cfg.SecretPath, key), conn.Data)
+	status, err := vaultHelper.WriteSecret(vc, fmt.Sprintf("%s/%s", getSecretPath(), key), conn.Data)
 	if err != nil {
 		log.Errorf("Failed to write '%v': %v", key, err)
 		return false
@@ -317,7 +345,6 @@ func deleteConnection(vc *vaultApi.Client, key string) bool {
 	log.Debugf("deleteConnection: %v", key)
 	currentCommand = "delete"
 	_, err := getRawConnection(vc, key)
-
 	if err != nil {
 		log.Debug("Unable to retrieve connection", key)
 		return false
@@ -334,7 +361,7 @@ func deleteConnection(vc *vaultApi.Client, key string) bool {
 		return false
 	}
 
-	status, err := vaultHelper.DeleteSecret(vc, fmt.Sprintf("%s/%s", cfg.SecretPath, key))
+	status, err := vaultHelper.DeleteSecret(vc, fmt.Sprintf("%s/%s", getSecretPath(), key))
 	if err != nil {
 		log.Warning("Unable to delete connection", key)
 		return false
@@ -491,7 +518,6 @@ func getCache(key string) (map[string]interface{}, error) {
 func getRemoteCache(vc *vaultApi.Client, key string) (map[string]interface{}, error) {
 	log.Debugf("getRemoteCache: %v", key)
 	conn, err := getRawConnection(vc, key)
-
 	if err != nil {
 		log.Errorf("Failed to request data for '%v': %v", key, err)
 		return nil, err
@@ -570,7 +596,7 @@ func populateCache(vc *vaultApi.Client) (bool, error) {
 // purgeCache will remove the cache directory and its contents, or an individual item's cache if requested
 func purgeCache() (bool, error) {
 	log.Debugf("purgeCache")
-	var targeted = purgeConnection != "" && purgeConnection != "all"
+	targeted := purgeConnection != "" && purgeConnection != "all"
 	currentCommand = "purge"
 
 	if !purgeForce {
@@ -611,7 +637,7 @@ func saveCache(key string, data map[string]interface{}) (bool, error) {
 		return false, err
 	}
 
-	if err := ioutil.WriteFile(getCachePath(key), []byte(string(buff)), 0640); err != nil {
+	if err := ioutil.WriteFile(getCachePath(key), []byte(string(buff)), 0o640); err != nil {
 		log.Errorf("Failed to save cache for '%v': %v", key, err)
 		return false, err
 	}
@@ -620,7 +646,7 @@ func saveCache(key string, data map[string]interface{}) (bool, error) {
 
 // getRawConnection retrieves the secret from Vault
 func getRawConnection(vc *vaultApi.Client, key string) (*vaultApi.Secret, error) {
-	secret, err := vaultHelper.ReadSecret(vc, fmt.Sprintf("%s/%s", cfg.SecretPath, key))
+	secret, err := vaultHelper.ReadSecret(vc, fmt.Sprintf("%s/%s", getSecretPath(), key))
 
 	if err != nil || secret == nil {
 		if !strings.HasPrefix(key, LockPrefix) && currentCommand != "write" {

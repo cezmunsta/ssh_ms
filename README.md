@@ -41,20 +41,19 @@ Binaries are available from the [official Vault download page](https://www.vault
 ## Usage
 
 ```sh
-ssh_ms integrates with HashiCorp Vault to store SSH configs and ease your remote life
-
 Usage:
   ssh_ms [flags]
   ssh_ms [command]
 
 Available Commands:
+  cache       Cache management
   completion  Generate completion script
   connect     Connect to a host
   delete      Delete a connection
   help        Help about any command
+  inspect     Inspect the value of an internal item
   list        List available connections
   print       Print out the SSH command for a connection
-  purge       Purge the cache
   search      Search for a connection
   show        Display a connection
   update      Update an existing connection to storage
@@ -65,11 +64,11 @@ Flags:
   -d, --debug                Provide addition output
   -n, --dry-run              Prevent certain commands without full execution
   -h, --help                 help for ssh_ms
-  -s, --storage string       Storage path for caching (default "/home/ceri/.ssh/cache")
+  -s, --storage string       Storage path for caching (default "/home/user/.ssh/cache")
       --stored-token         Use a stored token from 'vault login' (overrides --vault-token, auto-enabled when no token is specified)
-  -u, --user string          Your SSH username for templated configs
-      --vault-addr string    Specify the Vault address
-      --vault-token string   Specify the Vault token
+  -u, --user string          Your SSH username for templated configs (default "user")
+      --vault-addr string    Specify the Vault address (default "http://127.0.0.1:8200")
+      --vault-token string   Specify the Vault token (default "myroottoken")
   -v, --verbose              Provide addition output
 
 Use "ssh_ms [command] --help" for more information about a command.
@@ -250,6 +249,43 @@ Wed 19 May 17:20:44 BST 2021
 Shared connection to localhost closed.
 ```
 
+### Using namespaces
+It may be desirable to maintain multiple namespaces in Vault, so that access to specific connections can be
+controlled, such as a single binary that can be used by users with different policies applied to their account.
+Namespaces are configured at build time via the `SSH_MS_SECRET_PATH` variable. When performing write operations 
+without specifying a namespace, a default one will be chosen (the first one in the list of namespaces).
+
+```shell
+# Check which namespaces are available
+$ ssh_ms version --verbose
+Version: 8a8d6a915e13999bef6fb6b4bd279459d743ce9c
+Arch: linux amd64
+Go Version: go1.18.4
+Vault Version: 1.11.1
+Base path: /home/user/.ssh/cache
+Namespaces:
+- secret/ssh_ms
+- secret/my-special-namespace
+Default Vault address: http://127.0.0.1:8200
+Default SSH username: user
+SSH template username: SSH_MS_USERNAME
+SSH identity file: ~/.ssh/id_ed25519
+
+# Add a connection to a non-default namespace, 
+$ ssh_ms write secret-connection --namespace secret/my-special-namespace 
+
+# Search and list will scan all available namespaces
+$ ssh_ms list                                          
+test secret-connection 
+
+$ ssh_ms search conn
+secret-connection
+
+# List a specific namespace
+$ ssh_ms list --namespace secret/my-special-namespace  
+secret-connection
+```
+
 ## Build
 
 Should you wish to build the binary to have some defaults preset for you, then you can use the following env variables
@@ -261,6 +297,7 @@ along with `make build`:
 - `SSH_MS_DEFAULT_USERNAME`: Sets `config.EnvSSHDefaultUsername`, bypassing environment lookup of `USER`
 - `SSH_MS_ID_FILE`:  Sets `config.EnvSSHIdentityFile`
 - `SSH_MS_RENEW_THRESHOLD`: Sets `vault.RenewThreshold`
+- `SSH_MS_SECRET_PATH`: Sets the searchable paths in Vault
 - `SSH_MS_SYNC_HOST`: Sets the destination host for a binary push via `rsync`
 - `SSH_MS_SYNC_PATH`: Sets the destination path for a binary push via `rsync`
 - `SSH_MS_USERNAME`: Sets `config.EnvSSHUsername` template variable, used in templated usernames
