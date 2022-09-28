@@ -165,7 +165,7 @@ func getConnections(vc *vaultApi.Client) ([]string, error) {
 
 	secrets, err := vaultHelper.ListSecrets(vc, sp)
 
-	if err != nil {
+	if err != nil && len(secrets) == 0 {
 		log.Fatalf("Unable to get connections for %v: %v", vc.Address(), err)
 	} else if len(secrets) == 0 {
 		return nil, errors.New("no data returned")

@@ -109,7 +109,7 @@ func ListSecrets(c *api.Client, path string) ([]*api.Secret, []error) {
 	}
 
 	if len(errors) > 0 {
-		return nil, errors
+		return secrets, errors
 	}
 
 	return secrets, nil
