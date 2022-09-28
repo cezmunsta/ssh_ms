@@ -67,7 +67,7 @@ else
 endif
 
 dev-vault:
-	@${SHELL} scripts/dev-vault.sh
+	@${SHELL} scripts/dev-vault.sh 1
 
 test:
 	@"${GO}" test "${PACKAGE}/ssh" "${PACKAGE}/cmd" "${PACKAGE}/vault" "${PACKAGE}/log" "${PACKAGE}/config"

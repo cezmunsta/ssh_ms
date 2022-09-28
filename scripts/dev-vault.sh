@@ -2,7 +2,9 @@
 
 set -eux
 
-declare -ir RUN="${1:-1}"
+declare -ir RUN="${1:-0}"
+
+cd "$(dirname "${0}")/../" || exit 1
 
 function vault_exists {
     # shellcheck disable=SC2155
@@ -45,27 +47,10 @@ function prepare_vault {
 }
 
 function create_policy {
-    vault policy write ssh_ms <(cat <<EOS
-path "sys/*" {
-  policy = "deny"
-}
+    local policy_name="${1}"
+    local policy_src="${2}"
 
-path "secret/ssh_ms/*" {
-  policy = "read"
-  capabilities = ["list", "sudo"]
-}
-
-path "moresecret/ssh_ms/*" {
-  policy = "read"
-  capabilities = ["list", "sudo"]
-}
-
-path "secret/ssh_ms_admin/*" {
-  policy = "read"
-  capabilities = ["list", "sudo"]
-}
-EOS
-    )
+    cat "${policy_src}" | vault policy write "${policy_name}" -
 }
 
 function add_user {
@@ -86,12 +71,13 @@ function renew_test_token {
     vault token renew --increment=30m
 }
 
-test "${RUN}" -eq 1 && {
+test "${RUN}" -eq 0 || {
     if ! vault_exists; then
         create_vault
     fi
 
     start_vault
-    create_policy
+    create_policy ssh_ms_admin templates/policy-full.sh
+    create_policy ssh_ms templates/policy-min.sh
     add_user
 }
