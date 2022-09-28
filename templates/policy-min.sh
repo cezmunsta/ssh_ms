@@ -4,5 +4,5 @@ path "sys/*" {
 
 path "secret/ssh_ms/*" {
   policy = "read"
-  capabilities = ["list", "sudo"]
+  capabilities = ["create", "read", "update", "patch", "delete", "list"]
 }
