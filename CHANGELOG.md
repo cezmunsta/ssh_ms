@@ -5,7 +5,7 @@
 - Update Vault to v1.12.0 (#97)
 - Add support for multiple secret namespaces (#96)
 
-## 2021-11-28: v1.7.1
+## 2022-07-29: v1.7.1
 
 - Updated goutils to v1.1.1 (#93)
 - Updated Vault to 1.11.1 (#92)
