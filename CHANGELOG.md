@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 2022-10-20
+
+- Update Vault to v1.12.0 (#97)
+- Add support for multiple secret namespaces (#96)
+
 ## 2021-11-28: v1.7.1
 
 - Updated goutils to v1.1.1 (#93)

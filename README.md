@@ -25,8 +25,8 @@ $ go install github.com/cezmunsta/ssh_ms
 
 For ease of use, ensure that `${GOPATH}/bin` is in your `PATH` to use the tools with ease.
 
-- `go` : `1.18.1`
-- `vault`: `1.10.2`
+- `go` : `1.18.6`
+- `vault`: `1.12.0`
 
 #### Go
 
@@ -252,7 +252,7 @@ Shared connection to localhost closed.
 ### Using namespaces
 It may be desirable to maintain multiple namespaces in Vault, so that access to specific connections can be
 controlled, such as a single binary that can be used by users with different policies applied to their account.
-Namespaces are configured at build time via the `SSH_MS_SECRET_PATH` variable. When performing write operations 
+Namespaces are configured at build time via the `SSH_MS_SECRET_PATH` variable. When performing write operations
 without specifying a namespace, a default one will be chosen (the first one in the list of namespaces).
 
 ```shell
@@ -260,8 +260,8 @@ without specifying a namespace, a default one will be chosen (the first one in t
 $ ssh_ms version --verbose
 Version: 8a8d6a915e13999bef6fb6b4bd279459d743ce9c
 Arch: linux amd64
-Go Version: go1.18.4
-Vault Version: 1.11.1
+Go Version: go1.18.6
+Vault Version: 1.12.0
 Base path: /home/user/.ssh/cache
 Namespaces:
 - secret/ssh_ms
@@ -271,18 +271,18 @@ Default SSH username: user
 SSH template username: SSH_MS_USERNAME
 SSH identity file: ~/.ssh/id_ed25519
 
-# Add a connection to a non-default namespace, 
-$ ssh_ms write secret-connection --namespace secret/my-special-namespace 
+# Add a connection to a non-default namespace,
+$ ssh_ms write secret-connection --namespace secret/my-special-namespace
 
 # Search and list will scan all available namespaces
-$ ssh_ms list                                          
-test secret-connection 
+$ ssh_ms list
+test secret-connection
 
 $ ssh_ms search conn
 secret-connection
 
 # List a specific namespace
-$ ssh_ms list --namespace secret/my-special-namespace  
+$ ssh_ms list --namespace secret/my-special-namespace
 secret-connection
 ```
 
