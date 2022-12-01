@@ -60,6 +60,7 @@ type userName struct {
 	IsParsed                                                              bool
 }
 
+// TODO: decide if we should have per-connection types, e.g. OpenSSL, GCloud, AWS, etc
 // Connection stores the SSH properties
 type Connection struct {
 	HostName            string
@@ -78,6 +79,7 @@ type Connection struct {
 	// Compression bool
 	// ControlMaster bool
 	// ControlPersist uint16
+	ConnectionType string
 }
 
 // CachedConnection contains a full config
@@ -466,6 +468,7 @@ func setSendEnv(sshArgs *Connection, args map[string]interface{}) {
 	sshArgs.SendEnv = option
 }
 
+// TODO: decide if we need per-conncetion type helpers, e.g. OpenSSL, GCloud, AWS, etc
 // BuildConnection creates the SSH command for execution
 // args : options provided for inspection
 func (c *Connection) BuildConnection(args map[string]interface{}, key string, templateUser string) []string {

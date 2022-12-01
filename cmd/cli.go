@@ -274,6 +274,9 @@ func checkVersion() [][]string {
 	if _, err := client.Do(req); err != nil {
 		log.Debugf("Request: %v", req)
 		log.Fatalf("Failed to lookup %s", url)
+		// log.Warningf("Failed to lookup %s", url)
+		// lines = append(lines, []string{"Unable to check the latest version at this time"})
+		// return lines
 	}
 
 	if parts := strings.Split(redirectURL[0], "/"); parts != nil {

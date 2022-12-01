@@ -376,9 +376,12 @@ func deleteConnection(vc *vaultApi.Client, key string) bool {
 func prepareConnection(vc *vaultApi.Client, args []string) ([]string, ssh.Connection, string, string) {
 	log.Debugf("prepareConnection: %v", args)
 	var sshArgs []string
+	var sshClient ssh.Connection
 	var svc string
 	var configComment string
 	var configMotd string
+
+	connType := "ssh"
 
 	if len(args) == 0 {
 		log.Fatal("Minimum requirement is to specify an alias")
@@ -403,9 +406,21 @@ func prepareConnection(vc *vaultApi.Client, args []string) ([]string, ssh.Connec
 	}
 
 	log.Debugf("config: %v", config)
-	sshClient := ssh.Connection{}
-	sshArgs = append(sshClient.BuildConnection(config, key, cfg.User), args[1:]...)
-	log.Debugf("sshArgs: %v", sshArgs)
+
+	if val, ok := config["ConnectionType"]; ok {
+		log.Debugf("ConnectionType detected: %v", val)
+		connType = val.(string)
+	}
+
+	// TODO: need to move connType-specific code to separate blocks
+	switch connType {
+	case "gcloud", "aws":
+		log.Fatalf("The %s connection type is currently unsupported", connType)
+	default:
+		sshClient = ssh.Connection{}
+		sshArgs = append(sshClient.BuildConnection(config, key, cfg.User), args[1:]...)
+		log.Debugf("sshArgs: %v", sshArgs)
+	}
 
 	for i := 0; i < len(sshClient.LocalForward); i++ {
 		switch sshClient.LocalForward[i].RemotePort {
