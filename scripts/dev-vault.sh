@@ -7,12 +7,8 @@ declare -ir RUN="${1:-0}"
 cd "$(dirname "${0}")/../" || exit 1
 
 function vault_exists {
-    # shellcheck disable=SC2155
-    local id="$(podman container ls --filter name=dev-vault --all --quiet)"
-    local -i status=1
-
-    test -z "${id}" || status=0
-    return ${status}
+    podman container exists dev-vault
+    return ${?}
 }
 
 function create_vault {
@@ -34,10 +30,15 @@ function watch_vault {
 }
 
 function prepare_vault {
-    export VAULT_ADDR=http://127.0.0.1:8200 \
-           VAULT_TOKEN=myroottoken
+    until podman container ls --filter name=dev-vault,status=running -q | grep -Eq \\w; do
+      sleep 1;
+    done
 
-    vault login -no-store
+    set +x
+    export VAULT_ADDR=http://127.0.0.1:8200 VAULT_TOKEN=myroottoken
+    echo -n "${VAULT_TOKEN}" | vault login -no-store -non-interactive -
+    set -x
+
     vault secrets disable secret/
     vault secrets enable --path=secret/ssh_ms kv
     vault secrets enable --path=moresecret/ssh_ms kv
