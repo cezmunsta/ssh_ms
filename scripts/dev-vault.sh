@@ -30,17 +30,29 @@ function watch_vault {
 }
 
 function prepare_vault {
+    local -r vault_host=127.0.0.1
+    local -ri vault_port=8200
+    local -r vault_scheme='http'
+
+    set +x
+    export VAULT_ADDR="${vault_scheme}://${vault_host}:${vault_port}" \
+            VAULT_TOKEN=myroottoken
+
     until podman container ls --filter name=dev-vault,status=running -q | grep -Eq \\w; do
       sleep 1;
     done
 
-    set +x
-    export VAULT_ADDR=http://127.0.0.1:8200 VAULT_TOKEN=myroottoken
-    echo -n "${VAULT_TOKEN}" | vault login -no-store -non-interactive -
+    until nc -z "${vault_host}" "${vault_port}"; do
+        sleep 1
+    done
+
+    echo -n "${VAULT_TOKEN}" | vault login -no-store -non-interactive -field token_duration -
     set -x
 
     vault secrets disable secret/
     vault secrets enable --path=secret/ssh_ms kv
+    vault secrets enable --path=secret/ssh_ms_kv1 kv-v1
+    vault secrets enable --path=secret/ssh_ms_kv2 kv-v2
     vault secrets enable --path=moresecret/ssh_ms kv
     vault secrets enable --path=secret/ssh_ms_admin kv
 
@@ -51,7 +63,7 @@ function create_policy {
     local policy_name="${1}"
     local policy_src="${2}"
 
-    cat "${policy_src}" | vault policy write "${policy_name}" -
+    vault policy write "${policy_name}" - < "${policy_src}"
 }
 
 function add_user {
