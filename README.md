@@ -1,6 +1,6 @@
 ![](https://github.com/cezmunsta/ssh_ms/actions/workflows/pr-go.yaml/badge.svg)
 [![CodeQL](https://github.com/cezmunsta/ssh_ms/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/cezmunsta/ssh_ms/actions/workflows/codeql-analysis.yml)
-
+[![Scorecard supply-chain security](https://github.com/cezmunsta/ssh_ms/actions/workflows/scorecard.yml/badge.svg)](https://github.com/cezmunsta/ssh_ms/actions/workflows/scorecard.yml)
 # ssh_ms
 
 Integrate with [HashiCorp Vault](https://github.com/hashicorp/vault) to store SSH configs and ease your remote life.
