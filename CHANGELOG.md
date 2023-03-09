@@ -1,5 +1,23 @@
 # CHANGELOG
 
+## 2023-03-09
+
+- Bump golang.org/x/net from 0.0.0-20220909164309-bea034e7d591 to 0.7.0 (#102)
+- Added scorecard badge to README (#100)
+- Ugraded codeql-action to v2
+- Added OSSF scorecard
+- Update Vault to v1.12.2 (#99)
+- Improved dev-vault helper script (#98)
+  - Updated prepare_vault to wait for Vault to become available
+    (address:port test) before automatic login
+  - Added additional secret paths for testing
+  - Fixed lint issue, replacing `cat` with input redirection
+  - Optimised vault_exists
+  - Updated prepare_vault to wait for the container to be in
+    a running state
+
+
+
 ## 2022-10-20
 
 - Update Vault to v1.12.0 (#97)
