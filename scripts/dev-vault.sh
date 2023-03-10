@@ -2,15 +2,13 @@
 
 set -eux
 
-declare -ir RUN="${1:-1}"
+declare -ir RUN="${1:-0}"
+
+cd "$(dirname "${0}")/../" || exit 1
 
 function vault_exists {
-    # shellcheck disable=SC2155
-    local id="$(podman container ls --filter name=dev-vault --all --quiet)"
-    local -i status=1
-
-    test -z "${id}" || status=0
-    return ${status}
+    podman container exists dev-vault
+    return ${?}
 }
 
 function create_vault {
@@ -32,28 +30,40 @@ function watch_vault {
 }
 
 function prepare_vault {
-    export VAULT_ADDR=http://127.0.0.1:8200 \
-           VAULT_TOKEN=myroottoken
+    local -r vault_host=127.0.0.1
+    local -ri vault_port=8200
+    local -r vault_scheme='http'
 
-    vault login -no-store
+    set +x
+    export VAULT_ADDR="${vault_scheme}://${vault_host}:${vault_port}" \
+            VAULT_TOKEN=myroottoken
+
+    until podman container ls --filter name=dev-vault,status=running -q | grep -Eq \\w; do
+      sleep 1;
+    done
+
+    until nc -z "${vault_host}" "${vault_port}"; do
+        sleep 1
+    done
+
+    echo -n "${VAULT_TOKEN}" | vault login -no-store -non-interactive -field token_duration -
+    set -x
+
     vault secrets disable secret/
     vault secrets enable --path=secret/ssh_ms kv
+    vault secrets enable --path=secret/ssh_ms_kv1 kv-v1
+    vault secrets enable --path=secret/ssh_ms_kv2 kv-v2
+    vault secrets enable --path=moresecret/ssh_ms kv
+    vault secrets enable --path=secret/ssh_ms_admin kv
 
     ./bin/ssh_ms write test --comment Testing HostName=localhost User=@@USER_FIRSTNAME
 }
 
 function create_policy {
-    vault policy write ssh_ms <(cat <<EOS
-path "sys/*" {
-  policy = "deny"
-}
+    local policy_name="${1}"
+    local policy_src="${2}"
 
-path "secret/ssh_ms/*" {
-  policy = "read"
-  capabilities = ["list", "sudo"]
-}
-EOS
-    )
+    vault policy write "${policy_name}" - < "${policy_src}"
 }
 
 function add_user {
@@ -74,12 +84,13 @@ function renew_test_token {
     vault token renew --increment=30m
 }
 
-test "${RUN}" -eq 1 && {
+test "${RUN}" -eq 0 || {
     if ! vault_exists; then
         create_vault
     fi
 
     start_vault
-    create_policy
+    create_policy ssh_ms_admin templates/policy-full.sh
+    create_policy ssh_ms templates/policy-min.sh
     add_user
 }

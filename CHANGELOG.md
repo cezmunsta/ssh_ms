@@ -1,6 +1,40 @@
 # CHANGELOG
 
+## 2023-03-09
+
+- Bump golang.org/x/net from 0.0.0-20220909164309-bea034e7d591 to 0.7.0 (#102)
+- Added scorecard badge to README (#100)
+- Ugraded codeql-action to v2
+- Added OSSF scorecard
+- Update Vault to v1.12.2 (#99)
+- Improved dev-vault helper script (#98)
+  - Updated prepare_vault to wait for Vault to become available
+    (address:port test) before automatic login
+  - Added additional secret paths for testing
+  - Fixed lint issue, replacing `cat` with input redirection
+  - Optimised vault_exists
+  - Updated prepare_vault to wait for the container to be in
+    a running state
+
+
+
+## 2022-10-20
+
+- Update Vault to v1.12.0 (#97)
+- Add support for multiple secret namespaces (#96)
+
+## 2022-07-29: v1.7.1
+
+- Updated goutils to v1.1.1 (#93)
+- Updated Vault to 1.11.1 (#92)
+- Updated cobra@v1.4.0 (#91)
+- PR workflow improvements (#89)
+- Updated to Go 1.18 (#87)
+- Updated dependencies (#82)
+
+
 ## 2021-11-28: v1.7.0
+
 - Notify user when their token will soon expire (#81)
   To help avoid unexpected expiration of tokens, the user is provided with a warning when they use a renewable token and it is due to expire in less than 7 days (default).
   The threshold for notifying about renewing tokens, `SSH_MS_RENEW_THRESHOLD` can be defined for `make build` and `make binaries`.

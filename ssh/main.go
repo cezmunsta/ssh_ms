@@ -75,9 +75,9 @@ type Connection struct {
 	Cache               CachedConnection
 	ControlPath         string
 	ForwardAgent        string
-	//Compression bool
-	//ControlMaster bool
-	//ControlPersist uint16
+	// Compression bool
+	// ControlMaster bool
+	// ControlPersist uint16
 }
 
 // CachedConnection contains a full config
@@ -122,7 +122,6 @@ func (c Connection) exists(lf LocalForward) bool {
 // doMarshal of userName to JSON format
 func (un *userName) doMarshal() (string, error) {
 	data, err := json.Marshal(un)
-
 	if err != nil {
 		log.Error("Failed to marshal:", un, ", error:", err)
 		return "", err
@@ -136,7 +135,6 @@ func (un *userName) doUnmarshal(jsonString string) (userName, error) {
 	var newUser userName
 
 	err := json.Unmarshal([]byte(jsonString), &newUser)
-
 	if err != nil {
 		log.Error("Failed to unmarshal:", jsonString, ", error: ", err)
 		return userName{}, err
@@ -150,7 +148,6 @@ func (un *userName) doUnmarshalToKeys(jsonString string) (map[string]interface{}
 	var keyedItem map[string]interface{}
 
 	err := json.Unmarshal([]byte(jsonString), &keyedItem)
-
 	if err != nil {
 		log.Error("Failed to unmarshal:", jsonString, ", error: ", err)
 		return nil, err
@@ -193,7 +190,7 @@ func (un *userName) generateUserName(username string) (bool, error) {
 // rewriteUsername config templates
 func (un *userName) rewriteUsername(newuser string) (bool, error) {
 	var b bytes.Buffer
-	var tempUser = userName{}
+	tempUser := userName{}
 	tempUser.generateUserName(newuser)
 	log.Debugf("original user '%v'", un)
 
@@ -443,7 +440,7 @@ func setPortForwarding(sshArgs *Connection) {
 		log.Errorf("Failed to generate JSON to cache '%v': %v", sshArgs.ControlPath, err)
 	}
 
-	if err := ioutil.WriteFile(sshArgs.ControlPath+".json", []byte(string(buff)), 0640); err != nil {
+	if err := ioutil.WriteFile(sshArgs.ControlPath+".json", []byte(string(buff)), 0o640); err != nil {
 		log.Errorf("Failed to save cache for '%v': %v", sshArgs.ControlPath, err)
 	}
 }
