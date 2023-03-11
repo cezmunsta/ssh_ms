@@ -32,7 +32,7 @@ VETFLAGS?=( -unusedresult -bools -copylocks -framepointer -httpresponse -json -s
 
 all: lint format test binaries
 
-binaries: binary-linux binary-mac
+binaries: binary-linux binary-mac binary-mac-m1
 
 flags:
 	@echo -e "\"${LDFLAGS}\"" | sed 's/-ldflags /-ldflags "/; s/^"//'
@@ -46,6 +46,14 @@ binary-prep:
 binary-mac: export GOOS=darwin
 binary-mac: export GOARCH=amd64
 binary-mac: binary-prep
+	@"${GO}" build -trimpath -o "${BUILD_DIR}/${GOOS}/${GOARCH}/ssh_ms" ${LDFLAGS};
+ifeq ($(COMPRESS_BINARY), 1)
+	@xz -fkez9 "${BUILD_DIR}/${GOOS}/${GOARCH}/ssh_ms";
+endif
+
+binary-mac-m1: export GOOS=darwin
+binary-mac-m1: export GOARCH=arm64
+binary-mac-m1: binary-prep
 	@"${GO}" build -trimpath -o "${BUILD_DIR}/${GOOS}/${GOARCH}/ssh_ms" ${LDFLAGS};
 ifeq ($(COMPRESS_BINARY), 1)
 	@xz -fkez9 "${BUILD_DIR}/${GOOS}/${GOARCH}/ssh_ms";
