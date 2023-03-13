@@ -38,6 +38,7 @@ flags:
 	@echo -e "\"${LDFLAGS}\"" | sed 's/-ldflags /-ldflags "/; s/^"//'
 
 sync:
+	@find bin/{linux,darwin} -type f -exec chmod a+r {} \;
 	@rsync -rlpDvc --progress bin/{linux,darwin} "${SSH_MS_SYNC_HOST}":"${SSH_MS_SYNC_PATH}"
 
 binary-prep:
@@ -45,6 +46,7 @@ binary-prep:
 
 binary-mac: export GOOS=darwin
 binary-mac: export GOARCH=amd64
+binary-mac: export CGO_ENABLED=0
 binary-mac: binary-prep
 	@"${GO}" build -trimpath -o "${BUILD_DIR}/${GOOS}/${GOARCH}/ssh_ms" ${LDFLAGS};
 ifeq ($(COMPRESS_BINARY), 1)
@@ -53,6 +55,7 @@ endif
 
 binary-mac-m1: export GOOS=darwin
 binary-mac-m1: export GOARCH=arm64
+binary-mac-m1: export CGO_ENABLED=0
 binary-mac-m1: binary-prep
 	@"${GO}" build -trimpath -o "${BUILD_DIR}/${GOOS}/${GOARCH}/ssh_ms" ${LDFLAGS};
 ifeq ($(COMPRESS_BINARY), 1)
@@ -61,8 +64,9 @@ endif
 
 binary-linux: export GOOS=linux
 binary-linux: export GOARCH=amd64
+binary-linux: export CGO_ENABLED=0
 binary-linux: binary-prep
-	@"${GO}" build -race -trimpath -o "${BUILD_DIR}/${GOOS}/${GOARCH}/ssh_ms" ${LDFLAGS};
+	@"${GO}" build -trimpath -o "${BUILD_DIR}/${GOOS}/${GOARCH}/ssh_ms" ${LDFLAGS};
 ifeq ($(COMPRESS_BINARY), 1)
 	@xz -fkez9 "${BUILD_DIR}/${GOOS}/${GOARCH}/ssh_ms";
 endif
