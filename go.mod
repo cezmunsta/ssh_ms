@@ -4,10 +4,10 @@ go 1.18
 
 require (
 	github.com/gabriel-vasile/mimetype v1.4.0
-	github.com/hashicorp/vault v1.12.2
-	github.com/hashicorp/vault-plugin-secrets-kv v0.13.0
+	github.com/hashicorp/vault v1.12.5
+	github.com/hashicorp/vault-plugin-secrets-kv v0.13.3
 	github.com/hashicorp/vault/api v1.8.0
-	github.com/hashicorp/vault/sdk v0.6.1-0.20221102145943-1e9b0a1225c3
+	github.com/hashicorp/vault/sdk v0.6.1-0.20230302210543-38f40f637f4f
 	github.com/sirupsen/logrus v1.9.0
 	github.com/spf13/cobra v1.4.0
 )
@@ -116,7 +116,7 @@ require (
 	github.com/hashicorp/go-secure-stdlib/awsutil v0.1.6 // indirect
 	github.com/hashicorp/go-secure-stdlib/base62 v0.1.2 // indirect
 	github.com/hashicorp/go-secure-stdlib/mlock v0.1.2 // indirect
-	github.com/hashicorp/go-secure-stdlib/parseutil v0.1.6 // indirect
+	github.com/hashicorp/go-secure-stdlib/parseutil v0.1.7 // indirect
 	github.com/hashicorp/go-secure-stdlib/reloadutil v0.1.1 // indirect
 	github.com/hashicorp/go-secure-stdlib/strutil v0.1.2 // indirect
 	github.com/hashicorp/go-secure-stdlib/tlsutil v0.1.2 // indirect
@@ -197,7 +197,7 @@ require (
 	go.mongodb.org/mongo-driver v1.7.3 // indirect
 	go.opencensus.io v0.23.0 // indirect
 	go.uber.org/atomic v1.9.0 // indirect
-	golang.org/x/crypto v0.0.0-20220817201139-bc19a97f63c8 // indirect
+	golang.org/x/crypto v0.6.0 // indirect
 	golang.org/x/net v0.7.0 // indirect
 	golang.org/x/oauth2 v0.0.0-20220524215830-622c5d57e401 // indirect
 	golang.org/x/sync v0.0.0-20220722155255-886fb9371eb4 // indirect
