@@ -1,6 +1,8 @@
 package vault
 
 import (
+	"context"
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -91,6 +93,51 @@ func DeleteSecret(c *api.Client, key string) (bool, error) {
 	return true, nil
 }
 
+func getKvVersion(c *api.Client, path string) (string, error) {
+	var (
+		outerErr     = fmt.Errorf("no match found")
+		saveRequired = true
+		ver          string
+	)
+	log.Debugf("checkSecret: %s", path)
+
+	/*f, err := ioutil.TempFile("", "ssh_ms-")
+	if err != nil {
+		panic(err)
+	}
+	if err := f.Close(); err != nil {
+		panic(err)
+	}
+	if err := os.Remove(f.Name()); err != nil {
+		panic(err)
+	}
+
+	if db, err := bolt.Open("/tmp/ssh_ms.db", 0600, nil); err != nil {
+		log.Fatalf("failed to open database")
+		saveRequired = true
+	} else {
+		defer func() {
+			db.Close()
+		}()
+	}*/
+
+	if saveRequired {
+		if secret, err := c.Logical().List(path + "/metadata"); err == nil && secret != nil {
+			log.Debugf("kv2 detected: %s", path)
+			ver, outerErr = "kv2", nil
+		}
+
+		if secret, err := c.Logical().List(path); err == nil && secret != nil {
+			log.Debugf("kv1 detected: %s", path)
+			ver, outerErr = "kv1", nil
+		}
+
+		log.Debugf("save required for %v", path)
+	}
+
+	return ver, outerErr
+}
+
 // ListSecrets reads the list of secrets/data under a path in Vault
 // c : Vault client
 // path : path to secret/data in Vault
@@ -99,8 +146,28 @@ func ListSecrets(c *api.Client, path string) ([]*api.Secret, []error) {
 	paths := strings.Split(path, ",")
 	secrets := []*api.Secret{}
 
+	_ = context.Background()
+
 	for _, p := range paths {
-		secret, err := c.Logical().List(p)
+		var err error
+		var secret *api.Secret
+		var ver string
+		/*kv1 := c.KVv1(p)
+		kv2 := c.KVv2(p)
+		v1p, err1p := kv1.Get(ctx, "*")
+		v2p, err2p := kv2.Get(ctx, "")
+		log.Debugf("KVv1: %v %v", v1p, err1p)
+		log.Debugf("KVv2: %v %v", v2p, err2p)*/
+		ver, err = getKvVersion(c, p)
+		switch ver {
+		case "kv2":
+			secret, err = c.Logical().List(p + "/metadata")
+		case "kv1":
+			secret, err = c.Logical().List(p)
+		default:
+			errors = append(errors, fmt.Errorf("unable to match KV version: %v", ver))
+		}
+
 		if err != nil {
 			errors = append(errors, err)
 		} else {
