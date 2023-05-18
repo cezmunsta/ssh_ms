@@ -125,9 +125,7 @@ func getKvVersion(c *api.Client, path string) (string, error) {
 		if secret, err := c.Logical().List(path + "/metadata"); err == nil && secret != nil {
 			log.Debugf("kv2 detected: %s", path)
 			ver, outerErr = "kv2", nil
-		}
-
-		if secret, err := c.Logical().List(path); err == nil && secret != nil {
+		} else if secret, err := c.Logical().List(path); err == nil && secret != nil {
 			log.Debugf("kv1 detected: %s", path)
 			ver, outerErr = "kv1", nil
 		}
