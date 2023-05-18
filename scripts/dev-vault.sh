@@ -12,9 +12,9 @@ function vault_exists {
 }
 
 function create_vault {
-    podman container create --cap-add=IPC_LOCK --name=dev-vault --network=host \
+    podman container create --cap-add=IPC_LOCK,SETFCAP --name=dev-vault --network=host \
         -e VAULT_DEV_ROOT_TOKEN_ID=myroottoken \
-        -e VAULT_DEV_LISTEN_ADDRESS=127.0.0.1:8200 vault
+        -e VAULT_DEV_LISTEN_ADDRESS=127.0.0.1:8200 hashicorp/vault
 }
 
 function start_vault {
