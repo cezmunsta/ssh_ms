@@ -16,3 +16,13 @@ path "secret/ssh_ms_admin/*" {
   policy = "read"
   capabilities = ["list", "sudo"]
 }
+
+path "secret/ssh_ms_kv1/*" {
+  policy = "read"
+  capabilities = ["list", "sudo"]
+}
+
+path "secret/ssh_ms_kv2/*" {
+  policy = "read"
+  capabilities = ["list", "sudo"]
+}

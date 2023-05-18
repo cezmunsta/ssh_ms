@@ -89,7 +89,7 @@ test "${RUN}" -eq 0 || {
     fi
 
     start_vault
-    create_policy ssh_ms_admin templates/policy-full.sh
-    create_policy ssh_ms templates/policy-min.sh
+    create_policy ssh_ms_admin templates/policy-full.hcl
+    create_policy ssh_ms templates/policy-min.hcl
     add_user
 }
