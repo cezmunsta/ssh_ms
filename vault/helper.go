@@ -3,7 +3,6 @@ package vault
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -45,7 +44,7 @@ func Authenticate(e UserEnv, st bool) *api.Client {
 
 	if st {
 		storedToken := ""
-		if read, err := ioutil.ReadFile(filepath.Join(os.Getenv("HOME"), ".vault-token")); err != nil {
+		if read, err := os.ReadFile(filepath.Join(os.Getenv("HOME"), ".vault-token")); err != nil {
 			log.Fatalf("Unable to find existing session, please login using vault")
 		} else {
 			storedToken = string(read)
