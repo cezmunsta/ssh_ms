@@ -92,47 +92,40 @@ func DeleteSecret(c *api.Client, key string) (bool, error) {
 	return true, nil
 }
 
+func getSplitPath(path string) (string, string) {
+	sp := strings.Split(path, "/")
+
+	return strings.Join(sp[0:len(sp)-1], "/"), sp[len(sp)-1]
+}
+
 func getKvVersion(c *api.Client, path string) (string, error) {
 	var (
-		outerErr     = fmt.Errorf("no match found")
-		saveRequired = true
-		ver          string
+		outerErr = fmt.Errorf("no match found")
+		ver      string
 	)
+
 	log.Debugf("checkSecret: %s", path)
 
-	/*f, err := ioutil.TempFile("", "ssh_ms-")
-	if err != nil {
-		panic(err)
-	}
-	if err := f.Close(); err != nil {
-		panic(err)
-	}
-	if err := os.Remove(f.Name()); err != nil {
-		panic(err)
-	}
-
-	if db, err := bolt.Open("/tmp/ssh_ms.db", 0600, nil); err != nil {
-		log.Fatalf("failed to open database")
-		saveRequired = true
-	} else {
-		defer func() {
-			db.Close()
-		}()
-	}*/
-
-	if saveRequired {
-		if secret, err := c.Logical().List(path + "/metadata"); err == nil && secret != nil {
-			log.Debugf("kv2 detected: %s", path)
-			ver, outerErr = "kv2", nil
-		} else if secret, err := c.Logical().List(path); err == nil && secret != nil {
-			log.Debugf("kv1 detected: %s", path)
-			ver, outerErr = "kv1", nil
-		}
-
-		log.Debugf("save required for %v", path)
+	if secret, err := c.Logical().List(path + "/metadata"); err == nil && secret != nil {
+		log.Debugf("kv2 detected: %s", path)
+		ver, outerErr = "kv2", nil
+	} else if secret, err := c.Logical().List(path); err == nil && secret != nil {
+		log.Debugf("kv1 detected: %s", path)
+		ver, outerErr = "kv1", nil
 	}
 
 	return ver, outerErr
+}
+
+func getKvItems(c *api.Client, path string) ([]*api.KVSecret, error) {
+	var (
+		outerErr = fmt.Errorf("no match found")
+		secrets  []*api.KVSecret
+	)
+
+	log.Debugf("getKvItems: %s", path)
+
+	return secrets, outerErr
 }
 
 // ListSecrets reads the list of secrets/data under a path in Vault
@@ -149,12 +142,7 @@ func ListSecrets(c *api.Client, path string) ([]*api.Secret, []error) {
 		var err error
 		var secret *api.Secret
 		var ver string
-		/*kv1 := c.KVv1(p)
-		kv2 := c.KVv2(p)
-		v1p, err1p := kv1.Get(ctx, "*")
-		v2p, err2p := kv2.Get(ctx, "")
-		log.Debugf("KVv1: %v %v", v1p, err1p)
-		log.Debugf("KVv2: %v %v", v2p, err2p)*/
+
 		ver, err = getKvVersion(c, p)
 		switch ver {
 		case "kv2":
