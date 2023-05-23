@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"bytes"
-	"io/ioutil"
+	"io"
 	"runtime"
 	"strings"
 	"testing"
@@ -21,7 +21,7 @@ func TestExecute(t *testing.T) {
 	cmd.SetArgs([]string{"version"})
 	cmd.Execute()
 
-	out, err := ioutil.ReadAll(b)
+	out, err := io.ReadAll(b)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -59,7 +59,7 @@ func TestGetVersion(t *testing.T) {
 
 func TestCheckVersion(t *testing.T) {
 	lines := checkVersion()
-	//latestVersion := "You are using the latest version"
+	// latestVersion := "You are using the latest version"
 
 	if len(lines) != 1 && len(lines) != 2 {
 		t.Fatalf("expected: 1-2 lines, got: %v", lines)

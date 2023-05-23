@@ -69,20 +69,18 @@ func TestHelpers(t *testing.T) {
 	defer cluster.Cleanup()
 
 	for _, secretPath := range vaultSecretPaths {
-		if strings.HasSuffix(secretPath, "_v2") {
-			continue
-		}
-
 		key := fmt.Sprintf("%s/%s", secretPath, "dummy")
 		data := make(secretData)
 		data["User"] = "dummy"
 
 		if status, err := WriteSecret(client, key, data); err != nil || !status {
-			t.Fatalf("writeSecret expected: %v, got: %v, %v", data, status, err)
+			t.Fatalf("WriteSecret expected: %v, got: %v, %v", data, status, err)
 		}
-		if secret, err := ReadSecret(client, key); err != nil || secret.Data["User"] != data["User"] {
+
+		if secret, err := ReadSecret(client, key); err != nil || secret["User"] != data["User"] {
 			t.Fatalf("ReadSecret expected: %v, got: %v, %v", data, secret, err)
 		}
+
 		if status, err := DeleteSecret(client, key); err != nil || !status {
 			t.Fatalf("DeleteSecret expected: %v, got: %v, %v", data, status, err)
 		}
@@ -95,6 +93,7 @@ func TestHelpers(t *testing.T) {
 	}) {
 		t.Fatalf("requiresRenewal expected: true")
 	}
+
 	expires = expires.Add(24 * 8 * time.Hour)
 	if requiresRenewal(map[string]interface{}{
 		"renewable":   true,

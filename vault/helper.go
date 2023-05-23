@@ -24,6 +24,11 @@ type UserEnv struct {
 // RenewThreshold is used to compare against the token expiration time
 var RenewThreshold = "168h"
 
+const (
+	apiTimeout      = time.Second * 60
+	noMatchFoundErr = "no match found"
+)
+
 // Authenticate a user with Vault
 // e : user environment
 // st: flag to use the stored token
@@ -86,46 +91,26 @@ func requiresRenewal(d map[string]interface{}) bool {
 
 // DeleteSecret removes a secret from Vault
 func DeleteSecret(c *api.Client, key string) (bool, error) {
-	if _, err := c.Logical().Delete(key); err != nil {
-		return false, err
+	ctx := context.Background()
+	mountPath, secretName := getSplitPath(key)
+	timeout, cancel := context.WithTimeout(ctx, apiTimeout)
+
+	defer cancel()
+
+	if ver, err := getKvVersion(c, mountPath); err == nil {
+		switch ver {
+		case "kv2":
+			if err := c.KVv2(mountPath).Delete(timeout, secretName); err != nil {
+				return false, err
+			}
+		case "kv1":
+			if err := c.KVv1(mountPath).Delete(timeout, secretName); err != nil {
+				return false, err
+			}
+		}
 	}
+
 	return true, nil
-}
-
-func getSplitPath(path string) (string, string) {
-	sp := strings.Split(path, "/")
-
-	return strings.Join(sp[0:len(sp)-1], "/"), sp[len(sp)-1]
-}
-
-func getKvVersion(c *api.Client, path string) (string, error) {
-	var (
-		outerErr = fmt.Errorf("no match found")
-		ver      string
-	)
-
-	log.Debugf("checkSecret: %s", path)
-
-	if secret, err := c.Logical().List(path + "/metadata"); err == nil && secret != nil {
-		log.Debugf("kv2 detected: %s", path)
-		ver, outerErr = "kv2", nil
-	} else if secret, err := c.Logical().List(path); err == nil && secret != nil {
-		log.Debugf("kv1 detected: %s", path)
-		ver, outerErr = "kv1", nil
-	}
-
-	return ver, outerErr
-}
-
-func getKvItems(c *api.Client, path string) ([]*api.KVSecret, error) {
-	var (
-		outerErr = fmt.Errorf("no match found")
-		secrets  []*api.KVSecret
-	)
-
-	log.Debugf("getKvItems: %s", path)
-
-	return secrets, outerErr
 }
 
 // ListSecrets reads the list of secrets/data under a path in Vault
@@ -135,8 +120,6 @@ func ListSecrets(c *api.Client, path string) ([]*api.Secret, []error) {
 	errors := []error{}
 	paths := strings.Split(path, ",")
 	secrets := []*api.Secret{}
-
-	_ = context.Background()
 
 	for _, p := range paths {
 		var err error
@@ -170,12 +153,27 @@ func ListSecrets(c *api.Client, path string) ([]*api.Secret, []error) {
 // ReadSecret requests the secret/data from Vault
 // c : Vault client
 // key : the key for the desired secret/data
-func ReadSecret(c *api.Client, key string) (*api.Secret, error) {
-	secret, err := c.Logical().Read(key)
-	if err != nil {
-		return nil, err
+func ReadSecret(c *api.Client, key string) (map[string]interface{}, error) {
+	ctx := context.Background()
+	mountPath, secretName := getSplitPath(key)
+	timeout, cancel := context.WithTimeout(ctx, apiTimeout)
+
+	defer cancel()
+
+	if ver, err := getKvVersion(c, mountPath); err == nil {
+		switch ver {
+		case "kv2":
+			if secret, _ := c.KVv2(mountPath).Get(timeout, secretName); secret != nil {
+				return secret.Data, nil
+			}
+		case "kv1":
+			if secret, _ := c.KVv1(mountPath).Get(timeout, secretName); secret != nil {
+				return secret.Data, nil
+			}
+		}
 	}
-	return secret, nil
+
+	return nil, fmt.Errorf(noMatchFoundErr)
 }
 
 // WriteSecret adds a secret to Vault
@@ -183,6 +181,12 @@ func ReadSecret(c *api.Client, key string) (*api.Secret, error) {
 // key : the key for the secret
 // data : config for use when writing data
 func WriteSecret(c *api.Client, key string, data map[string]interface{}) (bool, error) {
+	ctx := context.Background()
+	mountPath, secretName := getSplitPath(key)
+	timeout, cancel := context.WithTimeout(ctx, apiTimeout)
+
+	defer cancel()
+
 	sanitisedData := make(secretData)
 	keyLookup := map[string]interface{}{
 		"hostname":            "HostName",
@@ -213,8 +217,41 @@ func WriteSecret(c *api.Client, key string, data map[string]interface{}) (bool, 
 		}
 		sanitisedData[opt] = v
 	}
-	if _, err := c.Logical().Write(key, sanitisedData); err != nil {
-		return false, err
+
+	if ver, err := getKvVersion(c, mountPath); err == nil {
+		switch ver {
+		case "kv2":
+			if _, err := c.KVv2(mountPath).Put(timeout, secretName, sanitisedData); err != nil {
+				return false, err
+			}
+		case "kv1":
+			if err := c.KVv1(mountPath).Put(timeout, secretName, sanitisedData); err != nil {
+				return false, err
+			}
+		}
 	}
+
 	return true, nil
+}
+
+func getSplitPath(path string) (string, string) {
+	sp := strings.Split(path, "/")
+
+	return strings.Join(sp[0:len(sp)-1], "/"), sp[len(sp)-1]
+}
+
+func getKvVersion(c *api.Client, path string) (string, error) {
+	log.Debugf("getKvVersion: %s", path)
+
+	if secret, err := c.Logical().List(path + "/metadata"); err == nil && secret != nil /*&& len(secret.Warnings) == 0*/ {
+		log.Debugf("kv2 detected: %s", path)
+		return "kv2", nil
+	}
+
+	if secret, err := c.Logical().List(path); err == nil && secret != nil {
+		log.Debugf("kv1 detected: %s", path)
+		return "kv1", nil
+	}
+
+	return "", fmt.Errorf(noMatchFoundErr)
 }

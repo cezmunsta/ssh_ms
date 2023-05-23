@@ -119,7 +119,7 @@ func TestShowConnection(t *testing.T) {
 	}
 
 	sshClient := ssh.Connection{}
-	sshClient.BuildConnection(cn.Data, lookupKey, "dummy")
+	sshClient.BuildConnection(cn, lookupKey, "dummy")
 	config := sshClient.Cache.Config
 
 	if !strings.Contains(config, lookupKey) {
