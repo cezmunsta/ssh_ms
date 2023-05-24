@@ -232,6 +232,7 @@ func init() {
 	updateCmd.Flags().StringVarP(&cfg.ConfigMotd, "motd", "m", "", "Set the Motd for the config entry")
 	writeCmd.Flags().StringVarP(&cfg.ConfigMotd, "motd", "m", "", "Add a Motd comment for the config entry")
 
+	connectCmd.Flags().StringVarP(&cfg.NameSpace, "namespace", "N", "", "Specify the namespace for the config entry")
 	deleteCmd.Flags().StringVarP(&cfg.NameSpace, "namespace", "N", "", "Specify the namespace for the config entry")
 	listCmd.Flags().StringVarP(&cfg.NameSpace, "namespace", "N", "", "Specify the namespace for the config entry")
 	showCmd.Flags().StringVarP(&cfg.NameSpace, "namespace", "N", "", "Specify the namespace for the config entry")
