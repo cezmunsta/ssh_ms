@@ -25,8 +25,9 @@ type UserEnv struct {
 var RenewThreshold = "168h"
 
 const (
-	apiTimeout      = time.Second * 60
-	noMatchFoundErr = "no match found"
+	apiTimeout           = time.Second * 60
+	errHasMetadataSuffix = "metadata is a reserved word"
+	errNoMatchFound      = "no match found"
 )
 
 // Authenticate a user with Vault
@@ -173,7 +174,7 @@ func ReadSecret(c *api.Client, key string) (map[string]interface{}, error) {
 		}
 	}
 
-	return nil, fmt.Errorf(noMatchFoundErr)
+	return nil, fmt.Errorf(errNoMatchFound)
 }
 
 // WriteSecret adds a secret to Vault
@@ -228,6 +229,8 @@ func WriteSecret(c *api.Client, key string, data map[string]interface{}) (bool, 
 			if err := c.KVv1(mountPath).Put(timeout, secretName, sanitisedData); err != nil {
 				return false, err
 			}
+		default:
+			return false, err
 		}
 	}
 
@@ -243,15 +246,25 @@ func getSplitPath(path string) (string, string) {
 func getKvVersion(c *api.Client, path string) (string, error) {
 	log.Debugf("getKvVersion: %s", path)
 
-	if secret, err := c.Logical().List(path + "/metadata"); err == nil && secret != nil /*&& len(secret.Warnings) == 0*/ {
-		log.Debugf("kv2 detected: %s", path)
-		return "kv2", nil
+	// Ensure that we aren't getting secret/mount/path/metadata getting
+	// passed in to the check, as this is used for KV2 secrets
+	if strings.HasSuffix(path, "/metadata") {
+		log.Debugf("%s has metadata suffix", path)
+		return "", fmt.Errorf(errHasMetadataSuffix)
 	}
 
-	if secret, err := c.Logical().List(path); err == nil && secret != nil {
-		log.Debugf("kv1 detected: %s", path)
+	secret, err := c.Logical().List(path)
+
+	if err == nil && (secret == nil || len(secret.Warnings) == 0) {
+		log.Debugf("%s is kv1", path)
 		return "kv1", nil
 	}
 
-	return "", fmt.Errorf(noMatchFoundErr)
+	if err == nil && secret != nil && len(secret.Warnings) > 0 {
+		log.Debugf("%s is kv2", path)
+		return "kv2", nil
+	}
+
+	log.Debugf("%s is unknown", path)
+	return "", fmt.Errorf(errNoMatchFound)
 }
