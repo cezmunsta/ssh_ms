@@ -101,7 +101,8 @@ func DeleteSecret(c *api.Client, key string) (bool, error) {
 	if ver, err := getKvVersion(c, mountPath); err == nil {
 		switch ver {
 		case "kv2":
-			if err := c.KVv2(mountPath).Delete(timeout, secretName); err != nil {
+			// TODO: this should be changed when adding support for revisions
+			if err := c.KVv2(mountPath).DeleteMetadata(timeout, secretName); err != nil {
 				return false, err
 			}
 		case "kv1":
@@ -139,7 +140,7 @@ func ListSecrets(c *api.Client, path string) ([]*api.Secret, []error) {
 
 		if err != nil {
 			errors = append(errors, err)
-		} else {
+		} else if secret != nil {
 			secrets = append(secrets, secret)
 		}
 	}

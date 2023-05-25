@@ -86,6 +86,12 @@ func TestHelpers(t *testing.T) {
 		}
 	}
 
+	for _, secretPath := range vaultSecretPaths {
+		if secrets, err := ListSecrets(client, secretPath); err != nil || len(secrets) > 0 {
+			t.Fatalf("ListSecrets expected no errors nor secrets, got: %v, %v", secrets, err)
+		}
+	}
+
 	expires := time.Now().Add(24 * time.Hour)
 	if !requiresRenewal(map[string]interface{}{
 		"renewable":   true,
