@@ -79,6 +79,7 @@ else
 endif
 
 dev-vault:
+	@${SHELL} podman stop dev-vault 2>/dev/null || true
 	@${SHELL} scripts/dev-vault.sh 1
 
 test:
