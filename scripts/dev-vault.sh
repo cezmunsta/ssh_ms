@@ -33,6 +33,7 @@ function prepare_vault {
     local -r vault_host=127.0.0.1
     local -ri vault_port=8200
     local -r vault_scheme='http'
+    local -A secrets=( [ssh_ms]="1" [ssh_ms_kv1]="1" [ssh_ms_kv2]="2" )
 
     set +x
     export VAULT_ADDR="${vault_scheme}://${vault_host}:${vault_port}" \
@@ -50,13 +51,11 @@ function prepare_vault {
     set -x
 
     vault secrets disable secret/
-    vault secrets enable --path=secret/ssh_ms kv
-    vault secrets enable --path=secret/ssh_ms_kv1 kv-v1
-    vault secrets enable --path=secret/ssh_ms_kv2 kv-v2
-    vault secrets enable --path=moresecret/ssh_ms kv
-    vault secrets enable --path=secret/ssh_ms_admin kv
 
-    ./bin/ssh_ms write test --comment Testing HostName=localhost User=@@USER_FIRSTNAME
+    for secret in "${!secrets[@]}"; do
+        vault secrets enable --path=secret/"${secret}" --version="${secrets[${secret}]}" kv
+        vault kv put --mount=secret/"${secret}" test HostName="${secret}-${secrets[${secret}]}.localhost"
+    done
 }
 
 function create_policy {
