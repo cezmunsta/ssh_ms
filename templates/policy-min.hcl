@@ -1,8 +1,7 @@
 path "sys/*" {
-  policy = "deny"
+  capabilities = ["deny"]
 }
 
-path "secret/ssh_ms/*" {
-  policy = "read"
+path "secret/ssh_ms*" {
   capabilities = ["create", "read", "update", "patch", "delete", "list"]
 }

@@ -7,7 +7,6 @@ import (
 	"errors"
 	"fmt"
 	"html/template"
-	"io/ioutil"
 	"math"
 	"os"
 	"path/filepath"
@@ -307,19 +306,19 @@ func updateConnection(vc *vaultApi.Client, key string, args []string) bool {
 		if len(s) != 2 {
 			log.Fatalf("Unexpected option '%v', expected XXX=YYY", args[i])
 		}
-		conn.Data[s[0]] = s[1]
+		conn[s[0]] = s[1]
 	}
 
 	if len(cfg.ConfigComment) > 0 {
-		conn.Data["ConfigComment"] = cfg.ConfigComment
+		conn["ConfigComment"] = cfg.ConfigComment
 	}
 
 	if len(cfg.ConfigMotd) > 0 {
-		conn.Data["ConfigMotd"] = cfg.ConfigMotd
+		conn["ConfigMotd"] = cfg.ConfigMotd
 	}
 
 	if cfg.Simulate {
-		log.Infof("Simulate update of '%v': %v", key, conn.Data)
+		log.Infof("Simulate update of '%v': %v", key, conn)
 		return true
 	}
 
@@ -331,12 +330,12 @@ func updateConnection(vc *vaultApi.Client, key string, args []string) bool {
 		return false
 	}
 
-	status, err := vaultHelper.WriteSecret(vc, fmt.Sprintf("%s/%s", getSecretPath(), key), conn.Data)
+	status, err := vaultHelper.WriteSecret(vc, fmt.Sprintf("%s/%s", getSecretPath(), key), conn)
 	if err != nil {
 		log.Errorf("Failed to write '%v': %v", key, err)
 		return false
 	}
-	saveCache(key, conn.Data)
+	saveCache(key, conn)
 	return status
 }
 
@@ -501,7 +500,7 @@ func getCache(key string) (map[string]interface{}, error) {
 		return nil, err
 	}
 
-	read, err := ioutil.ReadFile(getCachePath(key))
+	read, err := os.ReadFile(getCachePath(key))
 	if err != nil {
 		log.Infof("No local copy exists for: %v", key)
 		return nil, err
@@ -523,10 +522,10 @@ func getRemoteCache(vc *vaultApi.Client, key string) (map[string]interface{}, er
 		return nil, err
 	}
 
-	if status, err := saveCache(key, conn.Data); err != nil || !status {
+	if status, err := saveCache(key, conn); err != nil || !status {
 		return nil, err
 	}
-	return conn.Data, nil
+	return conn, nil
 }
 
 // removeCache deletes a specific file
@@ -578,7 +577,7 @@ func populateCache(vc *vaultApi.Client) (bool, error) {
 				log.Error("failed to get connection", conn)
 				totalErrors++
 				continue
-			} else if _, err := saveCache(conn, rawConn.Data); err != nil {
+			} else if _, err := saveCache(conn, rawConn); err != nil {
 				log.Errorf("failed to save connection %s : %v", conn, err)
 				totalErrors++
 				continue
@@ -637,7 +636,7 @@ func saveCache(key string, data map[string]interface{}) (bool, error) {
 		return false, err
 	}
 
-	if err := ioutil.WriteFile(getCachePath(key), []byte(string(buff)), 0o640); err != nil {
+	if err := os.WriteFile(getCachePath(key), []byte(string(buff)), 0o640); err != nil {
 		log.Errorf("Failed to save cache for '%v': %v", key, err)
 		return false, err
 	}
@@ -645,7 +644,7 @@ func saveCache(key string, data map[string]interface{}) (bool, error) {
 }
 
 // getRawConnection retrieves the secret from Vault
-func getRawConnection(vc *vaultApi.Client, key string) (*vaultApi.Secret, error) {
+func getRawConnection(vc *vaultApi.Client, key string) (map[string]interface{}, error) {
 	secret, err := vaultHelper.ReadSecret(vc, fmt.Sprintf("%s/%s", getSecretPath(), key))
 
 	if err != nil || secret == nil {
