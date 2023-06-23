@@ -1,5 +1,21 @@
 # CHANGELOG
 
+## 2023-06-23
+
+- Add support for M1 ARM (#85)
+- Bump github.com/hashicorp/vault from 1.12.2 to 1.12.5 (#105)
+- Disable CGO for builds (#104)
+  Avoid issues relating to GLIBC versions on older platforms.
+- Bumped to go 1.20 (#106)
+- Updated dev-vault helper to use hashicorp/vault (#107)
+- Added missing --namespace flag from connect (#109)
+- Tweaks to improve the dev-vault helper (#112)
+- Add support for KV v2 (#110)
+  The KV version is determined based upon list responses, where an attempt is
+  first made to list a secret path as if it is v1. If this fails then an
+  attempt is made to list as if a secret path is v2. Secret paths can no longer
+  end in `/metadata`
+
 ## 2023-03-09
 
 - Bump golang.org/x/net from 0.0.0-20220909164309-bea034e7d591 to 0.7.0 (#102)
