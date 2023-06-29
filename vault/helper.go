@@ -10,6 +10,7 @@ import (
 
 	"github.com/hashicorp/vault/api"
 
+	"github.com/cezmunsta/ssh_ms/config"
 	"github.com/cezmunsta/ssh_ms/log"
 )
 
@@ -21,8 +22,12 @@ type UserEnv struct {
 	Simulate    bool
 }
 
-// RenewThreshold is used to compare against the token expiration time
-var RenewThreshold = "168h"
+var (
+	cfg = config.GetConfig()
+
+	// RenewThreshold is used to compare against the token expiration time
+	RenewThreshold = "168h"
+)
 
 const (
 	apiTimeout           = time.Second * 60
@@ -77,6 +82,10 @@ func Authenticate(e UserEnv, st bool) *api.Client {
 
 func requiresRenewal(d map[string]interface{}) bool {
 	log.Debugf("Checking data: %v", d)
+	if cfg.RenewWarningOptOut {
+		log.Debug("Bypassing renewal check")
+		return false
+	}
 	if val, ok := d["renewable"]; ok && !val.(bool) {
 		return false
 	}

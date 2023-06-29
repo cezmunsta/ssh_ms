@@ -13,8 +13,8 @@ import (
 
 // Settings contains the configuration details
 type Settings struct {
-	LogLevel                                                     logrus.Level
-	Debug, Simulate, StoredToken, Verbose, Version, VersionCheck bool
+	LogLevel                                                                         logrus.Level
+	Debug, RenewWarningOptOut, Simulate, StoredToken, Verbose, Version, VersionCheck bool
 	ConfigComment, ConfigMotd, EnvSSHDefaultUsername, EnvSSHIdentityFile,
 	CustomLocalForward, EnvSSHUsername, EnvVaultAddr, NameSpace, SecretPath, Show, StoragePath, User, VaultAddr, VaultToken, VaultVersion string
 }
@@ -34,6 +34,10 @@ var (
 	// EnvBasePath is the parent location used to prefix storage paths,
 	// default value is filepath.Join(os.Getenv("HOME"), ".ssh", "cache")
 	EnvBasePath string
+
+	// EnvRenewWarningOptOut will disable warnings normally sent when a token is due to expire
+	// default value is os.Getenv("SSH_MS_RENEW_WARNING_OPTOUT")
+	EnvRenewWarningOptOut string
 
 	// EnvSSHDefaultUsername sets the default used in connections,
 	// default value is os.Getenv("USER")
@@ -67,6 +71,7 @@ func (s *Settings) ToJSON() string {
 // ensuring that only one instance is ever returned
 func GetConfig() *Settings {
 	once.Do(func() {
+		renewWarningOptOut := false
 		if EnvBasePath == "" {
 			EnvBasePath = filepath.Join(os.Getenv("HOME"), ".ssh", "cache")
 		}
@@ -76,12 +81,20 @@ func GetConfig() *Settings {
 		if EnvSSHDefaultUsername == "" {
 			EnvSSHDefaultUsername = os.Getenv("USER")
 		}
+
 		if EnvSSHIdentityFile == "" {
 			EnvSSHIdentityFile = filepath.Join("~", ".ssh", "id_ed25519")
 		}
+
 		if EnvVaultAddr == "" {
 			EnvVaultAddr = os.Getenv(vaultApi.EnvVaultAddress)
 		}
+
+		EnvRenewWarningOptOut = os.Getenv("SSH_MS_RENEW_WARNING_OPTOUT")
+		if EnvRenewWarningOptOut == "1" || EnvRenewWarningOptOut == "yes" || EnvRenewWarningOptOut == "true" {
+			renewWarningOptOut = true
+		}
+
 		settings = Settings{
 			ConfigComment:         "",
 			ConfigMotd:            "",
@@ -92,6 +105,7 @@ func GetConfig() *Settings {
 			EnvVaultAddr:          EnvVaultAddr,
 			LogLevel:              logrus.WarnLevel,
 			NameSpace:             "",
+			RenewWarningOptOut:    renewWarningOptOut,
 			SecretPath:            SecretPath,
 			Simulate:              false,
 			StoragePath:           EnvBasePath,
