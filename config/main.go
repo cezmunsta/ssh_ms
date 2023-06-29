@@ -7,7 +7,7 @@ import (
 	"sync"
 
 	vaultApi "github.com/hashicorp/vault/api"
-	vaultVersion "github.com/hashicorp/vault/sdk/version"
+	vaultVersion "github.com/hashicorp/vault/version"
 	"github.com/sirupsen/logrus"
 )
 
