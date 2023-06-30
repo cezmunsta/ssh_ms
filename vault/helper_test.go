@@ -7,7 +7,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/cezmunsta/ssh_ms/config"
 	vaultKv "github.com/hashicorp/vault-plugin-secrets-kv"
 	vaultApi "github.com/hashicorp/vault/api"
 	vaultHttp "github.com/hashicorp/vault/http"
@@ -16,7 +15,6 @@ import (
 )
 
 var (
-	cfg              = config.GetConfig()
 	client           *vaultApi.Client
 	cluster          *vault.TestCluster
 	once             sync.Once
@@ -101,6 +99,15 @@ func TestHelpers(t *testing.T) {
 	}
 
 	expires = expires.Add(24 * 8 * time.Hour)
+	if requiresRenewal(map[string]interface{}{
+		"renewable":   true,
+		"expire_time": expires.Format(time.RFC3339),
+	}) {
+		t.Fatalf("requiresRenewal expected: false")
+	}
+
+	expires = time.Now().Add(-time.Hour)
+	cfg.RenewWarningOptOut = true
 	if requiresRenewal(map[string]interface{}{
 		"renewable":   true,
 		"expire_time": expires.Format(time.RFC3339),
