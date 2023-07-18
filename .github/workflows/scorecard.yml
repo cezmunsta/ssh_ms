@@ -13,6 +13,8 @@ on:
     - cron: '41 9 * * 0'
   push:
     branches: [ "master" ]
+  workflow_call:
+  workflow_dispatch:
 
 # Declare default permissions as read only.
 permissions: read-all
