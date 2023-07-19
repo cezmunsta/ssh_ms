@@ -1,6 +1,13 @@
 # CHANGELOG
 
-## 2023-06-23
+## 2023-07-19 v1.10.1
+
+- Bump github.com/cloudflare/circl from 1.1.0 to 1.3.3 (#118)
+- Bumped Vault version to v1.14.0 (#115)
+- Updated workflows for on-demand usage (#117)
+- Optional renewal warning (#114)
+
+## 2023-06-23 v1.10.0
 
 - Add support for M1 ARM (#85)
 - Bump github.com/hashicorp/vault from 1.12.2 to 1.12.5 (#105)
@@ -16,7 +23,7 @@
   attempt is made to list as if a secret path is v2. Secret paths can no longer
   end in `/metadata`
 
-## 2023-03-09
+## 2023-03-09 v1.9.0
 
 - Bump golang.org/x/net from 0.0.0-20220909164309-bea034e7d591 to 0.7.0 (#102)
 - Added scorecard badge to README (#100)
@@ -32,9 +39,7 @@
   - Updated prepare_vault to wait for the container to be in
     a running state
 
-
-
-## 2022-10-20
+## 2022-10-20 v1.8.0
 
 - Update Vault to v1.12.0 (#97)
 - Add support for multiple secret namespaces (#96)
