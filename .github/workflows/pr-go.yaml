@@ -24,7 +24,7 @@ jobs:
           sudo apt update -qqy
           sudo apt install -qqy podman
           systemctl --user start podman
-          echo "DOCKER_HOST=/run/user/$UID/podman/podman.sock" >> "$GITHUB_ENV"
+          echo "DOCKER_HOST=unix:///run/user/$UID/podman/podman.sock" >> "$GITHUB_ENV"
 
       - name: Prepare Go
         uses: actions/setup-go@v4
