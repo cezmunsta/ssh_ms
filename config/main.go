@@ -7,7 +7,6 @@ import (
 	"sync"
 
 	vaultApi "github.com/hashicorp/vault/api"
-	vaultVersion "github.com/hashicorp/vault/version"
 	"github.com/sirupsen/logrus"
 )
 
@@ -110,7 +109,7 @@ func GetConfig() *Settings {
 			Simulate:              false,
 			StoragePath:           EnvBasePath,
 			StoredToken:           false,
-			VaultVersion:          vaultVersion.Version,
+			VaultVersion:          "vaultVersion.Version",
 		}
 	})
 	return &settings

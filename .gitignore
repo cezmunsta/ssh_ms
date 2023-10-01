@@ -4,7 +4,10 @@
 data
 .vscode
 *.code-workspace
+.env
+bin
+builds
 debug
-builds/
-vendor/
-bin/
+old
+patches
+vendor
