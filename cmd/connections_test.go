@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
@@ -12,7 +13,7 @@ import (
 
 func TestMain(m *testing.M) {
 	cfg := config.GetConfig()
-	cfg.StoragePath = "/tmp/ssh_ms_cache"
+	cfg.StoragePath = filepath.Join(os.TempDir(), "ssh_ms_cache")
 	code := m.Run()
 	defer cluster.Cleanup()
 	os.RemoveAll(cfg.StoragePath)
@@ -20,7 +21,7 @@ func TestMain(m *testing.M) {
 }
 
 func TestGetVaultClient(t *testing.T) {
-	_, client = getDummyCluster(t)
+	_, client := getDummyCluster(t)
 
 	if len(client.Token()) == 0 {
 		t.Fatalf("expected: a non-zero length token got: a zero length token")
@@ -138,8 +139,8 @@ func TestPrepareConnection(t *testing.T) {
 	removeCache(lookupKey)
 	_, sshClient, configComment, configMotd := prepareConnection(client, []string{lookupKey})
 
-	if sshClient.User != lookupKey {
-		t.Fatalf("expected user '%v', got '%v'", lookupKey, sshClient.User)
+	if sshClient.User != cfg.EnvSSHDefaultUsername {
+		t.Fatalf("expected user '%v', got '%v'", cfg.EnvSSHDefaultUsername, sshClient.User)
 	}
 
 	if configComment != dummyComment {

@@ -2,68 +2,16 @@ package vault
 
 import (
 	"fmt"
-	"strings"
-	"sync"
 	"testing"
 	"time"
 
-	vaultKv "github.com/hashicorp/vault-plugin-secrets-kv"
-	vaultApi "github.com/hashicorp/vault/api"
-	vaultHttp "github.com/hashicorp/vault/http"
-	"github.com/hashicorp/vault/sdk/logical"
-	"github.com/hashicorp/vault/vault"
+	"github.com/cezmunsta/ssh_ms/helpers"
 )
-
-var (
-	client           *vaultApi.Client
-	cluster          *vault.TestCluster
-	once             sync.Once
-	vaultSecretPaths = []string{cfg.SecretPath, cfg.SecretPath + "_v2"}
-)
-
-const (
-	vaultTestToken = "iamadummytoken"
-)
-
-func GetDummyCluster(t *testing.T) (*vault.TestCluster, *vaultApi.Client) {
-	once.Do(func() {
-		cluster = vault.NewTestCluster(t, &vault.CoreConfig{
-			DevToken: vaultTestToken,
-			LogicalBackends: map[string]logical.Factory{
-				"kv": vaultKv.Factory,
-			},
-		}, &vault.TestClusterOptions{
-			HandlerFunc: vaultHttp.Handler,
-		})
-		cluster.Start()
-
-		// Create Secret mounts
-		cluster.Cores[0].Client.Sys().Unmount("secret")
-		for _, secretPath := range vaultSecretPaths {
-			version := "1"
-			if strings.HasSuffix(secretPath, "_v2") {
-				version = "2"
-			}
-
-			if err := cluster.Cores[0].Client.Sys().Mount(secretPath, &vaultApi.MountInput{
-				Type: "kv",
-				Options: map[string]string{
-					"version": version,
-				},
-			}); err != nil {
-				t.Fatal(err)
-			}
-		}
-
-		core := cluster.Cores[0].Core
-		vault.TestWaitActive(t, core)
-		client = cluster.Cores[0].Client
-	})
-	return cluster, client
-}
 
 func TestHelpers(t *testing.T) {
-	cluster, client := GetDummyCluster(t)
+	cluster, client := helpers.GetDummyCluster(t)
+	vaultSecretPaths := helpers.GetVaultSecretPaths()
+
 	defer cluster.Cleanup()
 
 	for _, secretPath := range vaultSecretPaths {

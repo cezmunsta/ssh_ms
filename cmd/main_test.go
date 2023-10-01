@@ -1,77 +1,30 @@
 package cmd
 
 import (
-	"fmt"
-	"strings"
-	"sync"
 	"testing"
 
-	vaultHelper "github.com/cezmunsta/ssh_ms/vault"
-	vaultKv "github.com/hashicorp/vault-plugin-secrets-kv"
+	"github.com/cezmunsta/ssh_ms/helpers"
 	vaultApi "github.com/hashicorp/vault/api"
-	vaultHttp "github.com/hashicorp/vault/http"
-	"github.com/hashicorp/vault/sdk/logical"
-	"github.com/hashicorp/vault/vault"
+	"github.com/hashicorp/vault/sdk/helper/testcluster/docker"
 )
 
 var (
-	client          *vaultApi.Client
-	cluster         *vault.TestCluster
-	lookupKey       = "dummy"
-	once            sync.Once
-	vaultSecretPath = cfg.SecretPath
+	client    *vaultApi.Client
+	cluster   *docker.DockerCluster
+	lookupKey = helpers.DummyHost
 )
 
 const (
-	dummyComment = "This is a comment"
-	dummyMotd    = "This is the motd"
-
-	vaultKvVersion = "1"
-	vaultTestToken = "iamadummytoken"
+	dummyComment = helpers.DummyComment
+	dummyMotd    = helpers.DummyMotd
 )
 
-func getDummyCluster(t *testing.T) (*vault.TestCluster, *vaultApi.Client) {
-	once.Do(func() {
-		cluster = vault.NewTestCluster(t, &vault.CoreConfig{
-			DevToken: vaultTestToken,
-			LogicalBackends: map[string]logical.Factory{
-				"kv": vaultKv.Factory,
-			},
-		}, &vault.TestClusterOptions{
-			HandlerFunc: vaultHttp.Handler,
-		})
-		cluster.Start()
-
-		// Create KV V1 mount
-		if err := cluster.Cores[0].Client.Sys().Mount("kv", &vaultApi.MountInput{
-			Type: "kv",
-			Options: map[string]string{
-				"version": vaultKvVersion, // TODO: update to test version 2 later
-			},
-		}); err != nil {
-			t.Fatal(err)
-		}
-		// Create Secret mount
-		cluster.Cores[0].Client.Sys().Unmount("secret")
-		for _, sp := range strings.Split(vaultSecretPath, ",") {
-			if err := cluster.Cores[0].Client.Sys().Mount(sp, &vaultApi.MountInput{
-				Type: "kv",
-				Options: map[string]string{
-					"version": vaultKvVersion, // TODO: update to test version 2 later
-				},
-			}); err != nil {
-				t.Fatal(err)
-			}
-		}
-
-		core := cluster.Cores[0].Core
-		vault.TestWaitActive(t, core)
-		client = cluster.Cores[0].Client
-		generateDummyData(t, lookupKey)
-	})
+func getDummyCluster(t *testing.T) (*docker.DockerCluster, *vaultApi.Client) {
+	cluster, client = helpers.GetDummyCluster(t)
 	return cluster, client
 }
 
+/*
 func generateDummyData(t *testing.T, frag string) {
 	for _, sp := range strings.Split(vaultSecretPath, ",") {
 		key := fmt.Sprintf("%s/%s", sp, frag)
@@ -86,3 +39,4 @@ func generateDummyData(t *testing.T, frag string) {
 		}
 	}
 }
+*/

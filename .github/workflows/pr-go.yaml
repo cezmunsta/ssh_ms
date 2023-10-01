@@ -14,9 +14,18 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os: [ubuntu-latest]
+        #os: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
+      - name: Prepare OS
+        id: podman_install
+        run: |
+          sudo apt update -qqy
+          sudo apt install -qqy podman
+          systemctl --user start podman
+          echo "DOCKER_HOST=unix:///run/user/$UID/podman/podman.sock" >> "$GITHUB_ENV"
+
       - name: Prepare Go
         uses: actions/setup-go@v4
         with:
