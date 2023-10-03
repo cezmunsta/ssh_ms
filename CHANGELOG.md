@@ -1,5 +1,17 @@
 # CHANGELOG
 
+## 2023-10-02 v1.10.2
+
+- Speedup for tests by reducing to a single Vault node (#123)
+- Refactored unit tests to use containers (#121)
+  The direct dependency on the main Vault package causes a number of
+  issues, such as unnecessary Dependabot activity due to CVEs in code
+  the is not used, etc. The SDK contains code that allows a test
+  cluster to be created from code and thus allows a more specific set of
+  dependencies and less maintenance.
+  N.B. config.VaultVersion has been set to "vaultVersion.Version" due to Vault no longer being a dependency and it will be removed completely in due course, as it is only displayed in the verbose version command.
+- Bump github.com/hashicorp/vault from 1.14.0 to 1.14.1 (#119)
+
 ## 2023-07-19 v1.10.1
 
 - Bump github.com/cloudflare/circl from 1.1.0 to 1.3.3 (#118)
