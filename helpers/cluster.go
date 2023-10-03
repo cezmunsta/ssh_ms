@@ -43,9 +43,12 @@ func GetDummyCluster(t *testing.T) (*docker.DockerCluster, *vaultApi.Client) {
 
 		defer cancel()
 
+		clusterOpts := docker.DefaultOptions(t)
+		clusterOpts.ClusterOptions.NumCores = 1
 		opts := &docker.DockerClusterOptions{
-			ImageRepo: "hashicorp/vault",
-			ImageTag:  "latest",
+			ImageRepo:      "hashicorp/vault",
+			ImageTag:       "latest",
+			ClusterOptions: clusterOpts.ClusterOptions,
 		}
 		cluster = docker.NewTestDockerCluster(t, opts)
 
