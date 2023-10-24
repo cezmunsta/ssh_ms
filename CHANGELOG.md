@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 2023-10-24 v1.10.3
+
+- Bump golang.org/x/net from 0.15.0 to 0.17.0 (#124)
+
 ## 2023-10-02 v1.10.2
 
 - Speedup for tests by reducing to a single Vault node (#123)
