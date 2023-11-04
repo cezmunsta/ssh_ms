@@ -16,7 +16,6 @@ const (
 	vaultAPIVersion = "%v"
 	vaultSDKVersion = "%v"
 )
-
 `
 
 func main() {
