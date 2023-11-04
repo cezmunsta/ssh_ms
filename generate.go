@@ -9,12 +9,12 @@ import (
 	"golang.org/x/mod/modfile"
 )
 
-const depVersions = `// Code generated - DO NOT EDIT
+const depVersions = `// Package config - DO NOT EDIT
 package config
 
 const (
-	vaultApiVersion = "%v"
-	vaultSdkVersion = "%v"
+	vaultAPIVersion = "%v"
+	vaultSDKVersion = "%v"
 )
 
 `

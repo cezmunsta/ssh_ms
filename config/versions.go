@@ -1,8 +1,8 @@
-// Code generated - DO NOT EDIT
+// Package config - DO NOT EDIT
 package config
 
 const (
-	vaultApiVersion = "v1.10.0"
-	vaultSdkVersion = "v0.10.2"
+	vaultAPIVersion = "v1.10.0"
+	vaultSDKVersion = "v0.10.2"
 )
 
