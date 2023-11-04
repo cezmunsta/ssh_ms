@@ -1,0 +1,83 @@
+# Security Policy
+
+## Supported Versions
+
+| Version | Supported          |
+| ------- | ------------------ |
+| 1.x.x   | :white_check_mark: |
+
+## Reporting a Vulnerability
+
+* Please practice responsible disclosure
+* Do not submit a ticket, or post to any public groups.
+
+For security-related bugs, please reach out via [Keybase](https://keybase.io/cezmunsta), or email security+ssh_ms@rxtx.uk
+
+Should you need to send anything sensitive via email then please use the following public key for encryption:
+```
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+
+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
+0Bzhm0K8bMJw4Vszn/E7Tpd4H3Jsag==
+=tyNZ
+-----END PGP PUBLIC KEY BLOCK-----
+```
