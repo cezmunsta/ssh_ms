@@ -42,6 +42,7 @@ sync:
 	@rsync -rlpDvc --progress bin/{linux,darwin} "${SSH_MS_SYNC_HOST}":"${SSH_MS_SYNC_PATH}"
 
 binary-prep:
+	@"${GO}" run generate.go
 	@mkdir -p ${BUILD_DIR}/${GOOS}/${GOARCH};
 
 binary-mac: export GOOS=darwin

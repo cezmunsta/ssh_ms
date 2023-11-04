@@ -52,8 +52,12 @@ func TestGetVersion(t *testing.T) {
 		t.Fatalf("expected: 'Go Version: %v', got: %v", runtime.Version(), lines[2])
 	}
 
-	if s := strings.Join(lines[3], " "); !strings.Contains(s, "Vault Version: "+cfg.VaultVersion) {
-		t.Fatalf("expected: 'Vault Version: %v', got: %v", cfg.VaultVersion, lines[3])
+	if s := strings.Join(lines[3], " "); !strings.Contains(s, "Vault API Version: "+cfg.VaultApiVersion) {
+		t.Fatalf("expected: 'Vault API Version: %v', got: %v", cfg.VaultApiVersion, lines[3])
+	}
+
+	if s := strings.Join(lines[3], " "); !strings.Contains(s, "Vault SDK Version: "+cfg.VaultSdkVersion) {
+		t.Fatalf("expected: 'Vault SDK Version: %v', got: %v", cfg.VaultSdkVersion, lines[3])
 	}
 }
 
