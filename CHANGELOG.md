@@ -1,5 +1,38 @@
 # CHANGELOG
 
+## 2024-01-08
+
+- Bump github.com/docker/docker (#126)
+- Updated go-version for workflow (#127)
+- Delete .github/workflows/push-go.yaml
+- [StepSecurity] Apply security best practices (#128)
+- Bump github.com/spf13/cobra from 1.4.0 to 1.7.0 (#137)
+- Bump actions/checkout from 2.7.0 to 4.1.1 (#129)
+- Bump ossf/scorecard-action from 2.0.6 to 2.3.1 (#132)
+- Bump github/codeql-action from 2.1.27 to 2.22.5 (#130)
+- Bump actions/upload-artifact from 3.1.0 to 3.1.3 (#134)
+- Bump actions/dependency-review-action from 2.5.1 to 3.1.0 (#136)
+- Bump github.com/sirupsen/logrus from 1.9.0 to 1.9.3 (#135)
+- Bump github.com/gabriel-vasile/mimetype from 1.4.2 to 1.4.3 (#133)
+- Bump github.com/hashicorp/vault/sdk from 0.10.0 to 0.10.2 (#131)
+- Display Vault API and SDK versions (#138)
+- Create SECURITY.md (#139)
+- Bump actions/dependency-review-action from 3.1.0 to 3.1.1 (#141)
+- Bump github.com/spf13/cobra from 1.7.0 to 1.8.0 (#140)
+- Bump github.com/go-jose/go-jose/v3 from 3.0.0 to 3.0.1 (#147)
+- Updated golint version in workflow (#150)
+- Bump actions/dependency-review-action from 3.1.1 to 3.1.4 (#151)
+- Bump github/codeql-action from 2.22.5 to 2.22.8 (#148)
+- Bump step-security/harden-runner from 2.6.0 to 2.6.1 (#146)
+- Bump actions/upload-artifact from 3.1.3 to 4.0.0 (#156)
+- Bump github/codeql-action from 2.22.8 to 3.22.11 (#155)
+- Bump actions/setup-go from 4.1.0 to 5.0.0 (#152)
+- Bump golang.org/x/crypto from 0.14.0 to 0.17.0 (#157)
+- Bump github/codeql-action from 3.22.11 to 3.22.12 (#159)
+- Bump github.com/containerd/containerd from 1.7.0 to 1.7.11 (#158)
+- Bump actions/dependency-review-action from 3.1.4 to 3.1.5 (#160)
+- Updated PR workflow Go version (#161)
+
 ## 2023-10-24 v1.10.3
 
 - Bump golang.org/x/net from 0.15.0 to 0.17.0 (#124)
