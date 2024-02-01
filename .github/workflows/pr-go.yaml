@@ -30,7 +30,7 @@ jobs:
         run: |
           case "${{ runner.os }}" in
             "macOS")
-              sudo brew install podman
+              brew install podman
               echo "DOCKER_HOST=unix://$(podman machine inspect --format '{{.ConnectionInfo.PodmanSocket.Path}}' >)" >> "$GITHUB_ENV"
               ;;
             "Linux")
