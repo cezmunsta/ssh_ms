@@ -31,7 +31,7 @@ jobs:
           case "${{ runner.os }}" in
             "macOS")
               brew install podman
-              echo "DOCKER_HOST=unix://$(podman machine inspect --format '{{.ConnectionInfo.PodmanSocket.Path}}' >)" >> "$GITHUB_ENV"
+              echo "DOCKER_HOST=unix://$(podman machine inspect --format '{{.ConnectionInfo.PodmanSocket.Path}}')" >> "$GITHUB_ENV"
               ;;
             "Linux")
               sudo apt update -qqy
