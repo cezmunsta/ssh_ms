@@ -17,7 +17,7 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [ubuntu-latest, macos-latest-xlarge]
+        os: [ubuntu-latest, macos-14]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Harden Runner
@@ -25,13 +25,21 @@ jobs:
         with:
           egress-policy: audit
 
-      - name: Prepare OS
+      - if: ${{ runner.os == "Linux" }}
+        name: Prepare OS
         id: podman_install
         run: |
           sudo apt update -qqy
           sudo apt install -qqy podman
           systemctl --user start podman
           echo "DOCKER_HOST=unix:///run/user/$UID/podman/podman.sock" >> "$GITHUB_ENV"
+
+      - if: ${{ runner.os == "macOS" }}
+        name: Prepare OS
+        id: podman_install
+        run: |
+          sudo brew install podman
+          echo "DOCKER_HOST=unix://$(podman machine inspect --format '{{.ConnectionInfo.PodmanSocket.Path}}' >)" >> "$GITHUB_ENV"
 
       - name: Prepare Go
         uses: actions/setup-go@0c52d547c9bc32b1aa3301fd7a9cb496313a4491 # v5.0.0
