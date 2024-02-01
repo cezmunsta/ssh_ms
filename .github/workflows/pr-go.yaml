@@ -25,7 +25,7 @@ jobs:
         with:
           egress-policy: audit
 
-      - if: ${{ runner.os == "Linux" }}
+      - if: ${{ runner.os }} == "Linux"
         name: Prepare OS
         id: podman_install
         run: |
@@ -34,7 +34,7 @@ jobs:
           systemctl --user start podman
           echo "DOCKER_HOST=unix:///run/user/$UID/podman/podman.sock" >> "$GITHUB_ENV"
 
-      - if: ${{ runner.os == "macOS" }}
+      - if: ${{ runner.os }} == "macOS"
         name: Prepare OS
         id: podman_install
         run: |
