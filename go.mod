@@ -5,7 +5,7 @@ go 1.21
 require (
 	github.com/gabriel-vasile/mimetype v1.4.3
 	github.com/hashicorp/vault/api v1.11.0
-	github.com/hashicorp/vault/sdk v0.10.2
+	github.com/hashicorp/vault/sdk v0.11.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.8.0
 )
@@ -14,7 +14,7 @@ require (
 	github.com/Azure/go-ansiterm v0.0.0-20230124172434-306776ec8161 // indirect
 	github.com/Microsoft/go-winio v0.6.1 // indirect
 	github.com/cenkalti/backoff/v3 v3.2.2 // indirect
-	github.com/containerd/containerd v1.7.11 // indirect
+	github.com/containerd/containerd v1.7.12 // indirect
 	github.com/docker/distribution v2.8.2+incompatible // indirect
 	github.com/docker/docker v24.0.7+incompatible // indirect
 	github.com/docker/go-connections v0.4.0 // indirect
