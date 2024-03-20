@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 2024-03-20
+## 2024-03-20 v1.10.5
 
 - Bump step-security/harden-runner from 2.6.1 to 2.7.0 (#170)
 - Bump github/codeql-action from 3.22.12 to 3.23.2 (#169)
@@ -20,7 +20,7 @@
 - Bump github/codeql-action from 3.24.6 to 3.24.8 (#189)
 - Bumped hashicorp/vault/api to v1.12.2 (#190)
 
-## 2024-01-08
+## 2024-01-08 v1.10.4
 
 - Bump github.com/docker/docker (#126)
 - Updated go-version for workflow (#127)
