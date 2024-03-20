@@ -1,5 +1,25 @@
 # CHANGELOG
 
+## 2024-03-20
+
+- Bump step-security/harden-runner from 2.6.1 to 2.7.0 (#170)
+- Bump github/codeql-action from 3.22.12 to 3.23.2 (#169)
+- Bump actions/upload-artifact from 4.0.0 to 4.3.0 (#167)
+- Bump actions/dependency-review-action from 3.1.5 to 4.0.0 (#165)
+- Bump github/codeql-action from 3.23.2 to 3.24.0 (#173)
+- Bump github.com/opencontainers/runc from 1.1.6 to 1.1.12 (#171)
+- Bump github.com/hashicorp/vault/api from 1.10.0 to 1.11.0 (#168)
+- Bump actions/upload-artifact from 4.3.0 to 4.3.1 (#174)
+- Bump github/codeql-action from 3.24.0 to 3.24.5 (#183)
+- Bump actions/dependency-review-action from 4.0.0 to 4.1.3 (#181)
+- Bump github.com/hashicorp/vault/sdk from 0.10.2 to 0.11.0 (#176)
+- Bump github/codeql-action from 3.24.5 to 3.24.6 (#184)
+- Bump github.com/go-jose/go-jose/v3 from 3.0.1 to 3.0.3 (#185)
+- Bump github.com/hashicorp/vault/sdk from 0.11.0 to 0.11.1 (#188)
+- Bump actions/checkout from 4.1.1 to 4.1.2 (#186)
+- Bump github/codeql-action from 3.24.6 to 3.24.8 (#189)
+- Bumped hashicorp/vault/api to v1.12.2 (#190)
+
 ## 2024-01-08
 
 - Bump github.com/docker/docker (#126)
