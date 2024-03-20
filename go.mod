@@ -5,7 +5,7 @@ go 1.21
 require (
 	github.com/gabriel-vasile/mimetype v1.4.3
 	github.com/hashicorp/vault/api v1.11.0
-	github.com/hashicorp/vault/sdk v0.11.0
+	github.com/hashicorp/vault/sdk v0.11.1
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.8.0
 )
