@@ -1,5 +1,34 @@
 # CHANGELOG
 
+## 2024-05-29 v1.10.6
+
+- Fixed config version constants (#224)
+- Bumped Go to 1.22 (#223)
+- Cleanup of go.sum (#222)
+- Bump github.com/hashicorp/vault/api from 1.13.0 to 1.14.0 (#220)
+- Bump github.com/hashicorp/vault/sdk from 0.12.0 to 0.13.0 (#219)
+- Bump github.com/gabriel-vasile/mimetype from 1.4.3 to 1.4.4 (#221)
+- Bump ossf/scorecard-action from 2.3.1 to 2.3.3 (#214)
+- Bump actions/checkout from 4.1.5 to 4.1.6 (#216)
+- Bump github/codeql-action from 3.25.3 to 3.25.6 (#217)
+- Bump step-security/harden-runner from 2.7.1 to 2.8.0 (#218)
+- Bump actions/checkout from 4.1.4 to 4.1.5 (#212)
+- Bump actions/setup-go from 5.0.0 to 5.0.1 (#211)
+- Bump actions/dependency-review-action from 4.3.1 to 4.3.2 (#210)
+- Bump github.com/hashicorp/vault/api from 1.12.2 to 1.13.0 (#203)
+- Bump github.com/hashicorp/vault/sdk from 0.11.1 to 0.12.0 (#197)
+- Bump actions/upload-artifact from 4.3.1 to 4.3.3 (#204)
+- Bump actions/checkout from 4.1.2 to 4.1.4 (#206)
+- Bump github/codeql-action from 3.24.10 to 3.25.3 (#207)
+- Bump actions/dependency-review-action from 4.2.5 to 4.3.1 (#208)
+- Bump step-security/harden-runner from 2.7.0 to 2.7.1 (#209)
+- Bump golang.org/x/net from 0.17.0 to 0.23.0 (#201)
+- Bump github/codeql-action from 3.24.9 to 3.24.10 (#196)
+- Bump github.com/docker/docker from 24.0.7+incompatible to 24.0.9+incompatible (#191)
+- Bump github/codeql-action from 3.24.8 to 3.24.9 (#193)
+- Bump actions/dependency-review-action from 4.1.3 to 4.2.5 (#195)
+- Fixed missing versions in CHANGELOG
+
 ## 2024-03-20 v1.10.5
 
 - Bump step-security/harden-runner from 2.6.1 to 2.7.0 (#170)

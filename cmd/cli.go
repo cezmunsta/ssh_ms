@@ -187,7 +187,7 @@ var (
 	purgeForce      bool
 
 	// Version of the code
-	Version = "1.10.5"
+	Version = "1.10.6"
 )
 
 func init() {
