@@ -7,7 +7,7 @@ require (
 	github.com/hashicorp/vault/api v1.14.0
 	github.com/hashicorp/vault/sdk v0.13.0
 	github.com/sirupsen/logrus v1.9.3
-	github.com/spf13/cobra v1.8.0
+	github.com/spf13/cobra v1.8.1
 )
 
 require (
