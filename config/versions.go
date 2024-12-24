@@ -2,6 +2,6 @@
 package config
 
 const (
-	vaultAPIVersion = "v1.14.0"
+	vaultAPIVersion = "v1.15.0"
 	vaultSDKVersion = "v0.13.0"
 )
