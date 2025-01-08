@@ -1,5 +1,48 @@
 # CHANGELOG
 
+## 2025-01-08 v1.10.7
+
+The changelog has been replaced with the release notes and the
+file will be removed in future releases.
+
+- Bump github.com/gabriel-vasile/mimetype from 1.4.7 to 1.4.8 (#296)
+- Updated versions.go (#295)
+- Bumped golang.org/x/net to v0.33.0 (#294)
+- Bump github/codeql-action from 3.27.9 to 3.28.0 (#293)
+- Bump github.com/hashicorp/vault/sdk from 0.13.0 to 0.14.0 (#257)
+- Bump github.com/hashicorp/vault/api from 1.14.0 to 1.15.0 (#258)
+- Bump github/codeql-action from 3.27.5 to 3.27.9 (#290)
+- Bump actions/upload-artifact from 4.4.3 to 4.5.0 (#291)
+- Bump actions/setup-go from 5.1.0 to 5.2.0 (#287)
+- Bump golang.org/x/crypto from 0.29.0 to 0.31.0 (#288)
+- Bump github/codeql-action from 3.27.4 to 3.27.5 (#283)
+- Bump actions/dependency-review-action from 4.4.0 to 4.5.0 (#284)
+- Bump github.com/gabriel-vasile/mimetype from 1.4.5 to 1.4.7 (#282)
+- Bump step-security/harden-runner from 2.10.1 to 2.10.2 (#281)
+- Bump github/codeql-action from 3.27.1 to 3.27.4 (#280)
+- Bump github/codeql-action from 3.27.0 to 3.27.1 (#278)
+- Bump github/codeql-action from 3.26.6 to 3.27.0 (#274)
+- Bump actions/setup-go from 5.0.2 to 5.1.0 (#276)
+- Bump actions/checkout from 4.1.7 to 4.2.2 (#275)
+- Bump actions/dependency-review-action from 4.3.4 to 4.4.0 (#277)
+- Bump actions/upload-artifact from 4.4.0 to 4.4.3 (#270)
+- Bump step-security/harden-runner from 2.9.1 to 2.10.1 (#259)
+- Bump step-security/harden-runner from 2.8.1 to 2.9.1 (#256)
+- Bump ossf/scorecard-action from 2.3.3 to 2.4.0 (#255)
+- Bump github.com/docker/docker from 25.0.5+incompatible to 25.0.6+incompatible (#244)
+- Bump github.com/hashicorp/go-retryablehttp from 0.7.6 to 0.7.7 (#233)
+- Bump github.com/gabriel-vasile/mimetype from 1.4.4 to 1.4.5 (#242)
+- Bump github.com/spf13/cobra from 1.8.0 to 1.8.1 (#232)
+- Bump actions/upload-artifact from 4.3.3 to 4.4.0 (#254)
+- Bump github/codeql-action from 3.25.8 to 3.26.6 (#253)
+- Bump actions/dependency-review-action from 4.3.3 to 4.3.4 (#237)
+- Bump actions/setup-go from 5.0.1 to 5.0.2 (#236)
+- Bump actions/checkout from 4.1.6 to 4.1.7 (#229)
+- Bump step-security/harden-runner from 2.8.0 to 2.8.1 (#228)
+- Bump actions/dependency-review-action from 4.3.2 to 4.3.3 (#227)
+- Bump github/codeql-action from 3.25.6 to 3.25.8 (#226)
+
+
 ## 2024-05-29 v1.10.6
 
 - Fixed config version constants (#224)
