@@ -1,7 +1,6 @@
 module github.com/cezmunsta/ssh_ms
 
-go 1.22.3
-toolchain go1.23.6
+go 1.23.6
 
 require (
 	github.com/gabriel-vasile/mimetype v1.4.8
