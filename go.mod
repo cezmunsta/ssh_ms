@@ -8,7 +8,6 @@ require (
 	github.com/hashicorp/vault/sdk v0.15.2
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.9.1
-	golang.org/x/mod v0.17.0
 )
 
 require (
