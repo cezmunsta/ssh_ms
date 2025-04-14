@@ -42,7 +42,7 @@ func main() {
 		}
 	}
 
-	if err := os.WriteFile("config/versions.go", []byte(fmt.Sprintf(depVersions, vApi, vSdk)), 0o644); err != nil {
+	if err := os.WriteFile("config/versions.go", fmt.Appendf([]byte{}, depVersions, vApi, vSdk), 0o644); err != nil {
 		panic("failed writing config/versions.go")
 	}
 }

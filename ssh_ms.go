@@ -16,6 +16,8 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>
 */
 package main
 
+//go:generate go run generate_versions.go
+
 import (
 	"os"
 

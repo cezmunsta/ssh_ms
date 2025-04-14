@@ -18,7 +18,6 @@ type Settings struct {
 	CustomLocalForward, EnvSSHUsername, EnvVaultAddr, NameSpace, SecretPath, Show, StoragePath, User, VaultAddr, VaultToken, VaultAPIVersion, VaultSDKVersion string
 }
 
-// go:generate go run generate_versions.go
 
 var (
 	once     sync.Once
