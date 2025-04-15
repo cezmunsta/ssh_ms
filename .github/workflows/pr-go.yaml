@@ -45,15 +45,17 @@ jobs:
 
       - name: Perform lint checks
         run: |
-          go install golang.org/x/lint/golint@v0.0.0-20210508222113-6edffad5e616
+          go install golang.org/x/lint/golint@v0.0.0-20241112194109-818c5a804067
           make lint
 
       - name: Perform format checks
-        run: make simplify
+        run: make format
 
       - name: Perform vet checks
         run: make vet
 
       - name: Run test suite
-        run: make test
+        run: |
+          make test
+          go generate
 ...

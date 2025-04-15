@@ -42,7 +42,7 @@ sync:
 	@rsync -rlpDvc --progress bin/{linux,darwin} "${SSH_MS_SYNC_HOST}":"${SSH_MS_SYNC_PATH}"
 
 binary-prep:
-	@"${GO}" run generate.go
+	@"${GO}" generate
 	@mkdir -p ${BUILD_DIR}/${GOOS}/${GOARCH};
 
 binary-mac: export GOOS=darwin
@@ -95,12 +95,7 @@ lint:
 
 format: export PACKAGE=./
 format:
-	@gofumpt -w "${PACKAGE}/ssh" "${PACKAGE}/cmd" "${PACKAGE}/vault" "${PACKAGE}/log" "${PACKAGE}/config"
-	@git diff --exit-code --quiet "${PACKAGE}/ssh" "${PACKAGE}/cmd" "${PACKAGE}/vault" "${PACKAGE}/log" "${PACKAGE}/config"
-
-simplify: export PACKAGE=./
-simplify:
-	@gofmt -s -w "${PACKAGE}/ssh" "${PACKAGE}/cmd" "${PACKAGE}/vault" "${PACKAGE}/log" "${PACKAGE}/config"
+	@"${GO}" fmt  "${PACKAGE}/ssh" "${PACKAGE}/cmd" "${PACKAGE}/vault" "${PACKAGE}/log" "${PACKAGE}/config"
 	@git diff --exit-code --quiet "${PACKAGE}/ssh" "${PACKAGE}/cmd" "${PACKAGE}/vault" "${PACKAGE}/log" "${PACKAGE}/config"
 
 vet:
@@ -108,7 +103,7 @@ vet:
 
 fix: export PACKAGE=./
 fix:
-	@"${GO}" tool fix -diff "${PACKAGE}/ssh" "${PACKAGE}/cmd" "${PACKAGE}/vault" "${PACKAGE}/log" "${PACKAGE}/config"
+	@"${GO}" tool fix -go go1.23 -diff "${PACKAGE}/ssh" "${PACKAGE}/cmd" "${PACKAGE}/vault" "${PACKAGE}/log" "${PACKAGE}/config"
 
 clean:
 	@find "${BUILD_DIR}" -type f -delete;
