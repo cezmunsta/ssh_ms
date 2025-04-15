@@ -108,7 +108,7 @@ vet:
 
 fix: export PACKAGE=./
 fix:
-	@"${GO}" tool fix -diff "${PACKAGE}/ssh" "${PACKAGE}/cmd" "${PACKAGE}/vault" "${PACKAGE}/log" "${PACKAGE}/config"
+	@"${GO}" tool fix -go go1.23 -diff "${PACKAGE}/ssh" "${PACKAGE}/cmd" "${PACKAGE}/vault" "${PACKAGE}/log" "${PACKAGE}/config"
 
 clean:
 	@find "${BUILD_DIR}" -type f -delete;
