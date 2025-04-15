@@ -49,7 +49,7 @@ jobs:
           make lint
 
       - name: Perform format checks
-        run: make simplify
+        run: make format
 
       - name: Perform vet checks
         run: make vet
