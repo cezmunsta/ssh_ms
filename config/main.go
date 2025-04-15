@@ -18,7 +18,6 @@ type Settings struct {
 	CustomLocalForward, EnvSSHUsername, EnvVaultAddr, NameSpace, SecretPath, Show, StoragePath, User, VaultAddr, VaultToken, VaultAPIVersion, VaultSDKVersion string
 }
 
-
 var (
 	once     sync.Once
 	settings Settings
