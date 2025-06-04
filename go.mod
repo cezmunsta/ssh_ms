@@ -4,7 +4,7 @@ go 1.23.6
 
 require (
 	github.com/gabriel-vasile/mimetype v1.4.9
-	github.com/hashicorp/vault/api v1.16.0
+	github.com/hashicorp/vault/api v1.20.0
 	github.com/hashicorp/vault/sdk v0.15.2
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.9.1
@@ -37,7 +37,7 @@ require (
 	github.com/hashicorp/go-secure-stdlib/strutil v0.1.2 // indirect
 	github.com/hashicorp/go-sockaddr v1.0.6 // indirect
 	github.com/hashicorp/go-uuid v1.0.3 // indirect
-	github.com/hashicorp/hcl v1.0.1-vault-5 // indirect
+	github.com/hashicorp/hcl v1.0.1-vault-7 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/klauspost/compress v1.17.11 // indirect
 	github.com/mattn/go-colorable v0.1.13 // indirect
