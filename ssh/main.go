@@ -7,10 +7,12 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"maps"
 	"net"
 	"os"
 	"os/exec"
 	"reflect"
+	"slices"
 	"strconv"
 	"strings"
 	"text/template"
@@ -341,13 +343,15 @@ func setPortForwarding(sshArgs *Connection) {
 	var targets []string
 
 	cfg := config.GetConfig()
+	hasCustomForwardFlag := len(cfg.CustomLocalForward) > 0
 
-	if len(cfg.CustomLocalForward) != 0 {
+	if hasCustomForwardFlag {
 		for _, k := range strings.Split(cfg.CustomLocalForward, ",") {
 			targets = append(targets, fmt.Sprintf("CUSTOM%s", k))
 		}
 	} else {
-		targets = []string{"NGINX", "PMM"}
+		// Use config["ServiceMap"] when custom flags are not used
+		targets = slices.Sorted(maps.Keys(cfg.ServiceMap))
 	}
 
 	_, err := os.Stat(sshArgs.ControlPath)
@@ -368,6 +372,7 @@ func setPortForwarding(sshArgs *Connection) {
 							p = uint16(cp)
 						}
 
+						// TODO: adjust to use config["ServiceMap"] lookups
 						if _, err := acquirePort(p, p); err != nil {
 							log.Debugf("Found port '%v' in use, reusing", val)
 							rp := uint16(0)
@@ -401,7 +406,7 @@ func setPortForwarding(sshArgs *Connection) {
 	data = map[string]interface{}{}
 	utargets := []uint16{}
 
-	if targets[0] != "NGINX" {
+	if hasCustomForwardFlag {
 		for _, port := range targets {
 			custom := strings.Replace(port, "CUSTOM", "", 1)
 			if iport, err := strconv.ParseUint(custom, 10, 16); err == nil {
@@ -409,7 +414,11 @@ func setPortForwarding(sshArgs *Connection) {
 			}
 		}
 	} else {
-		utargets = []uint16{uint16(nginxPort), uint16(pmmPort)}
+		for _, port := range cfg.ServiceMap {
+			if iport, err := strconv.ParseUint(port, 10, 16); err == nil {
+				utargets = append(utargets, uint16(iport))
+			}
+		}
 	}
 
 	for _, rp := range utargets {

@@ -2,8 +2,10 @@ package config
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 	"sync"
 
 	vaultApi "github.com/hashicorp/vault/api"
@@ -16,6 +18,7 @@ type Settings struct {
 	Debug, RenewWarningOptOut, Simulate, StoredToken, Verbose, Version, VersionCheck bool
 	ConfigComment, ConfigMotd, EnvSSHDefaultUsername, EnvSSHIdentityFile,
 	CustomLocalForward, EnvSSHUsername, EnvVaultAddr, NameSpace, SecretPath, Show, StoragePath, User, VaultAddr, VaultToken, VaultAPIVersion, VaultSDKVersion string
+	ServiceMap map[string]string
 }
 
 var (
@@ -55,7 +58,33 @@ var (
 
 	// SecretPath is the location used for connection manangement
 	SecretPath = "secret/ssh_ms"
+
+	portServiceMappings string
+	serviceMap          = make(map[string]string)
 )
+
+func init() {
+	if v := os.Getenv("SSH_MS_SERVICE_MAP"); v != "" {
+		// e.g. PMM:8443;SEP:8444
+		for _, m := range strings.Split(v, ";") {
+			p := strings.Split(m, ":")
+
+			if len(p) != 2 {
+				panic(fmt.Sprintf("Expected 2 items, got %d: %v", len(p), p))
+			}
+
+			/*if port, err := strconv.Atoi(p[1]); err == nil {
+			      serviceMap[port] = p[0]
+			  } else {
+			      panic(fmt.Sprintf("Expected 2 items, got %d: %v", len(p), p))
+			  }*/
+			serviceMap[p[0]] = p[1]
+		}
+	} else if v := os.Getenv("SSH_MS_SERVICE_MAP_DISABLED"); v != "1" {
+		serviceMap["NGINX"] = "443"
+		serviceMap["PMM"] = "8443"
+	}
+}
 
 // ToJSON returns the config in JSON format
 func (s *Settings) ToJSON() string {
@@ -106,6 +135,7 @@ func GetConfig() *Settings {
 			NameSpace:             "",
 			RenewWarningOptOut:    renewWarningOptOut,
 			SecretPath:            SecretPath,
+			ServiceMap:            serviceMap,
 			Simulate:              false,
 			StoragePath:           EnvBasePath,
 			StoredToken:           false,

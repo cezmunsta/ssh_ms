@@ -286,6 +286,11 @@ $ ssh_ms list --namespace secret/my-special-namespace
 secret-connection
 ```
 
+## Runtime
+
+- `SSH_MS_SERVICE_MAP`: Disable the use of the service map
+- `SSH_MS_SERVICE_MAP_DISABLED`: Set custom port mappings for LocalForward
+
 ## Build
 
 Should you wish to build the binary to have some defaults preset for you, then you can use the following env variables
@@ -300,7 +305,6 @@ along with `make build`:
 - `SSH_MS_SECRET_PATH`: Sets the searchable paths in Vault
 - `SSH_MS_SYNC_HOST`: Sets the destination host for a binary push via `rsync`
 - `SSH_MS_SYNC_PATH`: Sets the destination path for a binary push via `rsync`
-- `SSH_MS_USERNAME`: Sets `config.EnvSSHUsername` template variable, used in templated usernames
 
 To set the build version (e.g. if you are making a custom build, etc) you can use `make build` to set
 the build version (by default it will set it to `git rev-parse HEAD`), e.g.
