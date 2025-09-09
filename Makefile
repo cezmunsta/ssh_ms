@@ -13,6 +13,7 @@ SSH_MS_DEFAULT_VAULT_ADDR?=https://127.0.0.1:8200
 SSH_MS_DEFAULT_USERNAME?="${USER}"
 SSH_MS_ID_FILE?=~/.ssh/id_rsa
 SSH_MS_RENEW_THRESHOLD?=168h
+SSH_MS_SECRET_MAP?="'NGINX:443;PMM:8443'"
 SSH_MS_SECRET_PATH?=secret/ssh_ms
 SSH_MS_SYNC_HOST?=localhost
 SSH_MS_SYNC_PATH?=/usr/share/nginx/html/downloads/ssh_ms/
@@ -23,9 +24,9 @@ COMPRESS_BINARY=$(shell test "${XZ_COMPRESS}" = "1" && echo 1 || echo 0)
 
 PACKAGE=github.com/cezmunsta/ssh_ms
 ifeq ($(DEBUG_BUILD), 1)
-LDFLAGS=-ldflags "-X ${PACKAGE}/config.EnvBasePath=${SSH_MS_BASEPATH} -X ${PACKAGE}/cmd.Version=${RELEASE_VER} -X ${PACKAGE}/config.EnvSSHUsername=${SSH_MS_USERNAME} -X ${PACKAGE}/config.EnvSSHIdentityFile=${SSH_MS_ID_FILE} -X ${PACKAGE}/config.EnvSSHDefaultUsername=${SSH_MS_DEFAULT_USERNAME} -X ${PACKAGE}/config.EnvVaultAddr=${SSH_MS_DEFAULT_VAULT_ADDR} -X ${PACKAGE}/config.SecretPath=${SSH_MS_SECRET_PATH} -X ${PACKAGE}/vault.RenewThreshold=${SSH_MS_RENEW_THRESHOLD}"
+LDFLAGS=-ldflags "-X ${PACKAGE}/config.EnvBasePath=${SSH_MS_BASEPATH} -X ${PACKAGE}/cmd.Version=${RELEASE_VER} -X ${PACKAGE}/config.EnvSSHUsername=${SSH_MS_USERNAME} -X ${PACKAGE}/config.EnvSSHIdentityFile=${SSH_MS_ID_FILE} -X ${PACKAGE}/config.EnvSSHDefaultUsername=${SSH_MS_DEFAULT_USERNAME} -X ${PACKAGE}/config.EnvVaultAddr=${SSH_MS_DEFAULT_VAULT_ADDR} -X ${PACKAGE}/config.SecretPath=${SSH_MS_SECRET_PATH} -X ${PACKAGE}/vault.RenewThreshold=${SSH_MS_RENEW_THRESHOLD} -X ${PACKAGE}/config.portServiceMappings=${SSH_MS_SECRET_MAP}"
 else
-LDFLAGS=-ldflags "-w -X ${PACKAGE}/config.EnvBasePath=${SSH_MS_BASEPATH} -X ${PACKAGE}/cmd.Version=${RELEASE_VER} -X ${PACKAGE}/config.EnvSSHUsername=${SSH_MS_USERNAME} -X ${PACKAGE}/config.EnvSSHIdentityFile=${SSH_MS_ID_FILE} -X ${PACKAGE}/config.EnvSSHDefaultUsername=${SSH_MS_DEFAULT_USERNAME} -X ${PACKAGE}/config.EnvVaultAddr=${SSH_MS_DEFAULT_VAULT_ADDR} -X ${PACKAGE}/config.SecretPath=${SSH_MS_SECRET_PATH} -X ${PACKAGE}/vault.RenewThreshold=${SSH_MS_RENEW_THRESHOLD}"
+LDFLAGS=-ldflags "-w -X ${PACKAGE}/config.EnvBasePath=${SSH_MS_BASEPATH} -X ${PACKAGE}/cmd.Version=${RELEASE_VER} -X ${PACKAGE}/config.EnvSSHUsername=${SSH_MS_USERNAME} -X ${PACKAGE}/config.EnvSSHIdentityFile=${SSH_MS_ID_FILE} -X ${PACKAGE}/config.EnvSSHDefaultUsername=${SSH_MS_DEFAULT_USERNAME} -X ${PACKAGE}/config.EnvVaultAddr=${SSH_MS_DEFAULT_VAULT_ADDR} -X ${PACKAGE}/config.SecretPath=${SSH_MS_SECRET_PATH} -X ${PACKAGE}/vault.RenewThreshold=${SSH_MS_RENEW_THRESHOLD} -X ${PACKAGE}/config.portServiceMappings=${SSH_MS_SECRET_MAP}"
 endif
 
 VETFLAGS?=( -unusedresult -bools -copylocks -framepointer -httpresponse -json -stdmethods -printf -stringintconv -unmarshal -unsafeptr )
