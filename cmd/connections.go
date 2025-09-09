@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -368,6 +369,15 @@ func deleteConnection(vc *vaultApi.Client, key string) bool {
 	return status
 }
 
+func findKeyByValue(m map[string]string, value string) (string, bool) {
+	for k, v := range m {
+		if v == value {
+			return k, true
+		}
+	}
+	return "", false
+}
+
 // prepareConnection for SSH
 // vc : Vault client
 // args : options for inspection
@@ -407,12 +417,9 @@ func prepareConnection(vc *vaultApi.Client, args []string) ([]string, ssh.Connec
 	log.Debugf("sshArgs: %v", sshArgs)
 
 	for i := 0; i < len(sshClient.LocalForward); i++ {
-		switch sshClient.LocalForward[i].RemotePort {
-		case 443:
-			svc = "NGINX"
-		case 8443:
-			svc = "PMM"
-		default:
+		if svcName, ok := findKeyByValue(cfg.ServiceMap, strconv.FormatUint(uint64(sshClient.LocalForward[i].RemotePort), 10)); ok {
+			svc = svcName
+		} else {
 			svc = "Custom forwarding"
 		}
 		configMotd += fmt.Sprintf("\nFWD: https://127.0.0.1:%d - %s (%d)", sshClient.LocalForward[i].LocalPort, svc, sshClient.LocalForward[i].RemotePort)
