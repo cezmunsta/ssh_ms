@@ -119,7 +119,7 @@ func TestConnection(t *testing.T) {
 
 	// Test default connections
 	conn.BuildConnection(dummyArgs, "dummy", conn.User)
-	if len(conn.LocalForward) != 2 {
+	if len(cfg.ServiceMap) != len(conn.LocalForward) {
 		t.Fatalf("expected: 2 LocalFoward rules, got: %v", conn.LocalForward)
 	}
 	for _, lf := range conn.LocalForward {
