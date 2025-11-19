@@ -124,7 +124,7 @@ func TestConnection(t *testing.T) {
 	}
 	for _, lf := range conn.LocalForward {
 		switch lf.RemotePort {
-		case 443, 8443:
+		case 443, 8443, 8444:
 			continue
 		default:
 			t.Fatalf("unexpected remote port: %v", lf.RemotePort)
