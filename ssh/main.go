@@ -111,6 +111,11 @@ func acquirePort(min uint16, max uint16) (uint16, error) {
 	return 0, errNoFreePort
 }
 
+// check network interfaces
+func checkNetworkInterfaces(denyList []string) ([]string, error) {
+	return []string{}, nil
+}
+
 // exists checks to see if a value is already present
 func (c Connection) exists(lf LocalForward) bool {
 	for _, item := range c.LocalForward {
@@ -541,6 +546,14 @@ func Connect(args []string, e UserEnv) {
 	if e.Simulate {
 		log.Println("cmd: ssh", strings.Join(args, " "))
 	} else {
+		if len(cfg.UndesiredInterfaces) > 0 {
+			log.Debug("VPN check enabled, checking before connecting")
+
+			if detectedInterfaces, err := checkNetworkInterfaces(cfg.UndesiredInterfaces); err != nil {
+				log.Fatalf("detected undesired interfaces: %v", detectedInterfaces)
+			}
+		}
+
 		cmd := exec.Command("ssh", args...)
 		cmd.Stderr = os.Stderr
 		cmd.Stdin = os.Stdin
