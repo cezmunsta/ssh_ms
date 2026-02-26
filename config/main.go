@@ -18,20 +18,13 @@ type Settings struct {
 	Debug, RenewWarningOptOut, Simulate, StoredToken, Verbose, Version, VersionCheck bool
 	ConfigComment, ConfigMotd, EnvSSHDefaultUsername, EnvSSHIdentityFile,
 	CustomLocalForward, EnvSSHUsername, EnvVaultAddr, NameSpace, SecretPath, Show, StoragePath, User, VaultAddr, VaultToken, VaultAPIVersion, VaultSDKVersion string
-	ServiceMap map[string]string
+	ServiceMap          map[string]string
+	UndesiredInterfaces []string
 }
 
 var (
 	once     sync.Once
 	settings Settings
-
-	/*
-		The following support overrides during builds, which can be done
-		by setting ldflags, e.g.
-
-		`-ldflags "-X github.com/cezmunsta/ssh_ms/config.EnvSSHUserName=xxx"`
-
-	*/
 
 	// EnvBasePath is the parent location used to prefix storage paths,
 	// default value is filepath.Join(os.Getenv("HOME"), ".ssh", "cache")
@@ -60,7 +53,10 @@ var (
 	SecretPath = "secret/ssh_ms"
 
 	portServiceMappings string
-	serviceMap          = make(map[string]string)
+	undesiredInterfaces string
+
+	serviceMap              = make(map[string]string)
+	undesiredInterfaceNames = []string{}
 )
 
 func init() {
@@ -83,6 +79,10 @@ func init() {
 			serviceMap[p[0]] = p[1]
 		}
 	}
+
+	if len(undesiredInterfaces) > 0 {
+		undesiredInterfaceNames = strings.Split(undesiredInterfaces, ",")
+	}
 }
 
 // ToJSON returns the config in JSON format
@@ -99,6 +99,7 @@ func (s *Settings) ToJSON() string {
 func GetConfig() *Settings {
 	once.Do(func() {
 		renewWarningOptOut := false
+
 		if EnvBasePath == "" {
 			EnvBasePath = filepath.Join(os.Getenv("HOME"), ".ssh", "cache")
 		}
@@ -138,6 +139,7 @@ func GetConfig() *Settings {
 			Simulate:              false,
 			StoragePath:           EnvBasePath,
 			StoredToken:           false,
+			UndesiredInterfaces:   undesiredInterfaceNames,
 			VaultAPIVersion:       vaultAPIVersion,
 			VaultSDKVersion:       vaultSDKVersion,
 		}
