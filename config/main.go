@@ -80,6 +80,11 @@ func init() {
 		}
 	}
 
+	userByPass := os.Getenv("SSH_MS_BYPASS_INTERFACE_CHECK")
+	if userByPass == "1" || userByPass == "yes" || userByPass == "true" {
+		undesiredInterfaces = ""
+	}
+
 	if len(undesiredInterfaces) > 0 {
 		undesiredInterfaceNames = strings.Split(undesiredInterfaces, ",")
 	}

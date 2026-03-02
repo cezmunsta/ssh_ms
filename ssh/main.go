@@ -1,17 +1,20 @@
 package ssh
 
 import (
+	"bufio"
 	"bytes"
 	"crypto/sha1"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"maps"
 	"net"
 	"os"
 	"os/exec"
 	"reflect"
+	"regexp"
 	"slices"
 	"strconv"
 	"strings"
@@ -113,7 +116,63 @@ func acquirePort(min uint16, max uint16) (uint16, error) {
 
 // check network interfaces
 func checkNetworkInterfaces(denyList []string) ([]string, error) {
-	return []string{}, nil
+	var blockedInterfaces []string
+	var regexPatterns []*regexp.Regexp
+
+	interfaces, err := net.Interfaces()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get network interfaces: %w", err)
+	}
+
+	for _, pattern := range denyList {
+		re, err := regexp.Compile(pattern)
+		if err != nil {
+			return nil, fmt.Errorf("invalid regex pattern '%s': %w", pattern, err)
+		}
+		regexPatterns = append(regexPatterns, re)
+	}
+
+	for _, iface := range interfaces {
+		allowed := false
+		for _, re := range regexPatterns {
+			if !re.MatchString(iface.Name) {
+				allowed = true
+				break
+			}
+		}
+		if !allowed {
+			blockedInterfaces = append(blockedInterfaces, iface.Name)
+		}
+	}
+
+	return blockedInterfaces, nil
+}
+
+// action for when undesired network interfaces are required
+func handleUndesiredInterfacePresent() {
+	fmt.Println("Please confirm that you wish to proceed? y/n")
+
+	reader := bufio.NewReader(os.Stdin)
+	answer, err := reader.ReadString('\n')
+	if err != nil {
+		if err == io.EOF {
+			fmt.Println("\nInput cancelled")
+			os.Exit(1)
+		}
+		fmt.Fprintf(os.Stderr, "Error reading input: %v\n", err)
+		os.Exit(1)
+	}
+
+	switch strings.ToLower(strings.TrimSpace(answer)) {
+	case "y", "yes", "1":
+		fmt.Println("Proceeding...")
+	case "n", "no", "0":
+		fmt.Println("Cancelled")
+		os.Exit(0)
+	default:
+		fmt.Println("Invalid input. Please enter y/n")
+		os.Exit(1)
+	}
 }
 
 // exists checks to see if a value is already present
@@ -547,10 +606,11 @@ func Connect(args []string, e UserEnv) {
 		log.Println("cmd: ssh", strings.Join(args, " "))
 	} else {
 		if len(cfg.UndesiredInterfaces) > 0 {
-			log.Debug("VPN check enabled, checking before connecting")
+			log.Debug("Interface check enabled, checking before connecting")
 
-			if detectedInterfaces, err := checkNetworkInterfaces(cfg.UndesiredInterfaces); err != nil {
-				log.Fatalf("detected undesired interfaces: %v", detectedInterfaces)
+			if detectedInterfaces, err := checkNetworkInterfaces(cfg.UndesiredInterfaces); err != nil || len(detectedInterfaces) > 0 {
+				log.Warningf("detected undesired interfaces: %v", detectedInterfaces)
+				handleUndesiredInterfacePresent()
 			}
 		}
 
