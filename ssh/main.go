@@ -610,6 +610,7 @@ func Connect(args []string, e UserEnv) {
 
 			if detectedInterfaces, err := checkNetworkInterfaces(cfg.UndesiredInterfaces); err != nil || len(detectedInterfaces) > 0 {
 				log.Warningf("detected undesired interfaces: %v", detectedInterfaces)
+				fmt.Println("Your data may be transferred through undesired interfaces:", detectedInterfaces)
 				handleUndesiredInterfacePresent()
 			}
 		}
