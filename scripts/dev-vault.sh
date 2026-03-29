@@ -39,7 +39,7 @@ function prepare_vault {
     export VAULT_ADDR="${vault_scheme}://${vault_host}:${vault_port}" \
             VAULT_TOKEN=myroottoken
 
-    until podman container ls --filter name=dev-vault,status=running -q | grep -Eq \\w; do
+    until podman container ls --filter name=dev-vault --filter status=running -q | grep -Eq \\w; do
       sleep 1;
     done
 
