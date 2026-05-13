@@ -14,12 +14,12 @@ import (
 
 // Settings contains the configuration details
 type Settings struct {
-	LogLevel                                                                         logrus.Level
-	Debug, RenewWarningOptOut, Simulate, StoredToken, Verbose, Version, VersionCheck bool
+	LogLevel                                                                                   logrus.Level
+	CheckVPN, Debug, RenewWarningOptOut, Simulate, StoredToken, Verbose, Version, VersionCheck bool
 	ConfigComment, ConfigMotd, EnvSSHDefaultUsername, EnvSSHIdentityFile,
-	CustomLocalForward, EnvSSHUsername, EnvVaultAddr, NameSpace, SecretPath, Show, StoragePath, User, VaultAddr, VaultToken, VaultAPIVersion, VaultSDKVersion string
-	ServiceMap          map[string]string
-	UndesiredInterfaces []string
+	CustomLocalForward, EnvSSHUsername, EnvVaultAddr, NameSpace, SecretPath, Show, StoragePath, User, VaultAddr, VaultToken, VaultAPIVersion, VaultSDKVersion, VPNBaselinePath string
+	ServiceMap  map[string]string
+	VPNPatterns []string
 }
 
 var (
@@ -52,11 +52,19 @@ var (
 	// SecretPath is the location used for connection manangement
 	SecretPath = "secret/ssh_ms"
 
-	portServiceMappings string
-	undesiredInterfaces string
+	// VPNBaselineFile is the filename (within StoragePath) used for the
+	// captured network-interface baseline used to detect new VPN tunnels.
+	VPNBaselineFile = "vpn_baseline.json"
 
-	serviceMap              = make(map[string]string)
-	undesiredInterfaceNames = []string{}
+	// DefaultVPNPatterns are regex patterns matching VPN-like interface
+	// names. Newly observed interfaces matching any of these (and not on
+	// the whitelist) trigger a confirmation prompt before connect.
+	DefaultVPNPatterns = []string{`^tun`, `^utun`, `^ppp`, `^tap`, `^wg`, `^ipsec`}
+
+	portServiceMappings string
+
+	serviceMap  = make(map[string]string)
+	vpnPatterns = []string{}
 )
 
 func init() {
@@ -80,14 +88,21 @@ func init() {
 		}
 	}
 
-	userByPass := os.Getenv("SSH_MS_BYPASS_INTERFACE_CHECK")
-	if userByPass == "1" || userByPass == "yes" || userByPass == "true" {
-		undesiredInterfaces = ""
+	vpnPatterns = append(vpnPatterns, DefaultVPNPatterns...)
+	if v := os.Getenv("SSH_MS_VPN_PATTERNS"); v != "" {
+		vpnPatterns = splitCSV(v)
 	}
+}
 
-	if len(undesiredInterfaces) > 0 {
-		undesiredInterfaceNames = strings.Split(undesiredInterfaces, ",")
+func splitCSV(v string) []string {
+	parts := strings.Split(v, ",")
+	out := make([]string, 0, len(parts))
+	for _, p := range parts {
+		if p = strings.TrimSpace(p); p != "" {
+			out = append(out, p)
+		}
 	}
+	return out
 }
 
 // ToJSON returns the config in JSON format
@@ -129,6 +144,7 @@ func GetConfig() *Settings {
 		}
 
 		settings = Settings{
+			CheckVPN:              true,
 			ConfigComment:         "",
 			ConfigMotd:            "",
 			CustomLocalForward:    "",
@@ -144,9 +160,10 @@ func GetConfig() *Settings {
 			Simulate:              false,
 			StoragePath:           EnvBasePath,
 			StoredToken:           false,
-			UndesiredInterfaces:   undesiredInterfaceNames,
 			VaultAPIVersion:       vaultAPIVersion,
 			VaultSDKVersion:       vaultSDKVersion,
+			VPNBaselinePath:       filepath.Join(EnvBasePath, VPNBaselineFile),
+			VPNPatterns:           vpnPatterns,
 		}
 	})
 	return &settings

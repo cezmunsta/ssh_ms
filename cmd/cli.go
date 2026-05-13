@@ -195,6 +195,11 @@ func init() {
 		populateCacheCmd,
 		purgeCacheCmd,
 	)
+	vpnBaselineCmd.AddCommand(
+		vpnBaselineCaptureCmd,
+		vpnBaselineResetCmd,
+		vpnBaselineShowCmd,
+	)
 	rootCmd.AddCommand(
 		cacheCmd,
 		connectCmd,
@@ -206,6 +211,7 @@ func init() {
 		showCmd,
 		versionCmd,
 		updateCmd,
+		vpnBaselineCmd,
 		writeCmd,
 	)
 	rootCmd.PersistentFlags().StringVar(&cfg.VaultAddr, "vault-addr", cfg.EnvVaultAddr, "Specify the Vault address")
@@ -222,6 +228,8 @@ func init() {
 
 	connectCmd.Flags().StringVarP(&cfg.CustomLocalForward, "local-forward", "l", "",
 		"Define adhoc LocalForward rules by specifying the target ports, e.g. -l 8080,3306")
+	connectCmd.Flags().BoolVar(&cfg.CheckVPN, "check-vpn", true,
+		"Compare current network interfaces against the captured baseline and prompt if new VPN-like interfaces appear")
 
 	purgeCacheCmd.Flags().BoolVarP(&purgeForce, "force", "f", false, "Bypass confirmation prompt")
 	purgeCacheCmd.Flags().StringVarP(&purgeConnection, "connection", "c", "", "Select a connection to purge")
